@@ -1,0 +1,1 @@
+[10-Jun-2023 16:58:48 UTC] PHP Fatal error:  Cannot use Exception as Exception because the name is already in use in /home/bsolutio/public_html/saleswheel/app/Exceptions/Handler.php on line 11

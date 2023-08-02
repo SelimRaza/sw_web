@@ -1,0 +1,30 @@
+.tbl_header{
+	background-color: #2b4570; color: white;
+}
+
+.cell_left_border{
+	border-left: 7px solid #55b56d;
+	margin-bottom: 5px;
+	padding: 12px 7px;
+	letter-spacing: .5px;
+
+}
+.font_color{
+	color: #081522;
+	font-family: serif;
+	font-weight: bold;
+	font-size: initial;
+}
+
+.tbl_header_light{
+	background-color: #d9f5e0;
+}
+.tbl_body_gray{
+	background-color: #fafafa;
+}
+.icon_style{
+	color: white; font-size: 1.3em;
+}
+.text_left{
+	text-align: left;
+}
