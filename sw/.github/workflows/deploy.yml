@@ -15,19 +15,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # - name: Set up Node.js 16
-      #   uses: actions/setup-node@v2
-      #   with:
-      #     node-version: 16
-
-      # - name: Install dependencies
-      #   run: npm install
-
-      # - name: Set Git pull merge strategy
-      #   run: git config pull.rebase false
-
-      # - name: Build assets
-      #   run: npm run production
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Deploy to server
         uses: appleboy/ssh-action@master
@@ -35,7 +26,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           port: ${{ secrets.PORT }}
-          key: ${{ secrets.SSHKEY }}
           script: |
             cd /home1/test/sw
             ./.scripts/deploy.sh
