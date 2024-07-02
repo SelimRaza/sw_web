@@ -24,4 +24,4 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd /home1/test/sw
-            ./scripts/deploy.sh
+            /.scripts/deploy.sh
