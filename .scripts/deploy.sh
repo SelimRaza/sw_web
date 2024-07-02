@@ -10,20 +10,6 @@ php artisan down  || true
 # Pull the latest version of the app
 git pull origin main --ff
 
-# Install composer dependencies
-# composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-
-
-# Recreate caches
-# php artisan optimize
-
-# Compile npm assets
-# npm run prod
-
-# Run database migrations
-# php artisan migrate --force
-
-# Exit maintenance mode
 php artisan up
 
 # Clear the old cache
