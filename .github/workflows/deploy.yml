@@ -15,6 +15,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Print directory contents
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSHKEY }}
+          script: |
+            cd /home1/test/sw
+            ls -l
+            ls -l scripts
+
       - name: Deploy to server
         uses: appleboy/ssh-action@master
         with:
@@ -24,4 +36,4 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd /home1/test/sw
-            /.scripts/deploy.sh
+            ./scripts/deploy.sh
