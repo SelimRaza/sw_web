@@ -42,7 +42,7 @@ class MobileAPI extends Controller
 
     public function check_apk_version($current_apk)
     {
-        return $current_apk >= '29' || $current_apk == '18';
+        return $current_apk >= '300';
         // return $current_apk >= '29' || $current_apk == '25' || $current_apk == '26' || $current_apk == '18';
 
     }
@@ -70,13 +70,13 @@ class MobileAPI extends Controller
         );
         $loginAttempt = DB::select("select * from users where email='$request->email'");
         $cont_id = $loginAttempt[0]->cont_id;
-        if (($cont_id == 3 || $cont_id == 14 || $cont_id == 15) && $current_apk < 76) {
+        if (($cont_id == 3 || $cont_id == 2) && $current_apk < 300) {
             $result_data = array(
                 'success' => 0,
                 'force_status' => 1,
                 'message' => "This '" . $current_apk . "' version is not allowed !!!",
             );
-        } else {
+        }else {
             // }
             $user = User::where('email', '=', $name)->first();
             if ($user->remember_token == $token) {
@@ -132,15 +132,19 @@ class MobileAPI extends Controller
     }
 
     public function login_data_in_sync(Request $request)
-    {$country = (new Country())->country($request->country_id);
+    {
+        $country = (new Country())->country($request->country_id);
         if ($country != false) {
             $db_conn = $country->cont_conn;
+            $module_type = $country->module_type;
 
             $emp = Employee::on($db_conn)->where(['id' => $request->emp_id])->first();
 
             $spmp_sdpr = SPDS::on($db_conn)->where(['slgp_id' => $emp->slgp_id, 'zone_id' => $emp->zone_id])->first();//spmp
             $ck_attn = DB::connection($db_conn)->table('tl_atnt')->where(['slgp_id' => $emp->slgp_id])->first();//tl_atnt
-            if ($ck_attn == null) {
+            $ck_admo = DB::connection($db_conn)->table('tm_admo')->where(['status' => 1,'module_type' =>$module_type])->first();//tl_atnt
+            
+			if ($ck_attn == null) {
                 $attn_start = '00:00:00';
                 $attn_endt = '00:00:00';
             } else {
@@ -155,6 +159,18 @@ class MobileAPI extends Controller
                 $spmp_sdpr1 = $spmp_sdpr->spmp_sdpr;
                 $spmp_ldpr = $spmp_sdpr->spmp_ldpr;
             }
+			
+			if ($ck_admo == null) {
+                $id = '0';
+                $admo_type = '-';
+				$min_qty = '0';
+                $max_qty = '0';
+            } else {
+                $id = $ck_admo->id;
+                $admo_type = $ck_admo->admo_type;
+				$min_qty = $ck_admo->min_qty;
+                $max_qty = $ck_admo->max_qty;
+            }
             $emp->attn_start = $attn_start;
             $emp->attn_end = $attn_endt;
             $emp->spmp_sdpr = $spmp_sdpr1;
@@ -162,6 +178,11 @@ class MobileAPI extends Controller
 
             // $country1 = (new Country())->country($db_conn);
             $country1 = (new Country())->country($request->country_id);
+			
+			 $emp->admo_id = $id;
+             $emp->admo_type = $admo_type;
+		     $emp->admo_min_qty = $min_qty;
+             $emp->admo_max_qty = $max_qty;
 
             $emp->country_name = $emp->country()->cont_name;
 			$emp->cheque_day = $country1->GCKCD;
@@ -176,7 +197,8 @@ class MobileAPI extends Controller
             $emp->memo_sub_title = $country1->memo_sub_title;
             $emp->round_digit = $country1->cont_dgit;
             $emp->image_folder = $emp->country()->cont_imgf;
-            // $emp->cont_ogdt = $emp->country()->cont_ogdt;
+           $emp->vat_exc = $country1->vat_exc;
+           $emp->issite_rename = $country1->site_renm;
             $emp->cont_ogdt = $country1->cont_ogdt;
             $emp->currency = $emp->country()->cont_cncy;
             $emp->round_number = $emp->country()->cont_rund;
@@ -367,8 +389,139 @@ class MobileAPI extends Controller
             return $result_data;
         }
     }
+	
+	
+ public function login_sw(Request $request)
+{
+    $name = $request->email;
+    $version_code = $request->version_code;
+    $device_imei = $request->device_imei;
+    $hris_status = $request->hris_status;
+
+    // Check APK version
+    if (!$this->check_apk_version($version_code)) {
+        $result_data = [
+            'success' => 0,
+            'message' => "This '" . $version_code . "' version is not allowed !!! Please Use Latest APK.",
+        ];
+        return $result_data;
+    }
+
+    // Fetch user based on email
+    $user = User::where('email', $name)->first();
+ //return $user;
+
+    if (!$user) {
+        $result_data = [
+            'success' => 20,
+            'message' => "Username or password not found!!!",
+        ];
+        return $result_data;
+    }
     
-     public
+
+ 
+    $cont_id = $user->cont_id;
+    $country1 = (new Country())->country($cont_id);
+    $module_type = $country1->module_type;
+    
+
+ //return $user->device_imei.'--'.'N';
+ 
+    // Validate device IMEI
+   /*if ($device_imei != $user->device_imei) {
+        $result_data = [
+            'success' => 10,
+            'message' => "You are trying to login from the wrong device !!!",
+        ];
+        return $result_data;
+    }else 
+    if ($device_imei != $user->device_imei || $user->device_imei != 'N') {
+    
+        
+        $result_data = [
+            'success' => 03,
+            'message' => "You are trying to login from the wrong device !!!",
+        ];
+        return $result_data;
+    }*/
+
+ //return $name.'--'.$request->password;
+    // Perform authentication
+    $loginAttempt_n = Auth::attempt(['email' => $name, 'password' => $request->password]);
+    $loginAttempt_I = Auth::attempt(['email' => $name, 'password' => $request->password, 'lfcl_id' => 1]);
+
+//return $loginAttempt_n;
+    if (!$loginAttempt_n) {
+        $result_data = [
+            'success' => 2,
+            'message' => "Username or password might be wrong !!!",
+        ];
+        return $result_data;
+    }
+
+    // Update device IMEI
+    $user->device_imei = $device_imei;
+    $user->save();
+
+    // Logging login attempt
+    $log = new LoginLog();
+    $log->user_name = $request->email;
+    $log->api_int = $request->version_code;
+    $log->device_imei = $request->device_imei;
+    $log->device_name = $request->device_name;
+    $log->mobile_number = '0';
+    $log->auth_type = $hris_status;
+    $log->login_attempt = true; // Set to true since login was successful
+    $log->save();
+
+    // Fetch employee data
+    $db = $user->country()->cont_conn;
+    $user_id = $user->id;
+    $emp = Employee::on($db)->where('aemp_lued', '=', $user_id)->first();
+    $emp->aemp_utkn = $this->setEmpToken($user_id);
+    $emp->region_id = '';
+
+    // Fetch SPMP and tl_atnt data
+    $spmp_sdpr = SPDS::on($db)->where(['slgp_id' => $emp->slgp_id, 'zone_id' => $emp->zone_id])->first();
+    $ck_attn = DB::connection($db)->table('tl_atnt')->where(['slgp_id' => $emp->slgp_id])->first();
+
+    // Handle SPMP and tl_atnt data if available
+    $attn_start = $ck_attn ? $ck_attn->atnt_stat : '00:00:00';
+    $attn_endt = $ck_attn ? $ck_attn->atnt_etat : '00:00:00';
+    $spmp_sdpr1 = $spmp_sdpr ? $spmp_sdpr->spmp_sdpr : 0;
+    $spmp_ldpr = $spmp_sdpr ? $spmp_sdpr->spmp_ldpr : 0;
+
+    $emp->attn_start = $attn_start;
+    $emp->attn_end = $attn_endt;
+    $emp->spmp_sdpr = $spmp_sdpr1;
+    $emp->spmp_sdpr_line = $spmp_ldpr;
+
+    // Fetch country data
+    $emp->country_name = $country1->cont_name;
+    $emp->cheque_day = $country1->GCKCD;
+    $emp->cheque_xday = $country1->GTCCD;
+    $emp->credit_xday = $country1->GTCRD;
+    $emp->route_openblock = $country1->RTBO;
+    $emp->min_order_amt = $country1->min_oamt;
+    $emp->module_type = $country1->module_type;
+    $emp->cont_tzon = $country1->cont_tzon;
+    $emp->currency_symb = $country1->cncy_sym;
+    $emp->memo_title = $country1->memo_title;
+    $emp->memo_sub_title = $country1->memo_sub_title;
+    $emp->cont_ogdt = $country1->cont_ogdt;
+    $emp->image_folder = $user->country()->cont_imgf;
+    $emp->round_digit = $country1->cont_dgit;
+
+    $emp->currency = $user->country()->cont_cncy;
+    $emp->round_number = $user->country()->cont_rund;
+    $emp->youtube_api_key = 'AIzaSyDh1jUrg_MsZcq_30834wBIXq4VAuP01SY';
+    $emp->success = 1;
+    $emp->message = "Successful login";
+    return $emp;
+}
+
+    public
     function login_hris(Request $request)
     {
         $password = $request->password;
@@ -575,7 +728,8 @@ class MobileAPI extends Controller
                             $emp->cont_ogdt = $country1->cont_ogdt;
                             $emp->image_folder = $emp->country()->cont_imgf;
                             $emp->round_digit = $country1->cont_dgit;
-
+                          $emp->vat_exc = $country1->vat_exc;
+						  $emp->issite_rename = $country1->site_renm;
                             $emp->currency = $emp->country()->cont_cncy;
                             $emp->round_number = $emp->country()->cont_rund;
                             $emp->youtube_api_key = 'AIzaSyDh1jUrg_MsZcq_30834wBIXq4VAuP01SY';
@@ -780,7 +934,8 @@ class MobileAPI extends Controller
                         $emp->cont_ogdt = $country1->cont_ogdt;
                         $emp->image_folder = $emp->country()->cont_imgf;
                         $emp->round_digit = $country1->cont_dgit;
-
+                       $emp->vat_exc = $country1->vat_exc;
+					   $emp->issite_rename = $country1->site_renm;
                         $emp->currency = $emp->country()->cont_cncy;
                         $emp->round_number = $emp->country()->cont_rund;
                         $emp->youtube_api_key = 'AIzaSyDh1jUrg_MsZcq_30834wBIXq4VAuP01SY';
@@ -805,136 +960,7 @@ class MobileAPI extends Controller
         }
     }
 
-   public function login_sw(Request $request)
-{
-    $name = $request->email;
-    $version_code = $request->version_code;
-    $device_imei = $request->device_imei;
-    $hris_status = $request->hris_status;
-
-    // Check APK version
-    if (!$this->check_apk_version($version_code)) {
-        $result_data = [
-            'success' => 0,
-            'message' => "This '" . $version_code . "' version is not allowed !!!",
-        ];
-        return $result_data;
-    }
-
-    // Fetch user based on email
-    $user = User::where('email', $name)->first();
- //return $user;
-
-    if (!$user) {
-        $result_data = [
-            'success' => 20,
-            'message' => "Username or password not found!!!",
-        ];
-        return $result_data;
-    }
-    
-
- 
-    $cont_id = $user->cont_id;
-    $country1 = (new Country())->country($cont_id);
-    $module_type = $country1->module_type;
-    
-
- //return $user->device_imei.'--'.'N';
- 
-    // Validate device IMEI
-   /*if ($device_imei != $user->device_imei) {
-        $result_data = [
-            'success' => 10,
-            'message' => "You are trying to login from the wrong device !!!",
-        ];
-        return $result_data;
-    }else 
-    if ($device_imei != $user->device_imei || $user->device_imei != 'N') {
-    
-        
-        $result_data = [
-            'success' => 03,
-            'message' => "You are trying to login from the wrong device !!!",
-        ];
-        return $result_data;
-    }*/
-
- //return $name.'--'.$request->password;
-    // Perform authentication
-    $loginAttempt_n = Auth::attempt(['email' => $name, 'password' => $request->password]);
-    $loginAttempt_I = Auth::attempt(['email' => $name, 'password' => $request->password, 'lfcl_id' => 1]);
-
-//return $loginAttempt_n;
-    if (!$loginAttempt_n) {
-        $result_data = [
-            'success' => 2,
-            'message' => "Username or password might be wrong !!!",
-        ];
-        return $result_data;
-    }
-
-    // Update device IMEI
-    $user->device_imei = $device_imei;
-    $user->save();
-
-    // Logging login attempt
-    $log = new LoginLog();
-    $log->user_name = $request->email;
-    $log->api_int = $request->version_code;
-    $log->device_imei = $request->device_imei;
-    $log->device_name = $request->device_name;
-    $log->mobile_number = '0';
-    $log->auth_type = $hris_status;
-    $log->login_attempt = true; // Set to true since login was successful
-    $log->save();
-
-    // Fetch employee data
-    $db = $user->country()->cont_conn;
-    $user_id = $user->id;
-    $emp = Employee::on($db)->where('aemp_lued', '=', $user_id)->first();
-    $emp->aemp_utkn = $this->setEmpToken($user_id);
-    $emp->region_id = '';
-
-    // Fetch SPMP and tl_atnt data
-    $spmp_sdpr = SPDS::on($db)->where(['slgp_id' => $emp->slgp_id, 'zone_id' => $emp->zone_id])->first();
-    $ck_attn = DB::connection($db)->table('tl_atnt')->where(['slgp_id' => $emp->slgp_id])->first();
-
-    // Handle SPMP and tl_atnt data if available
-    $attn_start = $ck_attn ? $ck_attn->atnt_stat : '00:00:00';
-    $attn_endt = $ck_attn ? $ck_attn->atnt_etat : '00:00:00';
-    $spmp_sdpr1 = $spmp_sdpr ? $spmp_sdpr->spmp_sdpr : 0;
-    $spmp_ldpr = $spmp_sdpr ? $spmp_sdpr->spmp_ldpr : 0;
-
-    $emp->attn_start = $attn_start;
-    $emp->attn_end = $attn_endt;
-    $emp->spmp_sdpr = $spmp_sdpr1;
-    $emp->spmp_sdpr_line = $spmp_ldpr;
-
-    // Fetch country data
-    $emp->country_name = $country1->cont_name;
-    $emp->cheque_day = $country1->GCKCD;
-    $emp->cheque_xday = $country1->GTCCD;
-    $emp->credit_xday = $country1->GTCRD;
-    $emp->route_openblock = $country1->RTBO;
-    $emp->min_order_amt = $country1->min_oamt;
-    $emp->module_type = $country1->module_type;
-    $emp->cont_tzon = $country1->cont_tzon;
-    $emp->currency_symb = $country1->cncy_sym;
-    $emp->memo_title = $country1->memo_title;
-    $emp->memo_sub_title = $country1->memo_sub_title;
-    $emp->cont_ogdt = $country1->cont_ogdt;
-    $emp->image_folder = $user->country()->cont_imgf;
-    $emp->round_digit = $country1->cont_dgit;
-
-    $emp->currency = $user->country()->cont_cncy;
-    $emp->round_number = $user->country()->cont_rund;
-    $emp->youtube_api_key = 'AIzaSyDh1jUrg_MsZcq_30834wBIXq4VAuP01SY';
-    $emp->success = 1;
-    $emp->message = "Successful login";
-    return $emp;
-}
-    public function loginMasumSelimIkramHussainSujanAsad(Request $request)
+ public function loginMasumSelimIkramHussainSujanAsad(Request $request)
     {
         $password = $request->password;
         $name = $request->email;
@@ -3189,8 +3215,7 @@ WHERE t1.ordm_ornm = '$order_id'");
                         INNER JOIN tm_amim AS t3 ON t2.amim_id = t3.id
                         INNER JOIN dm_trip_detail t4 ON t1.ordm_ornm=t4.ORDM_ORNM AND t2.amim_id=t4.AMIM_ID
                         WHERE t1.ordm_ornm = '$order_id' and t4.OID=t2.id AND t2.ordd_dqty != 0 AND t1.lfcl_id in(11,39)");
-                        return response()->json(array('company_list' => $order_master, 'order_line' => $data2));
-                //return $order_master;
+
                 if (count($order_master) > 0) {
                     $order_master[0]->orderLine = $data2;
                     return response()->json(array('company_list' => $order_master, 'order_line' => $data2));
@@ -3248,7 +3273,7 @@ WHERE t1.ordm_ornm = '$order_id'");
                                 t4.acmp_nvat                                          AS vat_number,
                                 ''                                                    AS year,
                                 ''                                                    AS serial_number,
-                                '-'                                                   AS tax_invoice,
+                                t1.rtan_rtnm                                          AS tax_invoice,
                                 t4.acmp_addr                                          AS ou_address,
                                 t2.site_vtrn                                          AS site_trn,
                                 t4.acmp_rttl                                          AS invoice_title,
@@ -3711,7 +3736,7 @@ WHERE t1.ordm_ornm = '$order_id' AND t2.ordd_dqty != 0;");
     public
     function saveNote_sp(Request $request)
     {
-        $site_code = '';
+        $site_code = 'N';
         $country = (new Country())->country($request->country_id);
 
         if ($country != false) {
@@ -3876,30 +3901,48 @@ WHERE t1.ordm_ornm = '$order_id' AND t2.ordd_dqty != 0;");
             DB::connection($db_conn)->beginTransaction();
             $mgs = "";
             $cod = 0;
-
+            
             try {
-                $curl = curl_init();
-                curl_setopt_array($curl, array(
-                    CURLOPT_URL => 'http://coreapi.sihirfms.com/api/tripconfirm',
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_ENCODING => '',
-                    CURLOPT_MAXREDIRS => 10,
-                    CURLOPT_TIMEOUT => 0,
-                    CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                    CURLOPT_CUSTOMREQUEST => 'POST',
-                    CURLOPT_POSTFIELDS => array('trip_nummber' => $request->TRIP_NO,
-                        'cont_code_trip' => $request->country_id,
-                        'ApiKey_van' => 'API2345fsdvh3675gsvbxdgeg425435hdgfsfg33'),
-                ));
+                $module_type = $country->module_type;
+                if ($module_type == 2) {
+                      //  CURLOPT_URL => 'http://coreapi.sihirfms.com/api/tripconfirm',
+                    $curl = curl_init();
+                    curl_setopt_array($curl, array(
+                        CURLOPT_URL => '159.223.60.117/api/tripconfirm',
+                    
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_ENCODING => '',
+                        CURLOPT_MAXREDIRS => 10,
+                        CURLOPT_TIMEOUT => 0,
+                        CURLOPT_FOLLOWLOCATION => true,
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST => 'POST',
+                        CURLOPT_POSTFIELDS => array('trip_nummber' => $request->TRIP_NO,
+                            'cont_code_trip' => $request->country_id,
+                            'ApiKey_van' => 'API2345fsdvh3675gsvbxdgeg425435hdgfsfg33'),
+                    ));
 
-                $response = curl_exec($curl);
-                curl_close($curl);
-                $IBS_INVOICE = json_decode($response, true);
+                    $response = curl_exec($curl);
+                    curl_close($curl);
+                    $IBS_INVOICE = json_decode($response, true);
 
-                if ($IBS_INVOICE['trip_number'] == 'Success') {
+                    if ($IBS_INVOICE['trip_number'] == 'Success') {
+                        $ret = DB::connection($db_conn)->table('dm_trip')->where(['TRIP_NO' => $request->TRIP_NO,
+                            'STATUS' => 'N', 'DM_ID' => $request->DM_ID])->update(['DM_ACTIVITY' => '20']);
+                        if ($ret == 1) {
+                            $cod = 1;
+                            $mgs = "Trip Received Successful ";
+                        } else {
+                            $cod = 0;
+                            $mgs = "Trip Received Failed ";
+                        }
+                    } else {
+                        $cod = 0;
+                        $mgs = "Trip Received Failed ";
+                    }                                 
+                } else {
                     $ret = DB::connection($db_conn)->table('dm_trip')->where(['TRIP_NO' => $request->TRIP_NO,
-                        'STATUS' => 'N', 'DM_ID' => $request->DM_ID])->update(['DM_ACTIVITY' => '20']);
+                        'STATUS' => 'N', 'DM_ID' => $request->dm_id])->update(['DM_ACTIVITY' => '20']);
                     if ($ret == 1) {
                         $cod = 1;
                         $mgs = "Trip Received Successful ";
@@ -3907,11 +3950,8 @@ WHERE t1.ordm_ornm = '$order_id' AND t2.ordd_dqty != 0;");
                         $cod = 0;
                         $mgs = "Trip Received Failed ";
                     }
-                } else {
-                    $cod = 0;
-                    $mgs = "Trip Received Failed ";
                 }
-
+                
                 DB::connection($db_conn)->commit();
                 return array(
                     'success' => $cod,
@@ -3931,9 +3971,89 @@ WHERE t1.ordm_ornm = '$order_id' AND t2.ordd_dqty != 0;");
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
+            $module_type = $country->module_type;
+            if ($module_type == 1) {
+                $aemp_id = $request->emp_id;
+                $delivery_vs_collection_status = DB::connection($db_conn)->select("
+                        SELECT sum(t3.ORDD_AMNT) AS total_delivery_amount, sum(t3.COLLECTION_AMNT) AS total_collection_amount 
+                        FROM `dm_trip`t1 
+                        INNER JOIN `dm_trip_detail` t2 ON t1.`TRIP_NO`=t2.TRIP_NO
+                        INNER JOIN `dm_trip_master` AS t3 ON t2.`ORDM_ORNM`=t3.`ORDM_ORNM`
+                        WHERE t1.`DM_ID` = $aemp_id AND t1.`STATUS`='N';
+                        
+            ");
+
+                $pending_collection = DB::connection($db_conn)->select("
+                        SELECT SITE_CODE,SITE_ID ,slgp_id, optp_id as p_type_id  from(
+                            SELECT t3.SITE_CODE,t3.SITE_ID ,t3.slgp_id,2 AS optp_id,sum(t3.DELV_AMNT) amnt, sum(t6.COLLECTION_AMNT) camnt
+                            FROM 
+                            dm_trip t1
+                            JOIN dm_trip_master t3 ON(t3.SITE_ID= t3.SITE_ID )
+                            left JOIN dm_collection t6 ON(t6.site_id = t3.site_id) and t6.STATUS=11 and t6.INVT_ID=5 AND t3.slgp_id=t6.slgp_id
+                            WHERE t1.`DM_ID` = $aemp_id AND t1.`STATUS`='N' AND t3.DELIVERY_STATUS = 11 AND t3.COLLECTION_AMNT = 0
+                            and t3.DELV_AMNT>0 and t3.COLLECTION_AMNT=0 AND t1.`TRIP_NO`=t3.TRIP_NO
+                            group by t3.SITE_CODE,t3.site_id ,t3.slgp_id) d
+                            group by SITE_CODE,SITE_ID ,slgp_id
+                            having sum(ifnull(d.amnt,0))>sum( ifnull(d.camnt,0))
+                        LIMIT 1;
+            ");
+
+                $trip_m = DB::connection($db_conn)->select("
+                    SELECT TRIP_NO,trip_status,SITE_ID,SITE_CODE,site_name,site_mobile,AEMP_USNM,
+                    emp_id,aemp_name,geo_lat,geo_lon, sum(totalINv) total,sum(Delin) delivered ,optp_id AS p_type_id,deliveryStatus
+                    from(
+                        SELECT t1.`TRIP_NO`,t1.DM_ACTIVITY AS trip_status,t6.SITE_ID,t6.SITE_CODE,t3.site_name,t3.site_mob1 AS site_mobile,t6.AEMP_USNM,
+                        t4.id AS emp_id,t4.aemp_name,t3.geo_lat,t3.geo_lon, count(distinct t6.ORDM_ORNM) totalINv,if(t6.DELIVERY_STATUS='11',1,'0') Delin,2 as optp_id
+                        ,t6.DELIVERY_STATUS as deliveryStatus
+                        FROM `dm_trip`t1 
+                         JOIN dm_trip_master as t6 ON (t1.`TRIP_NO`= t6.TRIP_NO)
+                        JOIN tm_site t3 ON(t6.SITE_ID=t3.id)                                             
+                        JOIN tm_aemp t4 ON(t6.AEMP_USNM=t4.aemp_usnm) 
+                        WHERE t1.`DM_ID`=$aemp_id AND t1.`STATUS`='N'
+                        GROUP by t1.`TRIP_NO`,t1.DM_ACTIVITY,t6.SITE_ID,t6.SITE_CODE,t6.AEMP_USNM,t4.id,t3.geo_lat,t3.geo_lon,t6.DELIVERY_STATUS
+                        ) f
+                    group by TRIP_NO,trip_status,SITE_ID,SITE_CODE,site_name,site_mobile,AEMP_USNM,
+                    emp_id,aemp_name,geo_lat,geo_lon,optp_id,deliveryStatus                 
+        ");
+
+                $trip_Details = DB::connection($db_conn)->select("
+         SELECT
+  1                                          AS Item_Price_List,
+  1                                          AS Grv_Item_Price_List,
+  t1.id                                                AS Item_Id,
+  t1.amim_code                                         AS Item_Code,
+  t1.amim_imgl                                         AS amim_imgl,
+  ''                                         AS Category_Name,
+  t1.amim_name                                         AS Item_Name,
+  t9.ORDD_UPRC                                         AS Item_Rate,
+  t9.ORDD_UPRC                                         AS Grv_Item_Price,
+  t9.ORDD_EXCS AS Item_gst,
+  t1.amim_pvat                                         AS Item_vat,
+  t1.amim_duft                                         AS Item_Factor,
+  1                                         AS category_Showing_seqn,
+  t1.amim_dunt                                         AS D_Unit,
+  t1.amim_runt                                         AS R_Unit,
+  SUM(t9.INV_QNTY-t9.DELV_QNTY)                        AS Stock_Qty,
+  round(SUM(t9.ORDD_OAMT),4)                           AS t_amt
+FROM  dm_trip_detail t9
+INNER JOIN dm_trip AS t8 ON t8.TRIP_NO=t9.TRIP_NO 
+inner join tm_amim as t1 on t9.AMIM_ID=t1.id
+WHERE  t8.DM_ID=$aemp_id AND t8.`STATUS`='N'
+  GROUP BY                                        
+  t9.INV_QNTY,t9.DELV_QNTY, t9.ORDD_OAMT,                                      
+  t1.id ,                                              
+  t1.amim_code,                                         
+  t1.amim_imgl ,                                       
+  t1.amim_name ,
+  t9.ORDD_UPRC,
+  t9.ORDD_EXCS,
+  t1.amim_pvat ,
+  t1.amim_duft,
+  t1.amim_dunt,
+  t1.amim_runt");
+            } else {
+
             $aemp_code = $request->emp_code;
-
-
             $delivery_vs_collection_status = DB::connection($db_conn)->select("
                         SELECT sum(t3.ORDD_AMNT) AS total_delivery_amount, sum(t3.COLLECTION_AMNT) AS total_collection_amount 
                         FROM `dm_trip`t1 
@@ -3958,27 +4078,6 @@ WHERE t1.ordm_ornm = '$order_id' AND t2.ordd_dqty != 0;");
                             having sum(ifnull(d.amnt,0))>sum( ifnull(d.camnt,0))
                         LIMIT 1;
             ");
-
-
-            /* $trip_m = DB::connection($db_conn)->select("
-                     SELECT TRIP_NO,trip_status,SITE_ID,SITE_CODE,site_name,site_mobile,AEMP_USNM,
-                     emp_id,aemp_name,geo_lat,geo_lon, sum(totalINv) total,sum(Delin) delivered ,optp_id AS p_type_id,deliveryStatus
-                     from(
-                         SELECT t1.`TRIP_NO`,t1.DM_ACTIVITY AS trip_status,t2.SITE_ID,t2.SITE_CODE,t3.site_name,t3.site_mob1 AS site_mobile,t2.AEMP_USNM,
-                         t4.id AS emp_id,t4.aemp_name,t3.geo_lat,t3.geo_lon, count(distinct t2.ORDM_ORNM) totalINv,if(t2.TRIP_STATUS='D',1,'0') Delin,t5.optp_id
-                         ,t6.DELIVERY_STATUS as deliveryStatus
-                         FROM `dm_trip`t1
-                         JOIN dm_trip_detail t2 ON(t1.`TRIP_NO`=t2.TRIP_NO)
-                         JOIN tm_site t3 ON(t2.SITE_ID=t3.id)
-                         JOIN dm_trip_master as t6 ON (t2.SITE_ID= t6.SITE_ID)
-                         join tl_stcm t5 ON(t5.site_id=t3.id) AND t5.slgp_id = t6.slgp_id
-                         JOIN tm_aemp t4 ON(t2.AEMP_USNM=t4.aemp_usnm)
-                         WHERE t1.`DM_ID`='$aemp_code' AND t1.`STATUS`='N'
-                         GROUP by t1.`TRIP_NO`,t1.DM_ACTIVITY,t2.SITE_ID,t2.SITE_CODE,t2.AEMP_USNM,t4.id,t3.geo_lat,t3.geo_lon,t2.TRIP_STATUS,t5.optp_id,t6.DELIVERY_STATUS
-                     ) f
-                     group by TRIP_NO,trip_status,SITE_ID,SITE_CODE,site_name,site_mobile,AEMP_USNM,
-                     emp_id,aemp_name,geo_lat,geo_lon,optp_id,deliveryStatus
-         ");*/
 
             $trip_m = DB::connection($db_conn)->select("
                     SELECT TRIP_NO,trip_status,SITE_ID,SITE_CODE,site_name,site_mobile,AEMP_USNM,
@@ -4028,50 +4127,6 @@ WHERE t1.ordm_ornm = '$order_id' AND t2.ordd_dqty != 0;");
                     t8.id,t8.aemp_name,t3.geo_lat,t3.geo_lon,t4.optp_id,t6.lfcl_id;
         ");
 
-            /*$trip_Details = DB::connection($db_conn)->select("
-         SELECT
-    t5.plmt_id                                           AS Item_Price_List,
-    t5.plmt_id                                           AS Grv_Item_Price_List,
-    t1.id                                                AS Item_Id,
-    t1.amim_code                                         AS Item_Code,
-    t1.amim_imgl                                         AS amim_imgl,
-    t4.issc_name                                         AS Category_Name,
-    t1.amim_name                                         AS Item_Name,
-    t6.pldt_tppr                                         AS Item_Rate,
-    t6.pldt_tpgp                                         AS Grv_Item_Price,
-    (t1.amim_pexc * 100) / (t6.pldt_tppr * t6.amim_duft) AS Item_gst,
-    t1.amim_pvat                                         AS Item_vat,
-    t6.amim_duft                                         AS Item_Factor,
-    t4.issc_seqn                                         AS category_Showing_seqn,
-    t6.amim_dunt                                         AS D_Unit,
-    t6.amim_runt                                         AS R_Unit,
-    SUM(t9.INV_QNTY-t9.DELV_QNTY)                        AS Stock_Qty,
-    round(SUM(t9.ORDD_OAMT),4)                           AS t_amt
-    FROM `tm_amim`t1
-    INNER JOIN tl_sgit t2 ON t1.id=t2.amim_id
-    INNER JOIN tl_sgsm t3 ON t2.slgp_id = t3.slgp_id
-    INNER JOIN tm_issc t4 ON t2.issc_id = t4.id
-    INNER JOIN tl_stcm t5 ON t3.plmt_id = t5.plmt_id
-    INNER JOIN tm_pldt AS t6 ON t5.plmt_id = t6.plmt_id  AND t6.amim_id = t2.amim_id
-    INNER JOIN tm_aemp AS t7 ON t3.aemp_id=t7.id
-    INNER JOIN dm_trip AS t8 ON t7.aemp_usnm=t8.DM_ID
-    INNER JOIN dm_trip_detail t9 ON t8.TRIP_NO=t9.TRIP_NO and t9.AMIM_ID=t6.amim_id
-    WHERE  t1.lfcl_id=1 AND
-    t8.DM_ID='$aemp_code' AND t8.`STATUS`='N' GROUP BY t5.plmt_id,
-    t5.plmt_id, t9.INV_QNTY,t9.DELV_QNTY, t9.ORDD_OAMT,
-    t1.id ,
-    t1.amim_code,
-    t1.amim_imgl ,
-    t4.issc_name ,
-    t1.amim_name ,
-    t6.pldt_tppr ,
-    t6.pldt_tpgp ,
-    t1.amim_pvat  ,
-    t6.amim_duft ,
-    t4.issc_seqn ,
-    t6.amim_dunt ,
-    t6.amim_runt;");*/
-
             $trip_Details = DB::connection($db_conn)->select("
          SELECT
   1                                          AS Item_Price_List,
@@ -4107,7 +4162,7 @@ WHERE  t8.DM_ID='$aemp_code' AND t8.`STATUS`='N'
   t1.amim_duft,
   t1.amim_dunt,
   t1.amim_runt");
-
+        }
 
             if ($trip_m != null) {
                 $arrayObj = (array)$trip_m[0];
@@ -4211,7 +4266,7 @@ FROM (SELECT
   t3.amim_imic                                                                        AS amim_imic,
   t5.issc_name                                                                        AS Item_Category,
   t3.amim_name                                                                        AS Item_Name,
-  round(t2.pldt_tppr,2)                                                               AS Item_Price,
+  t2.pldt_tppr                                                                          AS Item_Price,
   t2.amim_duft                                                                        AS Item_Factor 
   
   FROM tl_sgsm AS t1
@@ -4237,7 +4292,7 @@ SELECT
   t3.amim_imic                                                                        AS amim_imic,
   t5.issc_name                                                                        AS Item_Category,
   t3.amim_name                                                                        AS Item_Name,
-  round(t2.pldt_tppr,2)                                                               AS Item_Price,
+  t2.pldt_tppr                                                               AS Item_Price,
   t2.amim_duft                                                                        AS Item_Factor 
   FROM tl_sgsm AS t1
   INNER JOIN tl_sgit AS t4 ON t1.slgp_id = t4.slgp_id 
@@ -4290,7 +4345,7 @@ FROM (SELECT
   t3.amim_imic                                                                        AS amim_imic,
   t5.issc_name                                                                        AS Item_Category,
   t3.amim_name                                                                        AS Item_Name,
-  round(t2.pldt_tppr,2)                                                               AS Item_Price,
+  t2.pldt_tppr                                                                        AS Item_Price,
   t2.amim_duft                                                                        AS Item_Factor 
   
   FROM tl_sgsm AS t1
@@ -4316,7 +4371,7 @@ SELECT
   t3.amim_imic                                                                        AS amim_imic,
   t5.issc_name                                                                        AS Item_Category,
   t3.amim_name                                                                        AS Item_Name,
-  round(t2.pldt_tppr,2)                                                               AS Item_Price,
+  t2.pldt_tppr                                                               AS Item_Price,
   t2.amim_duft                                                                        AS Item_Factor 
   FROM tl_sgsm AS t1
   INNER JOIN tl_sgit AS t4 ON t1.slgp_id = t4.slgp_id AND t4.slgp_id=$slgp_id
@@ -4365,13 +4420,15 @@ t3.amim_code
 
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
-
+        $module_type = $country->module_type;
         if ($db_conn != '') {
             $emp_id = $request->emp_id;
             $slgp_id = $request->slgp_id;
 
             $totalCollection = 0;
             $totalDepositHo = 0;
+			
+			if($module_type==2){
             if ($request->country_id == 14) {
 
                 if (empty($request->selectedDate)) {
@@ -4388,7 +4445,8 @@ t3.amim_code
                     FROM dm_collection AS t1                  
                     JOIN tl_site_party_mapping t3 ON t1.`SITE_CODE`=t3.mother_site_code
                     WHERE t1.AEMP_ID = $emp_id  AND t1.INVT_ID = 1 AND t1.`STATUS`!=24
-                    and (t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0 group by t1.COLLECTION_AMNT,t3.mother_site_name,t3.mother_site_code;
+                    and (t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0 
+					group by t1.COLLECTION_AMNT, t3.mother_site_name,t3.mother_site_code;
                 ");
                 } else {
                     $sql = DB::connection($db_conn)->select("
@@ -4413,7 +4471,7 @@ t3.amim_code
                     SELECT t1.COLLECTION_AMNT AS collectionAmount, round((t1.COLLECTION_AMNT - t1.COLL_REC_HO),4) AS dueAmount,round(t1.COLL_REC_HO,4) AS hoAmount,
                     t2.site_name AS siteName,t2.site_code AS siteCode
                     FROM dm_collection AS t1 
-                    INNER JOIN tm_site AS t2 ON t1.SITE_ID = t2.id
+                    INNER JOIN tm_site AS t2 ON t1.`SITE_CODE` = t2.site_code
                     WHERE t1.AEMP_ID = $emp_id  AND  INVT_ID = 1 AND t1.`STATUS`!=24
                     and (t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0
                     UNION  ALL 
@@ -4422,14 +4480,15 @@ t3.amim_code
                     FROM dm_collection AS t1                  
                     JOIN tl_site_party_mapping t3 ON t1.`SITE_CODE`=t3.mother_site_code
                     WHERE t1.AEMP_ID = $emp_id  AND t1.INVT_ID = 1 AND t1.`STATUS`!=24
-                    and (t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0 group by t1.COLLECTION_AMNT,t3.mother_site_name,t3.mother_site_code ;
+                    and (t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0 
+					group by t1.COLLECTION_AMNT, t3.mother_site_name,t3.mother_site_code;
                 ");
                 } else {
                     $sql = DB::connection($db_conn)->select("
                     SELECT t1.COLLECTION_AMNT AS collectionAmount,  round((t1.COLLECTION_AMNT - t1.COLL_REC_HO),4) AS dueAmount, round(t1.COLL_REC_HO,4) AS hoAmount,
                     t2.site_name AS siteName,t2.site_code AS siteCode
                     FROM dm_collection AS t1 
-                    INNER JOIN tm_site AS t2 ON t1.SITE_ID = t2.id
+                    INNER JOIN tm_site AS t2 ON t1.`SITE_CODE` = t2.site_code
                     WHERE t1.AEMP_ID = $emp_id  AND  INVT_ID = 1 AND t1.`STATUS`!=24
 					and date(t1.update_at) = '$request->selectedDate'
                     UNION  ALL 
@@ -4442,6 +4501,28 @@ t3.amim_code
                 ");
                 }
             }
+		}else{
+			  if (empty($request->selectedDate)) {
+                    $sql = DB::connection($db_conn)->select("
+                    SELECT t1.COLLECTION_AMNT AS collectionAmount, round((t1.COLLECTION_AMNT - t1.COLL_REC_HO),4) AS dueAmount,round(t1.COLL_REC_HO,4) AS hoAmount,
+                    t2.site_name AS siteName,t2.site_code AS siteCode
+                    FROM dm_collection AS t1 
+                    INNER JOIN tm_site AS t2 ON t1.SITE_ID = t2.id
+                    WHERE t1.AEMP_ID = $emp_id AND t1.INVT_ID = 1 AND t1.`STATUS`!=24
+                    and (t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0                    
+                ");
+                } else {
+                    $sql = DB::connection($db_conn)->select("
+                    SELECT t1.COLLECTION_AMNT AS collectionAmount,  round((t1.COLLECTION_AMNT - t1.COLL_REC_HO),4) AS dueAmount, round(t1.COLL_REC_HO,4) AS hoAmount,
+                    t2.site_name AS siteName,t2.site_code AS siteCode
+                    FROM dm_collection AS t1 
+                    INNER JOIN tm_site AS t2 ON t1.SITE_ID = t2.id
+                    WHERE t1.AEMP_ID = $emp_id AND t1.INVT_ID = 1 AND t1.`STATUS`!=24
+					and date(t1.update_at) = '$request->selectedDate'                    
+                ");
+                }
+		      }
+			
             foreach ($sql as $index => $item) {
                 $totalCollection += $item->collectionAmount;
                 $totalDepositHo += $item->hoAmount;
@@ -4743,6 +4824,86 @@ t3.amim_code
 
 
             return $data1;
+        }
+    }
+	public
+    function getUser7Daysdata(Request $request)
+    {
+        $emp_id = $request->emp_id;
+        $country = (new Country())->country($request->country_id);
+        $db_conn = $country->cont_conn;
+        $date = date('Y-m-d');
+
+        if ($db_conn != '') {
+            $data1 = DB::connection($db_conn)->select("
+           SELECT
+  t1.date,
+  IFNULL(t2.dhbd_tamt, 0) AS order_amt,
+  left(dayname(t1.date), 3) day_name,
+  day(t1.date) AS day_sl
+FROM
+  (SELECT adddate('2020-01-01', t4.i * 10000 + t3.i * 1000 + t2.i * 100 + t1.i * 10 + t0.i) AS date
+   FROM
+     (SELECT 0 i
+      UNION SELECT 1
+      UNION SELECT 2
+      UNION SELECT 3
+      UNION SELECT 4
+      UNION SELECT 5
+      UNION SELECT 6
+      UNION SELECT 7
+      UNION SELECT 8
+      UNION SELECT 9) t0,
+     (SELECT 0 i
+      UNION SELECT 1
+      UNION SELECT 2
+      UNION SELECT 3
+      UNION SELECT 4
+      UNION SELECT 5
+      UNION SELECT 6
+      UNION SELECT 7
+      UNION SELECT 8
+      UNION SELECT 9) t1,
+     (SELECT 0 i
+      UNION SELECT 1
+      UNION SELECT 2
+      UNION SELECT 3
+      UNION SELECT 4
+      UNION SELECT 5
+      UNION SELECT 6
+      UNION SELECT 7
+      UNION SELECT 8
+      UNION SELECT 9) t2,
+     (SELECT 0 i
+      UNION SELECT 1
+      UNION SELECT 2
+      UNION SELECT 3
+      UNION SELECT 4
+      UNION SELECT 5
+      UNION SELECT 6
+      UNION SELECT 7
+      UNION SELECT 8
+      UNION SELECT 9) t3,
+     (SELECT 0 i
+      UNION SELECT 1
+      UNION SELECT 2
+      UNION SELECT 3
+      UNION SELECT 4
+      UNION SELECT 5
+      UNION SELECT 6
+      UNION SELECT 7
+      UNION SELECT 8
+      UNION SELECT 9) t4) AS t1
+  LEFT JOIN th_dhbd_5 AS t2 ON t1.date = t2.dhbd_date AND t2.aemp_id = $emp_id
+WHERE t1.date BETWEEN subdate('$date',6) AND '$date'
+GROUP BY t1.date,t2.dhbd_tamt
+            "); 
+		
+           return array(
+                'data' => $data1               
+            );
+
+           
         }
     }
 

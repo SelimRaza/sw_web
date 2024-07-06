@@ -65,6 +65,7 @@
                                 <thead>
                                 <tr class="tbl_header">
                                     <th>SL</th>
+                                    <th>Division ID</th>
                                     <th>code</th>
                                     <th>Name</th>
                                     <th style="width: 20%">Action</th>
@@ -74,6 +75,7 @@
                                 @foreach($gDivision as $index=>$divisions)
                                     <tr>
                                         <td>{{$index+1}}</td>
+                                        <td>{{$divisions->id}}</td>
                                         <td>{{$divisions->disn_code}}</td>
                                         <td>{{$divisions->disn_name}}</td>
                                         <td>

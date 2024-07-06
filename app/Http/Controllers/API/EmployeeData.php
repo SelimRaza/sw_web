@@ -262,6 +262,8 @@ GROUP BY t1.date, t2.emp_id,t4.name,t5.prosess_status_id,t6.name,t5.leave_reason
     public function employeeAttendance(Request $request)
 
     {
+		
+		
         $dataRow = DB::select("SELECT
   t1.date,
   t2.emp_id,

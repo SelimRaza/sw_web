@@ -142,7 +142,7 @@ Route::group(['middleware' => ['VerifyAPIKey']], function () {
     Route::post('orderModuleData/aroundOutlet_UsingMarket', 'API\v2\OrderModuleData@aroundOutlet_UsingMarket');
     Route::post('OrderModuleData/MQRupdateOutletSave', 'API\v2\OrderModuleData@MQRupdateOutletSave');
     Route::post('orderModuleData/govDistrict', 'API\v2\OrderModuleDataUAE@govDistrict');
-    Route::post('orderModuleData/govThana', 'API\v2\OrderModuleData@govThana');
+    Route::post('orderModuleData/govThana', 'API\v2\OrderModuleDataUAE@govThana');
     Route::post('orderModuleData/govThana1', 'API\v2\OrderModuleData@govThana1');
     Route::post('orderModuleData/govWard', 'API\v2\OrderModuleData@govWard');
     Route::post('orderModuleData/market', 'API\v2\OrderModuleData@market');

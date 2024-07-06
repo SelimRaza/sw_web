@@ -1,12 +1,12 @@
 
-const date_gvt_h='<option value="1">Yesterday</option>' +
+var gvt='<option value="1">Yesterday</option>' +
                     '<option value="10">This Week</option>' +
                     '<option value="-1">Single Date</option>' +
                     '<option value="11">Last Week</option>' +
                     '<option value="12">Previous Week</option>' +
                     '<option value="5">As Of</option>'+
                     '<option value="30">Last Month</option>'; 
-const date_sales_h='<option value="0">Today</option>' +
+var sales='<option value="0">Today</option>' +
                     '<option value="1">Yesterday</option>' +
                     '<option value="-1">Single Date</option>' +
                     '<option value="10">This Week</option>' +
@@ -15,7 +15,6 @@ const date_sales_h='<option value="0">Today</option>' +
                     '<option value="5">As Of</option>'; 
 $("input[type='radio']").click(function () {
     var reportType = $("input[name='reportType']:checked").val();
-    console.log(reportType)
     switch (reportType){
         case "sr_activity_gvt_hierarchy":
         case "sr_activity_sales_hierarchy":
@@ -75,11 +74,17 @@ $("input[type='radio']").click(function () {
             $('.zone_div').show();
             $('#dirg_id_div').show();
             break;
+        
         case undefined:
             $('#sh_date_gvt').empty();
-            $('#sh_date_gvt').append(date_gvt_h);
+            $('#sh_date_gvt').append(gvt);
             $('#sh_date').empty();
-            $('#sh_date').append(date_sales_h);
+            $('#sh_date').append(sales);
+            break;
+        case "attendance_report":
+            hideFilterArea();
+            $('.attendance_type_div').show();
+            $('#sales_heirarchy').show();
             break;
         default:
             hideFilterArea();
@@ -99,6 +104,7 @@ function hideFilterArea(){
     $('#sr_zone_div').hide();
     $('#history_usr').hide();
     $('.outlet_weekly').hide();
+    $('.attendance_type_div').hide();
 }
 function resetGetReportFunction(){
     $('#send').removeAttr('onclick');

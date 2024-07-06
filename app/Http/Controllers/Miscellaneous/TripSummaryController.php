@@ -70,6 +70,7 @@ class TripSummaryController extends Controller
         $end_date       =$request->end_date;
         $sr_usnm        =$request->emp_id;
         $site_code      =$request->site_code;
+        $site_code2     =$request->site_code2;
         $ordm_ornm      =$request->ordm_ornm;
         $trip_no        =$request->trip_no;
         $sv_id          =$request->sv_id;
@@ -79,7 +80,7 @@ class TripSummaryController extends Controller
         $aemp_id=$employee?$employee->id:'';
         $rpt_type=$request->rpt_type;
         Switch($rpt_type){
-            case '1':
+            case '2':
                 $query_params='';
                 if($sr_usnm){
                     $query_param.=" AND t2.AEMP_USNM='$sr_usnm'";
@@ -88,7 +89,7 @@ class TripSummaryController extends Controller
                     $query_param.=" AND t1.DM_ID='$sv_id'";
                 }
                 if($site_code){
-                    $query_param.=" AND t2.SITE_CODE='$site_code'";
+                    $query_param.=" AND t2.SITE_CODE BETWEEN '$site_code' AND '$site_code2'";
                 }
                 if($dlrm_id){
                     $query_param.=" AND t1.DEPOT_ID='$dlrm_id'";
@@ -102,58 +103,108 @@ class TripSummaryController extends Controller
                 if($start_date && $end_date){
                     $query_param.=" AND t1.TRIP_DATE BETWEEN '$start_date' AND '$end_date'";
                 }
-                // $trip_date=DB::connection($this->db)->select("SELECT 
-                //             t1.TRIP_NO,t1.TRIP_DATE,t1.DM_ID,t4.aemp_name DM_NAME,t1.INVOICE_NUM,t1.SR_NUM,t1.ORDD_AMNT,
-                //             t1.INV_AMNT,t1.DELV_AMNT,t1.COLLECTION_AMNT,
-                //             ROUND(CASE WHEN t1.DM_ACTIVITY=5 THEN t1.INV_AMNT-t1.DELV_AMNT ELSE 0 END,2)RTAN_AMNT,
-                //             ROUND(t1.DELV_AMNT-t1.COLLECTION_AMNT) CRED_AMNT,
-                //             ROUND(SUM(t5.GRV_AMNT),2)GRV_AMNT,
-                //             IFNULL(ROUND(SUM(t5.GD_GRV),2),0) GD_GRV,IFNULL(ROUND(SUM(t5.BAD_GRV),2),0)BAD_GRV,
-                //             t2.dlrm_name DEPOT_NAME,t3.lfcl_name TRIP_STAT,
-                //             t1.DELI_NUM,t1.Cash,t1.Cheque,t1.Online
-                //             FROM 
-                //             (Select 
-                //             t1.TRIP_NO,
-                //             t1.TRIP_DATE,
-                //             t1.DM_ID,
-                //             t1.DM_ACTIVITY,t1.DEPOT_ID,
-                //             COUNT(t2.ORDM_ORNM) INVOICE_NUM,
-                //             COUNT(DISTINCT t2.AEMP_ID) SR_NUM,
-                //             SUM(CASE WHEN t2.DELIVERY_STATUS=11 THEN 1 ELSE 0 END ) DELI_NUM,
-                //             ROUND(SUM(t2.ORDD_AMNT),2) ORDD_AMNT,
-                //             ROUND(SUM(t2.INV_AMNT),2) INV_AMNT,
-                //             ROUND(SUM(t2.DELV_AMNT),2)DELV_AMNT,
-                //             ROUND(SUM(t2.COLLECTION_AMNT),2)COLLECTION_AMNT,
-                //             ROUND(SUM(CASE WHEN t4.COLLECTION_TYPE='Cash' THEN t4.COLLECTION_AMNT ELSE 0 END),2) Cash,
-                //             ROUND(SUM(CASE WHEN t4.COLLECTION_TYPE='Cheque' THEN t4.COLLECTION_AMNT ELSE 0 END),2) Cheque,
-                //             ROUND(SUM(CASE WHEN t4.COLLECTION_TYPE='Online' THEN t4.COLLECTION_AMNT ELSE 0 END),2) 'Online'
-                //             FROM dm_trip t1
-                //             INNER JOIN dm_trip_master t2 ON t1.TRIP_NO=t2.TRIP_NO
-                //             LEFT JOIN dm_invoice_collection_mapp t3 ON t2.ORDM_ORNM=t3.TRANSACTION_ID
-                //             LEFT JOIN dm_collection t4 ON COLL_NUMBER=t3.MAP_ID
-                //             WHERE t1.TRIP_DATE BETWEEN '$start_date' AND '$end_date' ". $query_param."
-                //             GROUP BY t1.TRIP_NO,t1.TRIP_DATE,t1.DM_ID,t1.DM_ACTIVITY,t1.DEPOT_ID)t1
-                //             INNER JOIN tm_dlrm t2 ON t1.DEPOT_ID=t2.dlrm_code
-                //             INNER JOIN tm_lfcl t3 ON t1.DM_ACTIVITY=t3.ID
-                //             INNER JOIN tm_aemp t4 ON t1.DM_ID=t4.AEMP_USNM
-                //             LEFT JOIN
-                //             ( SELECT dm_trip, rtan_rtnm,rtan_amnt GRV_AMNT,
-                //                 ROUND(SUM(CASE WHEN t6.rtdd_ptyp=1 THEN t6.rtdd_oamt ELSE 0 END),2) BAD_GRV,
-                //                 ROUND(SUM(CASE WHEN t6.rtdd_ptyp=2 THEN t6.rtdd_oamt ELSE 0 END),2) GD_GRV
-                //                 FROM tt_rtan t5
-                //             INNER JOIN tt_rtdd t6 ON t5.rtan_rtnm=t6.rtdd_rtan GROUP BY dm_trip,rtan_rtnm)t5
-                //             ON t1.TRIP_NO=t5.dm_trip 
-                //             GROUP BY t1.TRIP_NO,t1.TRIP_DATE,t1.DM_ID,t4.aemp_name,t1.INVOICE_NUM,t1.SR_NUM,t1.ORDD_AMNT,
-                //             t1.INV_AMNT,t1.DELV_AMNT,t1.COLLECTION_AMNT,t2.dlrm_name,t3.lfcl_name ORDER BY t1.TRIP_DATE ASC;");
+                $data=DB::connection($this->db)->select("SELECT 
+                        t1.TRIP_NO,t1.TRIP_DATE,t1.DM_ID,t4.aemp_name DM_NAME,t1.ORDD_AMNT,
+                        t1.INV_AMNT,(t1.DELV_AMNT+DISCOUNT)DELV_AMNT,t1.COLLECTION_AMNT,
+                        ROUND(t1.RTAN_AMNT,2) RTAN_AMNT,
+                        ROUND(t1.DELV_AMNT-t1.COLLECTION_AMNT) CRED_AMNT,
+                        ROUND(SUM(t5.GRV_AMNT),2)GRV_AMNT,
+                        IFNULL(ROUND(SUM(t5.GD_GRV),2),0) GD_GRV,IFNULL(ROUND(SUM(t5.BAD_GRV),2),0)BAD_GRV,
+                        t2.dlrm_name DEPOT_NAME,t3.lfcl_name TRIP_STAT, t7.lfcl_name ORDER_STAT,
+                        t1.Cash,t1.Cheque,t1.Online,
+                        DISCOUNT,
+                        ORDM_ORNM,
+                        t6.site_code SITE_CODE,
+                        t6.site_name SITE_NAME,
+                        t8.aemp_usnm AEMP_USNM,
+                        t8.aemp_name AEMP_NAME
+                        FROM 
+                            (Select 
+                                t1.TRIP_NO,
+                                t2.ORDM_ORNM,
+                                t1.TRIP_DATE,
+                                t1.DM_ID,
+                                t2.SITE_ID,
+                                t1.DM_ACTIVITY,t1.DEPOT_ID,
+                                t2.DELIVERY_STATUS,
+                                ROUND(SUM(t2.ORDD_AMNT),2) ORDD_AMNT, 
+                                ROUND(SUM(t100.DISCOUNT),2) DISCOUNT,
+                                ROUND(SUM(t2.INV_AMNT),2) INV_AMNT,
+                                ROUND(SUM(t2.DELV_AMNT),2)DELV_AMNT,
+                                ROUND(SUM(t2.COLLECTION_AMNT),2)COLLECTION_AMNT,
+                                ROUND(SUM(t3.Cash),2) Cash,
+                                ROUND(SUM(t3.Cheque),2) Cheque,
+                                ROUND(SUM(t3.Online),2) 'Online',
+                                t2.AEMP_ID,
+                                SUM(CASE WHEN t2.DELIVERY_STATUS=0 THEN 0 ELSE  IF(ROUND(ROUND(t2.INV_AMNT,2)-ROUND(t2.DELV_AMNT,2),2)<0,0,ROUND(ROUND(t2.INV_AMNT,2)-ROUND(t2.DELV_AMNT,2),2)) END) RTAN_AMNT
+                                FROM dm_trip t1
+                                INNER JOIN dm_trip_master t2 ON t1.TRIP_NO=t2.TRIP_NO
+                                INNER JOIN (SELECT TRIP_NO,ORDM_ORNM,SUM(DISCOUNT) DISCOUNT FROM dm_trip_detail GROUP BY TRIP_NO,ORDM_ORNM) t100 ON t2.TRIP_NO=t100.TRIP_NO AND t2.ORDM_ORNM=t100.ORDM_ORNM
+                                LEFT JOIN 
+                                (
+                                    SELECT  t3.TRANSACTION_ID,
+                                    ROUND(SUM(CASE WHEN t4.COLLECTION_TYPE='Cash' THEN t4.COLLECTION_AMNT ELSE 0 END),2) Cash,
+                                    ROUND(SUM(CASE WHEN t4.COLLECTION_TYPE='Cheque' THEN t4.COLLECTION_AMNT ELSE 0 END),2) Cheque,
+                                    ROUND(SUM(CASE WHEN t4.COLLECTION_TYPE='Online' THEN t4.COLLECTION_AMNT ELSE 0 END),2) 'Online'
+                                    FROM  
+                                    dm_invoice_collection_mapp t3 
+                                    LEFT JOIN dm_collection t4 ON COLL_NUMBER=t3.MAP_ID
+                                    GROUP BY TRANSACTION_ID
+                                )t3 ON t2.ORDM_ORNM=t3.TRANSACTION_ID
+                                WHERE 1 ".$query_param . "
+                                GROUP BY t1.TRIP_NO,t1.TRIP_DATE,t1.DM_ID,t1.DM_ACTIVITY,t1.DEPOT_ID,t2.ORDM_ORNM,t2.AEMP_ID
+                                )t1
+                        INNER JOIN tm_dlrm t2 ON t1.DEPOT_ID=t2.dlrm_code
+                        INNER JOIN tm_lfcl t3 ON t1.DM_ACTIVITY=t3.ID
+                        INNER JOIN tm_lfcl t7 ON t1.DELIVERY_STATUS=t7.id
+                        INNER JOIN tm_aemp t4 ON t1.DM_ID=t4.AEMP_USNM
+                        INNER JOIN tm_aemp t8 ON t1.AEMP_ID=t8.id
+                        LEFT JOIN
+                        ( SELECT dm_trip, rtan_rtnm,rtan_amnt GRV_AMNT,t5.site_id,
+                            ROUND(SUM(CASE WHEN t6.rtdd_ptyp=1 THEN t6.rtdd_oamt ELSE 0 END),2) BAD_GRV,
+                            ROUND(SUM(CASE WHEN t6.rtdd_ptyp=2 THEN t6.rtdd_oamt ELSE 0 END),2) GD_GRV
+                            FROM tt_rtan t5
+                        INNER JOIN tt_rtdd t6 ON t5.rtan_rtnm=t6.rtdd_rtan GROUP BY dm_trip,rtan_rtnm,site_id
+                        )t5
+                        ON t1.TRIP_NO=t5.dm_trip AND t1.SITE_ID=t5.site_id
+                        INNER JOIN tm_site t6 ON t1.SITE_ID=t6.id
+                        GROUP BY t1.TRIP_NO,t1.TRIP_DATE,t1.DM_ID,t4.aemp_name,t1.ORDD_AMNT,t1.ORDM_ORNM,t8.aemp_usnm,t8.aemp_name,
+                        t1.INV_AMNT,t1.DELV_AMNT,t1.COLLECTION_AMNT,t2.dlrm_name,t3.lfcl_name ORDER BY t1.TRIP_DATE,t1.TRIP_NO ASC");
+
+                return $data;
+            case '1':
+                $query_params='';
+                if($sr_usnm){
+                    $query_param.=" AND t2.AEMP_USNM='$sr_usnm'";
+                }
+                if($sv_id){
+                    $query_param.=" AND t1.DM_ID='$sv_id'";
+                }
+                if($site_code){
+                    $query_param.=" AND t2.SITE_CODE BETWEEN '$site_code' AND '$site_code2'";
+                }
+                if($dlrm_id){
+                    $query_param.=" AND t1.DEPOT_ID='$dlrm_id'";
+                }
+                if($trip_no){
+                    $query_param.=" AND t1.TRIP_NO='$trip_no'";
+                }
+                if($ordm_ornm){
+                    $query_param.=" AND t2.ORDM_ORNM='$ordm_ornm'";
+                }
+                if($start_date && $end_date){
+                    $query_param.=" AND t1.TRIP_DATE BETWEEN '$start_date' AND '$end_date'";
+                }
                 $trip_date=DB::connection($this->db)->select("SELECT 
                             t1.TRIP_NO,t1.TRIP_DATE,t1.DM_ID,t4.aemp_name DM_NAME,t1.INVOICE_NUM,t1.SR_NUM,t1.ORDD_AMNT,
-                            t1.INV_AMNT,t1.DELV_AMNT,t1.COLLECTION_AMNT,
+                            t1.INV_AMNT,(t1.DELV_AMNT+DISCOUNT)DELV_AMNT,t1.COLLECTION_AMNT,
                             ROUND(t1.RTAN_AMNT,2) RTAN_AMNT,
                             ROUND(t1.DELV_AMNT-t1.COLLECTION_AMNT) CRED_AMNT,
                             ROUND(SUM(t5.GRV_AMNT),2)GRV_AMNT,
                             IFNULL(ROUND(SUM(t5.GD_GRV),2),0) GD_GRV,IFNULL(ROUND(SUM(t5.BAD_GRV),2),0)BAD_GRV,
                             t2.dlrm_name DEPOT_NAME,t3.lfcl_name TRIP_STAT,
-                            t1.DELI_NUM,t1.Cash,t1.Cheque,t1.Online
+                            t1.DELI_NUM,t1.Cash,t1.Cheque,t1.Online,
+                            DISCOUNT
                             FROM 
                             (Select 
                             t1.TRIP_NO,
@@ -163,7 +214,8 @@ class TripSummaryController extends Controller
                             COUNT(t2.ORDM_ORNM) INVOICE_NUM,
                             COUNT(DISTINCT t2.AEMP_ID) SR_NUM,
                             SUM(CASE WHEN t2.DELIVERY_STATUS=11 THEN 1 ELSE 0 END ) DELI_NUM,
-                            ROUND(SUM(t2.ORDD_AMNT),2) ORDD_AMNT,
+                            ROUND(SUM(t2.ORDD_AMNT),2) ORDD_AMNT, 
+                            ROUND(SUM(t100.DISCOUNT),2) DISCOUNT,
                             ROUND(SUM(t2.INV_AMNT),2) INV_AMNT,
                             ROUND(SUM(t2.DELV_AMNT),2)DELV_AMNT,
                             ROUND(SUM(t2.COLLECTION_AMNT),2)COLLECTION_AMNT,
@@ -173,6 +225,7 @@ class TripSummaryController extends Controller
                             SUM(CASE WHEN t2.DELIVERY_STATUS=0 THEN 0 ELSE  IF(ROUND(ROUND(t2.INV_AMNT,2)-ROUND(t2.DELV_AMNT,2),2)<0,0,ROUND(ROUND(t2.INV_AMNT,2)-ROUND(t2.DELV_AMNT,2),2)) END) RTAN_AMNT
                             FROM dm_trip t1
                             INNER JOIN dm_trip_master t2 ON t1.TRIP_NO=t2.TRIP_NO
+                            INNER JOIN (SELECT TRIP_NO,ORDM_ORNM,SUM(DISCOUNT) DISCOUNT FROM dm_trip_detail GROUP BY TRIP_NO,ORDM_ORNM) t100 ON t2.TRIP_NO=t100.TRIP_NO AND t2.ORDM_ORNM=t100.ORDM_ORNM
                             LEFT JOIN 
                             (
                             SELECT  t3.TRANSACTION_ID,
@@ -200,7 +253,7 @@ class TripSummaryController extends Controller
                             t1.INV_AMNT,t1.DELV_AMNT,t1.COLLECTION_AMNT,t2.dlrm_name,t3.lfcl_name ORDER BY t1.TRIP_DATE ASC");
                 return $trip_date;    
                 break;
-            case '2':
+            case '20':
                 $trip_details=array();
                 $query_params='';
                 if($sr_usnm){

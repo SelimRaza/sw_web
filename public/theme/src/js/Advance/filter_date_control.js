@@ -187,9 +187,9 @@ function appendDate(date){
 }
 function customDateHide(){
     $('.year_mnth').hide();
-    $('.start_date_period_div').show();
+    // $('.start_date_period_div').show();
     $('.start_date_period_div_h').show();
-    $('.start_date_div').hide();
+    // $('.start_date_div').hide();
     $('.start_date_div_h').hide();
 }
 function hideIsDetailsOrSummaryFilter(){

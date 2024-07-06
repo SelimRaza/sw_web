@@ -259,10 +259,11 @@ function convert_number_to_words($number)
                                                             </tr>
                                                         </table>
                                                     </td>
-                                                   <!-- <td align="center">
-                                                         <img src="{{ asset("theme/image/logo.png")}}" alt="" width="100" height="60" style="margin-top:2px!important;"/>                                                                                                                                                                              
-                                                        <p id="qrcode_n"></p>	        	   																									
-													    </td> -->
+                                                    <td align="right">
+                                                         <img src="{{ asset("http://128.199.240.50/theme/image/logo.JPG")}}" alt="" width="100" height="60" style="margin-top:2px!important;"/>                                                                                                                                                                              
+                                                        <!--  <img src="{{ asset("theme/image/logo.JPG")}}" alt="" width="100" height="60" style="margin-top:2px!important;"/>                                                                                                                                                                              
+                                                       <p id="qrcode_n"></p>	-->        	   																									
+													    </td> 
                                                 </tr>                                   
                                             </table>
                                         </td>

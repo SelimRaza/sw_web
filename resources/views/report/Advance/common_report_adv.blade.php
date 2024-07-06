@@ -167,13 +167,13 @@
                                                                value="sr_item_survey"/> SR Item Survey
                                                     </label>
                                                 </div>
-                                                <div class="col-md-6 col-sm-6 ">
+                                                <!-- <div class="col-md-6 col-sm-6 ">
                                                     <label>
                                                         <input type="radio" class="flat" name="reportType"
                                                                id="reportType"
                                                                value="sr_routed_outlet"/> SR Route Outlet[Req Only]
                                                     </label>
-                                                </div>
+                                                </div> -->
                                                 
                                             </div>
                                             <div id="outlet_report"
@@ -1013,7 +1013,7 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="form-group col-md-6 start_date_div" style="display:none;" id="single_start_date_div">
+                                                <div class="form-group col-md-6 ">
                                                     <label class="control-label col-md-4 col-sm-4 col-xs-12"
                                                            for="start_date">Start Date<span class="required">*</span>
                                                     </label>
@@ -1024,7 +1024,7 @@
                                                                autocomplete="off"/>
                                                     </div>
                                                 </div>
-                                                <div class="form-group col-md-6 start_date_div" style="display:none;">
+                                                <div class="form-group col-md-6">
                                                     <label class="control-label col-md-4 col-sm-4 col-xs-12"
                                                            for="start_date">End Date<span class="required">*</span>
                                                     </label>
@@ -1035,7 +1035,21 @@
                                                                autocomplete="off"/>
                                                     </div>
                                                 </div>
-                                                <div class="form-group col-md-6 start_date_period_div">
+                                                <div class="form-group col-md-6 attendance_type_div"  id="attendance_type_div">
+                                                    <label class="control-label col-md-4 col-sm-4 col-xs-12"
+                                                           for="attendance_type">Attendance<span
+                                                                class="required"></span>
+                                                    </label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <select class="form-control cmn_select2" name="attendance_type"
+                                                                id="attendance_type">
+                                                                <option value="">Both</option>
+                                                                <option value="=1">Present</option>
+                                                                <option value="!=1">Absent</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <!-- <div class="form-group col-md-6 start_date_period_div">
                                                     <label class="control-label col-md-4 col-sm-4 col-xs-12"
                                                            for="start_date_period">Select Period<span
                                                                 class="required">*</span>
@@ -1050,7 +1064,7 @@
 
                                                     </div>
 
-                                                </div>
+                                                </div> -->
                                                 <div class="form-group col-md-6 ord_flag_div"  id="sr_zone_div">
                                                     <label class="control-label col-md-4 col-sm-4 col-xs-12"
                                                            for="dtls_sum">SR/Zone<span
@@ -1120,11 +1134,11 @@
 
                                                 <div class="form-group col-md-12 col-sm-12 col-xs-12"
                                                      style="margin-top: 15px;">
-                                                    <div class="pull-right" style="margin-right:5%; margin-top:2%;">
+                                                    <!-- <div class="pull-right" style="margin-right:5%; margin-top:2%;">
                                                         <a href="#" onclick="getRequestedReportList()"
                                                            class="request_report_check">Click here to see requested
                                                             report status</a>
-                                                    </div>
+                                                    </div> -->
 
 
                                                 </div>
@@ -1458,17 +1472,7 @@
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <div class="form-group col-md-12 col-sm-12 col-xs-12"
-                                                     style="margin-top: 15px;">
-                                                    <div class="pull-right" style="margin-right:5%; margin-top:2%;">
-                                                        <a href="#" onclick="getRequestedReportList()"
-                                                           class="request_report_check">Click here to see requested
-                                                            report status</a>
-                                                            
-                                                    </div>
-
-
-                                                </div>
+                                               
                                                 
 
                                             </div>
@@ -2062,16 +2066,16 @@
                     </div>
                     <!-- asset report end -->
                     <!-- Dynamic table start -->
-                    <div id="tbl_dynamic" class="div_hide">
+                    <div id="tl_dynamic" class="div_hide">
                         <div class="x_panel">
 
                             <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:280px;overflow:auto;" >
+                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:550px;overflow:auto;" >
                                     <div align="right" id="export_option_div">
 
                                     </div>
-                                    <table id="tl_dynamic" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
+                                   
+                                    <table id="masterTable" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"  data-page-length='100'>
                                         <thead id="tl_dynamic_head" class="tbl_header" style="position:sticky; inset-block-start:0;">
 
                                         </thead>
@@ -2662,36 +2666,8 @@
             });
             $('#rpt').height($("#hierarchy").height());
             function hide_me() {
-                // $('#tableDiv').hide();
-                // $('#tableDiv_sr_productivity').hide();
-                // $('#tableDiv_sr_productivity_summary').hide();
-                // $('#tableDiv_sr_history').hide();
-                // $('#tableDiv_sr_non_productivity').hide();
-                // $('#tableDiv_sr_summary_by_group').hide();
-                // $('#tableDiv_sr_activity_hourly_order').hide();
-                // $('#tableDiv_sr_activity_hourly_visit').hide();
-                // $('#tableDivd_market_outlet_sr_outlet').hide();
-                // $('#tableDiv_sr_wise_order_delivery').hide();
-                // $('#tableDiv_sku_wise_order_delivery').hide();
-                // $('#tableDiv_class_wise_order_summary').hide();
-                // $('#tableDiv_class_wise_order_summary_memo').hide();
-                // $('#tableDiv_zone_wise_order_delivery_summary').hide();
-                // $('#tableDiv_traking').hide();
-                // $('#item_wise_hierarchy').hide();
-                // $('#tableDiv_traking_gvt').hide();
-                // $('#tableDiv_sr_route_outlet').hide();
-                // $('#tableDiv_group_wise_route_outlet').hide();
-                // $('#tableDiv_note_report').hide();
-                // $('#emp_task_note_report').hide();
-                // $('#sr_movement_summary').hide();
                 $('#dev_note_date').hide();
-                // $('#tblDiv_requested_report').hide();
-                // $('#tablediv_sr_wise_item_summary_report').hide();
-                // $('#tablediv_order_details_report').hide();
-                // $('#tablediv_attendance_report').hide();
-               // $('#tblDiv_asset_report').hide();
                 $('#period').show();
-                //$('#employee_sales_traking_report_slgp').show();
                 $('.div_hide').hide();
                 $('.outlet_weekly').hide();
 
@@ -2699,14 +2675,6 @@
             function printTrip(divName){
                 var printContents = document.getElementById(divName).innerHTML;
                 var originalContents = document.body.innerHTML;
-
-              //  document.body.innerHTML = printContents;
-
-                
-
-             //   window.print();
-
-             //   document.body.innerHTML = originalContents;
                 var newWindow = window.open();
                 newWindow.document.write(printContents);
                 $("head").append("<style type='text/css' media='print'>@page { size: landscape; font-size: 9px !important; margin: 0;.text_center:text-align:center;}</style>");
@@ -2748,7 +2716,7 @@
                 $('#harch').show();
                 $('.gvt').hide();
                 $('#emp_tracking_report').hide();
-                $('.start_date_div').hide();
+                //$('.start_date_div').hide();
                 $('#asset_div').hide();
                 $('#ord_flag_div').hide();
                 $('#dtls_sum_div').hide();
@@ -2758,9 +2726,7 @@
                 $("input[name='reportType']").attr('checked', false);
                 $('#send').removeAttr('onclick');
                 $('#send').attr('onclick', 'getSummaryReport()');
-                // $('#getHReport').removeAttr('onclick');
-                // $('#getHReport').attr('onclick', 'getHReport()');
-                
+                $('.attendance_type_div').hide();              
 
             }
             function addClass() {
@@ -3490,7 +3456,7 @@
                     });
                 }
             }
-            function validateInputField(reportType, acmp_id, sales_group_id, start_date_period,
+            function validateInputField(reportType, acmp_id, sales_group_id,
             ...all
             )
             {
@@ -3518,22 +3484,55 @@
                     return true;
                 }
             }
-            function emptyContentAndAppendData(head,content){
+            // function emptyContentAndAppendData(head,content){
+            //     $('#tl_dynamic_head').empty();
+            //     $('#tl_dynamic_cont').empty();
+            //     $('#tl_dynamic_head').append(head);
+            //     $('#tl_dynamic_cont').append(content);
+            //     $('#tbl_dynamic').show();
+            // }
+
+
+            function emptyContentAndAppendData(head, content, filename = 'ExportData') {
+                $('#tl_dynamic').show();
+                var currentDate = '{{ date("Y_m_d") }}';
+                var exportLink = '<a onclick="exportTableToExcel(this, \'' + filename + currentDate + '.xls\', \'tl_dynamic\')" class="btn btn-sm" style="background-color:green;color:white;">Excel</a>';
                 $('#tl_dynamic_head').empty();
                 $('#tl_dynamic_cont').empty();
+                $('#export_option_div').empty();
+                $('#export_option_div').append(exportLink);
                 $('#tl_dynamic_head').append(head);
                 $('#tl_dynamic_cont').append(content);
-                $('#tbl_dynamic').show();
-                var height = $(window).height();
-                $('#tbl_dynamic').excelTableFilter();
-               // $('#tbl_dynamic').doubleScroll();
-                $('.dropdown-filter-item').css('color', 'black');
-                $('.dropdown-filter-dropdown').css({'margin-top': '3px', 'height': '23px', 'padding': '0px', 'gap': '1px' });
-                $('.arrow-down').css('display', 'none');
-                $('.dropdown-filter-icon').css('border', '1px solid white');
-                $('th').css({'vertical-align': 'top', 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'width': '100% !important', 'padding': '2px 10px'});
-
+                $('#tl_dynamic').show();
             }
+
+            // function emptyContentAndAppendData(head, content, filename = 'ExportData') {
+            //     $('#tl_dynamic').show();
+            //     var currentDate = '{{ date("Y_m_d") }}';
+            //     var exportLink = '<a onclick="exportTableToExcel(this, \'' + filename + currentDate + '.xls\', \'tl_dynamic\')" class="btn btn-sm" style="background-color:green;color:white;">Excel</a>';
+            //     $('#export_option_div').empty().append(exportLink);
+            //     $('#tl_dynamic_head').empty().append(head);
+            //     $('#tl_dynamic_cont').empty().append(content);
+            //     $('#tl_dynamic').show();
+
+            //     // Check if DataTable exists and destroy it
+            //      $('#masterTable').DataTable().destroy();
+               
+
+            //     // Wait for a short period before reinitializing DataTable
+            //     setTimeout(function() {
+            //         $('#masterTable').DataTable({
+            //                 dom: 'Bfrtip',
+            //                 retrieve: false,
+            //                 pageLength: 15,
+            //                 buttons: [
+            //                     'copy', 'csv', 'excel', 'pdf', 'print'
+            //                 ]
+            //         });
+            //     }, 100); // Delay for 100 milliseconds
+            // }
+
+
             function emptyContentAndAppendDataTrack(head,content){
                 $('#tableDiv_tracking_gvt_header1').empty();
                 $('#cont_traking_gvt').empty();
@@ -4023,6 +4022,8 @@
                 var sales_group_id = $('#sales_group_id').val();
                 var zone_id = $('#zone_id').val();
                 var time_period = $('#start_date_period').val()
+                var start_date = $('#start_date').val()
+                var end_date = $('#end_date').val()
                 var dist_id = $('#dist_id').val();
                 var than_id = $('#than_id').val();
                 var astm_id = $('#astm_id').val();
@@ -4034,11 +4035,8 @@
                 var start_date=$('#start_date').val();
                 var weekly_olt_sr=$('#sr_id').val();
                 var year_mnth=$('#year_mnth').val();
+                var attendance_type=$('#attendance_type').val();
                 var validityCheck = false;
-
-                if (time_period == '') {
-                    time_period = $('#start_date').val()
-                }
                 if (reportType === undefined) {
                     alert('Please select report');
                     return false;
@@ -4049,11 +4047,11 @@
                 }
                 if (reportType == 'market_outlet_sr_outlet') {
                     time_period = $('#start_date').val();
-                    validityCheck = validateInputField(reportType, acmp_id, sales_group_id, start_date_period, dist_id, than_id);
+                    validityCheck = validateInputField(reportType, acmp_id, sales_group_id, dist_id, than_id);
                 }
                 
                 else {
-                    validityCheck = validateInputField(reportType, acmp_id, sales_group_id, start_date_period);
+                    validityCheck = validateInputField(reportType, acmp_id, sales_group_id);
                     if(reportType=="asset_order"){
                         if(dirg_id==""||zone_id==""){
                             alert("Please select Region & Zone");
@@ -4079,11 +4077,14 @@
                                 dirg_id: dirg_id,
                                 astm_id:astm_id,
                                 ord_flag:ord_flag,
+                                start_date:start_date,
+                                end_date:end_date,
                                 utype:utype,
                                 rtype:rtype,
                                 weekly_olt_sr:weekly_olt_sr,
                                 year_mnth:year_mnth,
                                 sr_zone:sr_zone,
+                                attendance_type:attendance_type,
                                 _token: _token
                             },
                             cache: false,
@@ -4894,7 +4895,7 @@
                                             }
                                             emptyContentAndAppendData(head,html);
                                         break;
-                                    case "sr_activity_hourly_visit":
+                                    case "sr_activity_hourly_visit_bk":
                                             var head='';
                                             $('#sr_activity_hourly_visit_header').empty();
                                             if (time_period == 0) {
@@ -4960,6 +4961,80 @@
                                             }
                                             emptyContentAndAppendData(head,html);
                                         break;
+                                        case "sr_activity_hourly_visit":
+                                    var head=`<th>Date</th>
+                                        <th>Group</th>
+                                        <th>Zone</th>
+                                        <th>SR ID</th>
+                                        <th>SR Name</th>
+                                        <th>SR Mobile</th>
+                                        <th>09AM</th>
+                                        <th>10AM</th>
+                                        <th>11AM</th>
+                                        <th>12PM</th>
+                                        <th>01PM</th>
+                                        <th>02PM</th>
+                                        <th>03PM</th>
+                                        <th>04PM</th>
+                                        <th>05PM</th>
+                                        <th>06PM</th>
+                                        <th>07PM</th>
+                                        <th>08PM</th>
+                                        <th>09PM</th>`;
+                                        if (time_period == 0) {
+                                            count = 0;
+                                            var head=''
+                                            var dim = data[0].length;
+                                            for (var i = 0; i < data.length; i++) {
+                                                if (i == 0) {
+                                                    head += '<tr class="tbl_header">' + '<td>' + "Sl" + '</td>';
+                                                } else {
+                                                    html += '<tr>' + '<td>' + count + '</td>';
+                                                }
+
+                                                for (var j = 0; j < data[0].length; j++) {
+
+                                                    if(i==0){
+                                                        head += '<td>' + data[i][j] + '</td>';
+                                                    }else{
+                                                        html += '<td>' + data[i][j] + '</td>';
+                                                    }
+                                                }
+                                                //alert(data[i][0]);
+
+                                                html += '</tr>';
+
+                                                count++;
+                                            }
+                                            head+='</td>';
+                                            emptyContentAndAppendData(head,html)
+                                        }
+                                        else {
+                                            for (var i = 0; i < data.length; i++) {
+                                                html += '<tr>' +
+                                                    '<td>' + data[i]['act_date'] + '</td>' +
+                                                    '<td>' + data[i]['slgp_name'] + '</td>' +
+                                                    '<td>' + data[i]['zone_name'] + '</td>' +
+                                                    '<td>' + data[i]['aemp_usnm'] + '</td>' +
+                                                    '<td>' + data[i]['aemp_name'] + '</td>' +
+                                                    '<td>' + data[i]['aemp_mob1'] + '</td>' +
+                                                    '<td>' + data[i]['9am'] + '</td>' +
+                                                    '<td>' + data[i]['10am'] + '</td>' +
+                                                    '<td>' + data[i]['11am'] + '</td>' +
+                                                    '<td>' + data[i]['12pm'] + '</td>' +
+                                                    '<td>' + data[i]['1pm'] + '</td>' +
+                                                    '<td>' + data[i]['2pm'] + '</td>' +
+                                                    '<td>' + data[i]['3pm'] + '</td>' +
+                                                    '<td>' + data[i]['4pm'] + '</td>' +
+                                                    '<td>' + data[i]['5pm'] + '</td>' +
+                                                    '<td>' + data[i]['6pm'] + '</td>' +
+                                                    '<td>' + data[i]['7pm'] + '</td>' +
+                                                    '<td>' + data[i]['8pm'] + '</td>' +
+                                                    '<td>' + data[i]['9pm'] + '</td>';
+                                            }
+                                        }
+                                        emptyContentAndAppendData(head,html)
+                                    break;
                                     case "sr_hourly_activity":
                                         $('#sr_hourly_head').empty();
                                         $('#sr_hourly_cont').empty();
@@ -5800,7 +5875,8 @@
                                         emptyContentAndAppendData(head,html);
                                         break;
                                     case "sku_wise_order_delivery":
-                                        var head=`<th>SI</th>
+                                        var count=0;
+                                        var head=`<tr><th>SI</th>
                                             <th>Date</th>
                                             <th>Group Name</th>
                                             <th>Zone Name</th>
@@ -5809,8 +5885,11 @@
                                             <th>SR Mobile</th>
                                             <th>Item Code</th>
                                             <th>Item Name</th>
+                                            <th>Factor</th>
+                                            <th>Order Qty</th>
+                                            <th>Deli Qty</th>
                                             <th>Order Amount</th>
-                                            <th>Delivery Amount</th>`;
+                                            <th>Delivery Amount</th></tr>`;
                                         var gt=data.gt;
                                         var data=data.data;
                                         for (var i = 0; i < data.length; i++) {
@@ -5824,15 +5903,18 @@
                                                 '<td>' + data[i]['aemp_mob1'] + '</td>' +
                                                 '<td>' + data[i]['amim_code'] + '</td>' +
                                                 '<td>' + data[i]['amim_name'] + '</td>' +
+                                                '<td>' + data[i]['amim_duft'] + '</td>' +
+                                                '<td>' + data[i]['order_qty'] + '</td>' +
+                                                '<td>' + data[i]['deli_qty'] + '</td>' +
                                                 '<td>' + data[i]['ordd_amt'] + '</td>' +
                                                 '<td>' + data[i]['deli_amt'] + '</td>' +
                                                 '</tr>';
                                             count++;
                                         }
-                                        html+='<tr><td>GT</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>'+
+                                        html+='<tr><td>GT</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>'+
                                                 '<td>'+gt['t_order']+'</td>'+
                                                 '<td>'+gt['t_deli']+'</td></tr>';
-                                        emptyContentAndAppendData(head,html);
+                                        emptyContentAndAppendData(head,html,'SKU_WISE_ORDER_VS_DELIVERY');
                                         break;
                                     case "class_wise_order_report_amt":
                                         if(ord_flag==1){
@@ -6612,7 +6694,6 @@
                 var BOM = "\uFEFF";
                 var table=document.getElementById(tableId);
                 var html = table.outerHTML;
-                console.log(url);
                // var url = 'data:application/vnd.ms-excel,' + encodeURI(BOM+html); // Set your html table into url 
                 var url = 'data:application/vnd.ms-excel,' + escape(html); // Set your html table into url 
                 
@@ -8823,8 +8904,8 @@
 <script src="{{asset('theme/src/js/Advance/c_sr_attendance_rpt.js')}}"></script>
 <script src="{{asset('theme/src/js/Advance/c_sr_activity_polyline_map.js')}}"></script>
 <script src="{{asset('theme/src/js/Advance/c_sr_sales_gvt_monitoring.js')}}"></script>
-<!-- <script src="{{asset('theme/src/js/Advance/date_control.js')}}"></script>
-<script src="{{asset('theme/src/js/Advance/c_filter_division_control.js')}}"></script> -->
+<!-- <script src="{{asset('theme/src/js/Advance/date_control.js')}}"></script> -->
+<script src="{{asset('theme/src/js/Advance/c_filter_division_control.js')}}"></script>
 <script src="{{asset('theme/src/js/Advance/c_sr_note_report.js')}}"></script>
 <script src="{{asset('theme/src/js/Advance/asset_report.js')}}"></script>
 <script src="{{asset('theme/src/js/Advance/c_report_request.js')}}"></script>

@@ -6,8 +6,8 @@ $("input[type='radio']").click(function () {
     else{
         
         dateFilterOptionControl(reportType);
-        $('.start_date_div').hide();
-        $('.start_date_period_div').show();
+        // $('.start_date_div').hide();
+        // $('.start_date_period_div').show();
         $('.start_date_period_div_h').show();
         $('.start_date_div_h').hide();
     }

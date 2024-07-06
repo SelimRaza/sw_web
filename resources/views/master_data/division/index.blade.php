@@ -66,6 +66,7 @@
                                 <thead>
                                 <tr class="tbl_header">
                                     <th>SL</th>
+                                    <th>Division ID</th>
                                     <th>Name</th>
                                     <th>code</th>
 
@@ -76,6 +77,7 @@
                                 @foreach($division as $index=>$division)
                                     <tr>
                                         <td>{{$index+1}}</td>
+                                        <td>{{$division->id}}</td>
                                         <td>{{$division->sdvm_name}}</td>
                                         <td>{{$division->sdvm_code}}</td>
                                         <td>

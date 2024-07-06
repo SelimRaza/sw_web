@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\MasterData\DepotEmployee;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 
 class DealerController extends Controller
 {
@@ -24,10 +25,22 @@ class DealerController extends Controller
             $db_conn = $country->cont_conn;
 
             DB::connection($db_conn)->beginTransaction();
-            
 
             $up_user_id = $request->up_user_id;
-            $dealer = DB::connection($db_conn)->select("SELECT `acmp_id`, `dlrm_name`, `dlrm_code`, `dlrm_adrs`,`dlrm_mob1`, `dlrm_emal`, `id`, slgp_id, cont_id FROM `tm_dlrm` WHERE lfcl_id='1' and id='$up_user_id'");
+            $dealer_emp = Employee::on($db_conn)->where('id',$up_user_id)->first();
+            
+            if(!$dealer_emp){
+                return response()->json([
+                    "code" => 404,
+                    "status" => "error",
+                    "message" => "Employee not found"
+
+                ]);
+            }
+                    
+            $aemp_usnm  = $dealer_emp->aemp_usnm;
+            $dealer_code = str_replace('DMS', '', $aemp_usnm);
+            $dealer = DB::connection($db_conn)->select("SELECT `acmp_id`, `dlrm_name`, `dlrm_code`, `dlrm_adrs`,`dlrm_mob1`, `dlrm_emal`, `id`, slgp_id, cont_id FROM `tm_dlrm` WHERE lfcl_id='1' and dlrm_code='$dealer_code'");
             if(!$dealer){
                 return response()->json([
                     "code" => 404,
@@ -36,9 +49,11 @@ class DealerController extends Controller
 
                 ]);
             }
-
-            $code = 'DD'.$request->dm_code;
-            $pass_code = $request->dm_code;
+            $cur_second = date('s');
+            $code1 = $dealer_code.$cur_second;
+            $code = 'DD'.$code1;			
+           // $pass_code = $request->dm_code;
+            $pass_code = $code;           			
 
             $dlrm_adrs = $dealer[0]->dlrm_adrs;
             $id = $dealer[0]->id;
@@ -46,17 +61,6 @@ class DealerController extends Controller
             $cont_id = $dealer[0]->cont_id;
             $dlrm_mob1 = $dealer[0]->dlrm_mob1;
             $dlrm_emal = $dealer[0]->dlrm_emal;
-
-            $dealer_code = 'DMS'.$dealer[0]->dlrm_code;
-            $dealer_emp = Employee::on($db_conn)->where('aemp_usnm',$dealer_code)->first();
-            if(!$dealer_emp){
-                return response()->json([
-                    "code" => 404,
-                    "status" => "error",
-                    "message" => "Dealer not found"
-
-                ]);
-            }
             
             if ($cont_id=='2' || $cont_id=='5'){
                 $user=User::where('email',$code)->first();
@@ -125,12 +129,12 @@ class DealerController extends Controller
                 
                 $emp->aemp_emcc = '';
                 $emp->lfcl_id = 1;
-                $emp->amng_id = 0;
+                $emp->amng_id = 8;
                 $emp->save();
 
                 $de_emp = new DepotEmployee;
                 $de_emp->setConnection($db_conn);
-                $de_emp->aemp_code = $emp->aemp_usnm;
+                $de_emp->aemp_code = $code;
                 $de_emp->dlrm_code = $dealer[0]->dlrm_code;
                 $de_emp->aemp_id  = $emp->id;
                 $de_emp->dlrm_id = $dealer[0]->id;

@@ -60,9 +60,15 @@ class RoutePlanMappingController extends Controller
 
     // Rout Plan Mapping
     public function index(){
+        $data=DB::connection($this->db)->select("SELECT t2.id emp_id,t2.aemp_usnm,t2.aemp_name name,t3.slgp_name group_name FROM `tl_rpln` t1 
+                    INNER JOIN tm_aemp t2 ON t1.aemp_id=t2.id
+                    INNER JOIN tm_slgp t3 ON t2.slgp_id=t3.id
+                    INNER JOIN  tm_rout t4 ON t1.rout_id=t4.id
+                    GROUP BY  t2.id,t2.aemp_usnm,t2.aemp_name,t3.slgp_name
+                    ORDER BY t1.id DESC");
         return view('Mapping.RoutePlan.rout_plan',[
             'permission' => $this->userMenu,
-            'pjps' => []
+            'pjps' => $data
         ]);
     }
 

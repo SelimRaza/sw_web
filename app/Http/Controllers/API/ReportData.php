@@ -449,8 +449,16 @@ SELECT
   concat(t5.aemp_name, ' - ', t5.aemp_usnm) AS sv_name,
   0                                         AS dist_dif,
   0                                         AS time_dif,
-  0                                         AS type,
-  max(t7.created_at)                         AS last_time,
+  CASE 
+      WHEN t4.role_id =1 THEN '2'
+      WHEN t4.role_id =2 THEN '1'
+      WHEN t4.role_id =10 THEN '3'
+      WHEN t4.edsg_id =14 THEN '8'
+      WHEN t4.role_id =9  THEN '12'
+      WHEN t4.role_id >2 &&  t4.role_id<9 THEN '9'    
+      ELSE 2
+  END                                       AS 'type',
+  max(t7.created_at)                        AS last_time,
   t1.site_vrfy                              AS is_verified,
   ''                                        AS user_name,
   0                                         AS emp_id,

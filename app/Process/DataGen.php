@@ -171,144 +171,144 @@ WHERE t1.role_id = 1 AND t1.lfcl_id = 1 and t1.aemp_issl=1");
         DB::connection($db_conn)->table('th_dhbd_5')
             ->where(['role_id' => 1, 'dhbd_date' => $date])->delete();
         $result = DB::connection($db_conn)->select("SELECT
-  '$date'                        AS dhbd_date,
-  t1.id                            AS aemp_id,
-  t1.aemp_mngr                     AS aemp_mngr,
-  t1.role_id                       AS role_id,
-  1                                AS dhbd_ucnt,
-  !isnull(t3.attn_date)            AS dhbd_prnt,
-  !isnull(t6.memo_count)           AS dhbd_pact,
-  if(t6.memo_count > 9, 1, 0)     AS dhbd_prdt,
-  t4.site_count                    AS dhbd_tsit,
-  t5.visited_count                 AS dhbd_tvit,
-  t6.memo_count                    AS dhbd_memo,
-  t5.visited_count - t6.memo_count AS dhbd_oexc,
-  t12.line_count                   AS dhbd_line,
-  t12.today_amount                 AS dhbd_tamt,
-  t8.target_amount                 AS dhbd_ttar,
-  t9.order_count                   AS dhbd_cblc,
-  t9.order_amount                  AS dhbd_cbla,
-  t10.order_count                  AS dhbd_oblc,
-  t10.order_amount                 AS dhbd_obla,
-  t11.order_count                  AS dhbd_sblc,
-  t11.order_amount                 AS dhbd_sbla,
-  0                                AS dhbd_tmbg,
-  0                                AS dhbd_tmav,
-  0                                AS dhbd_spbg,
-  0                                AS dhbd_spav,
-  0                                AS dhbd_mtdo,
-  0                               AS dhbd_mtdd,
-  '$datetime'                        AS dhbd_time,
-  t1.cont_id                       AS cont_id,
-  1                                AS lfcl_id,
-  1                                AS aemp_iusr,
-  1                                AS aemp_eusr,
-  t13.dhbd_lvsr                    AS dhbd_lvsr
-FROM tm_aemp AS t1
-  INNER JOIN tm_aemp AS t2 ON t1.aemp_mngr = t2.id
-  LEFT JOIN (SELECT
-               t1.aemp_id,
-               t1.attn_date
-             FROM tt_attn AS t1
-             WHERE t1.attn_date = '$date'AND t1.atten_atyp!=3
-             GROUP BY t1.aemp_id, t1.attn_date) AS t3 ON t1.id = t3.aemp_id
-  LEFT JOIN (SELECT
-               t1.aemp_id,
-               count(t2.site_id) AS site_count
-             FROM tl_rpln AS t1 LEFT JOIN tl_rsmp AS t2 ON t1.rout_id = t2.rout_id
-             WHERE t1.rpln_day = dayname('$date')
-             GROUP BY t1.aemp_id) AS t4 ON t4.aemp_id = t1.id
-  LEFT JOIN (SELECT
-               t1.aemp_id,
-               count(t1.site_id) AS visited_count
-             FROM th_ssvh AS t1
-             WHERE t1.ssvh_date = '$date'
-             GROUP BY t1.aemp_id) AS t5 ON t1.id = t5.aemp_id
-  LEFT JOIN (SELECT
-               t1.aemp_id,
-               count(t1.site_id) AS memo_count
-             FROM th_ssvh AS t1
-             WHERE t1.ssvh_date = '$date' AND t1.ssvh_ispd = 1
-             GROUP BY t1.aemp_id) AS t6 ON t1.id = t6.aemp_id
-  LEFT JOIN (SELECT
-               t1.aemp_susr,
-               sum(t1.trgt_ramt) AS target_amount
-             FROM tt_trgt AS t1
-             WHERE t1.trgt_mnth = month('$date') AND t1.trgt_year = year('$date')
-             GROUP BY t1.aemp_susr) AS t8 ON t1.id = t8.aemp_susr
-  LEFT JOIN (SELECT
-               t1.id,
-               count(t2.order_count) AS order_count,
-               sum(t2.order_amount)  AS order_amount
-             FROM tm_aemp AS t1
-               LEFT JOIN (SELECT
-                            t1.aemp_id,
-                            t1.id             AS order_count,
-                            sum(t1.ordm_amnt) AS order_amount
-                          FROM tt_ordm AS t1
-                          WHERE t1.lfcl_id = 9 AND t1.ordm_date = '$date'
-                          GROUP BY t1.aemp_id, t1.id) AS t2 ON t1.id = t2.aemp_id
-             WHERE t1.role_id = 1
-             GROUP BY t1.id) AS t9 ON t1.id = t9.id
-  LEFT JOIN (SELECT
-               t1.id,
-               count(t2.order_count) AS order_count,
-               sum(t2.order_amount)  AS order_amount
-             FROM tm_aemp AS t1
-               LEFT JOIN (SELECT
-                            t1.aemp_id,
-                            t1.id             AS order_count,
-                            sum(t1.ordm_amnt) AS order_amount
-                          FROM tt_ordm AS t1
-                          WHERE t1.lfcl_id = 14 AND t1.ordm_date = '$date'
-                          GROUP BY t1.aemp_id, t1.id) AS t2 ON t1.id = t2.aemp_id
-             WHERE t1.role_id = 1
-             GROUP BY t1.id) AS t10 ON t1.id = t10.id
-  LEFT JOIN (SELECT
-               t1.id,
-               count(t2.order_count) AS order_count,
-               sum(t2.order_amount)  AS order_amount
-             FROM tm_aemp AS t1
-               LEFT JOIN (SELECT
-                            t1.aemp_id,
-                            t1.id             AS order_count,
-                            sum(t1.ordm_amnt) AS order_amount
-                          FROM tt_ordm AS t1
-                          WHERE t1.lfcl_id = 17 AND t1.ordm_date = '$date'
-                          GROUP BY t1.aemp_id, t1.id) AS t2 ON t1.id = t2.aemp_id
-             WHERE t1.role_id = 1
-             GROUP BY t1.id) AS t11 ON t1.id = t11.id
-  LEFT JOIN (SELECT
-  sdd.aemp_id,
-  sum(line_count)   AS line_count,
-  SUM(today_amount) AS today_amount
-FROM (
-       SELECT
-         t1.aemp_id,
-         t1.site_id,
-         count(DISTINCT t2.amim_id) AS line_count,
-         sum(t2.ordd_oamt)          AS today_amount
-       FROM tt_ordm AS t1
-         INNER JOIN tt_ordd AS t2 ON t1.id = t2.ordm_id
-       WHERE t1.ordm_date = '$date'
-       GROUP BY t1.aemp_id, t1.site_id) AS sdd
-GROUP BY sdd.aemp_id) AS t12 ON t1.id = t12.aemp_id
-LEFT JOIN (SELECT
-               t1.aemp_id,
-               t1.attn_date,
-                count(t1.atten_atyp) AS dhbd_lvsr
-                FROM tt_attn AS t1
-                                WHERE t1.attn_date = '$date' AND t1.atten_atyp=3
-                                                     GROUP BY t1.aemp_id, t1.attn_date,t1.atten_atyp) AS t13 ON t1.id = t13.aemp_id
-WHERE t1.role_id = 1 AND t1.lfcl_id = 1 and t1.aemp_issl=1");
-        $result = array_map(function ($value) {
-            return (array)$value;
-        }, $result);
-        foreach (array_chunk($result, 500) as $t) {
-            DB::connection($db_conn)->table('th_dhbd_5')->insertOrIgnore(
-                $t
-            );
-        }
+                    '$date'                        AS dhbd_date,
+                    t1.id                            AS aemp_id,
+                    t1.aemp_mngr                     AS aemp_mngr,
+                    t1.role_id                       AS role_id,
+                    1                                AS dhbd_ucnt,
+                    !isnull(t3.attn_date)            AS dhbd_prnt,
+                    !isnull(t6.memo_count)           AS dhbd_pact,
+                    if(t6.memo_count > 9, 1, 0)     AS dhbd_prdt,
+                    t4.site_count                    AS dhbd_tsit,
+                    t5.visited_count                 AS dhbd_tvit,
+                    t6.memo_count                    AS dhbd_memo,
+                    t5.visited_count - t6.memo_count AS dhbd_oexc,
+                    t12.line_count                   AS dhbd_line,
+                    t12.today_amount                 AS dhbd_tamt,
+                    t8.target_amount                 AS dhbd_ttar,
+                    t9.order_count                   AS dhbd_cblc,
+                    t9.order_amount                  AS dhbd_cbla,
+                    t10.order_count                  AS dhbd_oblc,
+                    t10.order_amount                 AS dhbd_obla,
+                    t11.order_count                  AS dhbd_sblc,
+                    t11.order_amount                 AS dhbd_sbla,
+                    0                                AS dhbd_tmbg,
+                    0                                AS dhbd_tmav,
+                    0                                AS dhbd_spbg,
+                    0                                AS dhbd_spav,
+                    0                                AS dhbd_mtdo,
+                    0                               AS dhbd_mtdd,
+                    '$datetime'                        AS dhbd_time,
+                    t1.cont_id                       AS cont_id,
+                    1                                AS lfcl_id,
+                    1                                AS aemp_iusr,
+                    1                                AS aemp_eusr,
+                    t13.dhbd_lvsr                    AS dhbd_lvsr
+                  FROM tm_aemp AS t1
+                    INNER JOIN tm_aemp AS t2 ON t1.aemp_mngr = t2.id
+                    LEFT JOIN (SELECT
+                                t1.aemp_id,
+                                t1.attn_date
+                              FROM tt_attn AS t1
+                              WHERE t1.attn_date = '$date'AND t1.atten_atyp!=3
+                              GROUP BY t1.aemp_id, t1.attn_date) AS t3 ON t1.id = t3.aemp_id
+                    LEFT JOIN (SELECT
+                                t1.aemp_id,
+                                count(t2.site_id) AS site_count
+                              FROM tl_rpln AS t1 LEFT JOIN tl_rsmp AS t2 ON t1.rout_id = t2.rout_id
+                              WHERE t1.rpln_day = dayname('$date')
+                              GROUP BY t1.aemp_id) AS t4 ON t4.aemp_id = t1.id
+                    LEFT JOIN (SELECT
+                                t1.aemp_id,
+                                count(t1.site_id) AS visited_count
+                              FROM th_ssvh AS t1
+                              WHERE t1.ssvh_date = '$date'
+                              GROUP BY t1.aemp_id) AS t5 ON t1.id = t5.aemp_id
+                    LEFT JOIN (SELECT
+                                t1.aemp_id,
+                                count(t1.site_id) AS memo_count
+                              FROM th_ssvh AS t1
+                              WHERE t1.ssvh_date = '$date' AND t1.ssvh_ispd = 1
+                              GROUP BY t1.aemp_id) AS t6 ON t1.id = t6.aemp_id
+                    LEFT JOIN (SELECT
+                                t1.aemp_susr,
+                                sum(t1.trgt_ramt) AS target_amount
+                              FROM tt_trgt AS t1
+                              WHERE t1.trgt_mnth = month('$date') AND t1.trgt_year = year('$date')
+                              GROUP BY t1.aemp_susr) AS t8 ON t1.id = t8.aemp_susr
+                    LEFT JOIN (SELECT
+                                t1.id,
+                                count(t2.order_count) AS order_count,
+                                sum(t2.order_amount)  AS order_amount
+                              FROM tm_aemp AS t1
+                                LEFT JOIN (SELECT
+                                              t1.aemp_id,
+                                              t1.id             AS order_count,
+                                              sum(t1.ordm_amnt) AS order_amount
+                                            FROM tt_ordm AS t1
+                                            WHERE t1.lfcl_id = 9 AND t1.ordm_date = '$date'
+                                            GROUP BY t1.aemp_id, t1.id) AS t2 ON t1.id = t2.aemp_id
+                              WHERE t1.role_id = 1
+                              GROUP BY t1.id) AS t9 ON t1.id = t9.id
+                    LEFT JOIN (SELECT
+                                t1.id,
+                                count(t2.order_count) AS order_count,
+                                sum(t2.order_amount)  AS order_amount
+                              FROM tm_aemp AS t1
+                                LEFT JOIN (SELECT
+                                              t1.aemp_id,
+                                              t1.id             AS order_count,
+                                              sum(t1.ordm_amnt) AS order_amount
+                                            FROM tt_ordm AS t1
+                                            WHERE t1.lfcl_id = 14 AND t1.ordm_date = '$date'
+                                            GROUP BY t1.aemp_id, t1.id) AS t2 ON t1.id = t2.aemp_id
+                              WHERE t1.role_id = 1
+                              GROUP BY t1.id) AS t10 ON t1.id = t10.id
+                    LEFT JOIN (SELECT
+                                t1.id,
+                                count(t2.order_count) AS order_count,
+                                sum(t2.order_amount)  AS order_amount
+                              FROM tm_aemp AS t1
+                                LEFT JOIN (SELECT
+                                              t1.aemp_id,
+                                              t1.id             AS order_count,
+                                              sum(t1.ordm_amnt) AS order_amount
+                                            FROM tt_ordm AS t1
+                                            WHERE t1.lfcl_id = 17 AND t1.ordm_date = '$date'
+                                            GROUP BY t1.aemp_id, t1.id) AS t2 ON t1.id = t2.aemp_id
+                              WHERE t1.role_id = 1
+                              GROUP BY t1.id) AS t11 ON t1.id = t11.id
+                    LEFT JOIN (SELECT
+                    sdd.aemp_id,
+                    sum(line_count)   AS line_count,
+                    SUM(today_amount) AS today_amount
+                  FROM (
+                        SELECT
+                          t1.aemp_id,
+                          t1.site_id,
+                          count(DISTINCT t2.amim_id) AS line_count,
+                          sum(t2.ordd_oamt)          AS today_amount
+                        FROM tt_ordm AS t1
+                          INNER JOIN tt_ordd AS t2 ON t1.id = t2.ordm_id
+                        WHERE t1.ordm_date = '$date'
+                        GROUP BY t1.aemp_id, t1.site_id) AS sdd
+                  GROUP BY sdd.aemp_id) AS t12 ON t1.id = t12.aemp_id
+                  LEFT JOIN (SELECT
+                                t1.aemp_id,
+                                t1.attn_date,
+                                  count(t1.atten_atyp) AS dhbd_lvsr
+                                  FROM tt_attn AS t1
+                                                  WHERE t1.attn_date = '$date' AND t1.atten_atyp=3
+                                                                      GROUP BY t1.aemp_id, t1.attn_date,t1.atten_atyp) AS t13 ON t1.id = t13.aemp_id
+                  WHERE t1.role_id = 1 AND t1.lfcl_id = 1 and t1.aemp_issl=1");
+                          $result = array_map(function ($value) {
+                              return (array)$value;
+                          }, $result);
+                          foreach (array_chunk($result, 500) as $t) {
+                              DB::connection($db_conn)->table('th_dhbd_5')->insertOrIgnore(
+                                  $t
+                              );
+                          }
         $plog[] = array(
             'dhlg_name' => 'End',
             'dhlg_code' => '9999');

@@ -330,8 +330,26 @@ class BlockOrderData extends Controller
                         }
                     }
                 } elseif ($request->status_id == 18) {
+					
                     $orderMaster->lfcl_id = 21;
                     $orderMaster->ocrs_id = $request->cancel_reason;
+					
+					$sale_type = DB::connection($country->cont_conn)->select("Select SALES_TYPE FROM dm_trip_master WHERE ORDM_ORNM='$request->order_id'");
+					$sale_type1 = $sale_type ? $sale_type[0]->SALES_TYPE : 'PS';
+					if($sale_type1=='VS'){
+					 DB::connection($country->cont_conn)
+                    ->table('dm_trip_master')
+                    ->where('ORDM_ORNM', $request->order_id)
+                    ->delete();
+					DB::connection($country->cont_conn)
+                    ->table('dm_trip_detail')
+                    ->where('ORDM_ORNM', $request->order_id)
+                    ->delete();				   
+							      
+                    DB::connection($country->cont_conn)->table('tl_stcm')->where(['site_id' => $orderMaster->site_id,'slgp_id' => $orderMaster->slgp_id,'optp_id' =>2
+                    ])->decrement('stcm_ordm', $orderMaster->ordm_amnt);
+					}
+					
                     $msg = "Order Cancel Successful";
                     $success = 1;
                 }

@@ -645,18 +645,17 @@ public function getSurveyImage($id){
         for($i=0;$i<count($dirg_zone_list);$i++){
             $zone_list[$i]=$dirg_zone_list[$i]->zone_id;
         }
-        $this->single_date=$request->start_date;
-        $date=$this->getStartAndEndDate($time_period);
-        $start_date=$date['start_date'];
-        $end_date=$date['end_date'];
+        // $this->single_date=$request->start_date;
+        // $date=$this->getStartAndEndDate($time_period);
+        $start_date=$request->start_date;
+        $end_date=$request->end_date;
 
      //   $oid_min_max=DB::connection($this->db)->select("Select min(id) as min_id,max(id) as max_id FROM tt_ordm where ordm_date BETWEEN '$start_date' AND '$end_date'");
         // $min_id=$oid_min_max[0]->min_id;
         // $max_id=$oid_min_max[0]->max_id;
-        $min_oid=DB::connection($this->db)->select("Select min(id) as min_id FROM tt_ordm where ordm_date = '$start_date'");
-        $max_oid=DB::connection($this->db)->select("Select max(id) as max_id FROM tt_ordm where ordm_date = '$end_date'");
-        $min_id=$min_oid[0]->min_id;
-        $max_id=$max_oid[0]->max_id;
+        $auto_id=DB::connection($this->db)->select("Select min(id) as min_id, max(id) as max_id FROM tt_ordm where ordm_date between '$start_date' AND '$end_date'");
+        $min_id=$auto_id[0]->min_id;
+        $max_id=$auto_id[0]->max_id;
         $cls_cat_switch=$request->rtype.$request->sr_zone;
         //return $cls_cat_switch;
         // return [
@@ -1260,7 +1259,118 @@ public function getSurveyImage($id){
                             return $data;
                         }
                 break;
-            case "sr_activity_hourly_visit":
+
+                case "sr_activity_hourly_visit":
+                    $flag_curdate=500;
+                    if($start_date==date('Y-m-d')|| $end_date==date('Y-m-d')){$flag_curdate=0; $c_date=date('Y-m-d');}
+                    if($flag_curdate==0){
+                        $zone="";
+                        $group="";
+                        if($dirg_id !=""){
+                            $zone=" AND t2.id IN (".implode(',',$zone_list).")";
+                        }
+                        if ($zone_id != "") {
+                            $zone = " AND t2.zone_id = $zone_id";
+                        }
+                        
+                        if ($sales_group_id != "") {
+                            // $group = " AND t1.slgp_id = '$sales_group_id'";
+                            $group ="AND t1.slgp_id IN (".implode(',',$sales_group_id).")";
+                        }
+                        DB::connection($this->db)->select(DB::raw("SET sql_mode=''"));
+                        $data=DB::connection($this->db)->select("SELECT p.act_date, p.id, p.aemp_name, p.aemp_mob1, p.aemp_usnm,
+                                p.acmp_id, p.acmp_name, p.slgp_id, p.slgp_name, p.zone_id, p.zone_name, SUM(p.9am + p.9amn) 9am, SUM(p.10am + p.10amn)10am,
+                                SUM(p.11am + p.11amn) 11am, SUM(p.12pm + p.12pmn) 12pm, SUM(p.1pm + p.1pmn) 1pm, SUM(p.2pm + p.2pmn) 2pm,
+                                SUM(p.3pm + p.3pmn) 3pm, SUM(p.4pm + p.4pmn) 4pm, SUM(p.5pm + p.5pmn) 5pm, SUM(p.6pm + p.6pmn) 6pm,
+                                SUM(p.7pm + p.7pmn) 7pm, SUM(p.8pm + p.8pmn) 8pm, SUM(p.9pm + p.9pmn) 9pm,CURRENT_TIMESTAMP+INTERVAL 6 HOUR 'created_at'
+                                FROM
+                                (SELECT 
+                                t2.id,t2.aemp_name,t2.aemp_mob1,t2.aemp_usnm,t6.id acmp_id,
+                                t6.acmp_name,t4.id slgp_id,t4.slgp_name,t5.id zone_id,
+                                t5.zone_name,t1.ordm_date act_date,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)<9 THEN 1 ELSE 0 END)`9am`,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)=9 THEN 1 ELSE 0 END)`10am`,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)=10 THEN 1 ELSE 0 END)`11am`,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)=11 THEN 1 ELSE 0 END)`12pm`,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)=12 THEN 1 ELSE 0 END)`1pm`,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)=13 THEN 1 ELSE 0 END)`2pm`,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)=14 THEN 1 ELSE 0 END)`3pm`,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)=15 THEN 1 ELSE 0 END)`4pm`,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)=16 THEN 1 ELSE 0 END)`5pm`,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)=17 THEN 1 ELSE 0 END)`6pm`,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)=18 THEN 1 ELSE 0 END)`7pm`,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)=19 THEN 1 ELSE 0 END)`8pm`,
+                                SUM(CASE WHEN HOUR(t1.ordm_time)>=20 THEN 1 ELSE 0 END)`9pm`,
+                                '0' 9amn,'0' 10amn ,'0' 11amn,'0' 12pmn,'0' 1pmn,'0' 2pmn,'0' 3pmn,
+                                '0' 4pmn,'0' 5pmn,'0' 6pmn,'0' 7pmn,'0' 8pmn,'0' 9pmn
+                                FROM tt_ordm t1
+                                INNER JOIN tm_aemp t2 on t1.aemp_id=t2.id
+                                INNER JOIN tm_slgp t4 ON t2.slgp_id=t4.id 
+                                INNER JOIN tm_zone t5 ON t2.zone_id=t5.id
+                                INNER JOIN tm_acmp t6 ON t4.acmp_id=t6.id
+                                WHERE t1.ordm_date='$c_date' " .$group . $zone  ."
+                                GROUP By t2.id,t2.aemp_name,t2.aemp_mob1,t2.aemp_usnm
+                                UNION ALL 
+                                SELECT t2.id,t2.aemp_name,t2.aemp_mob1,t2.aemp_usnm,t6.id acmp_id,
+                                t6.acmp_name,t4.id slgp_id,t4.slgp_name,t5.id zone_id,t5.zone_name,
+                                t1.npro_date act_date,'0' 9am,'0' 10am ,'0' 11am,'0' 12pm,'0' 1pm,
+                                '0' 2pm,'0' 3pm,'0' 4pm,'0' 5pm,'0' 6pm,'0' 7pm,'0' 8pm,'0' 9pm,
+                                SUM(CASE WHEN HOUR(t1.npro_time)<9 THEN 1 ELSE 0 END)`9amn`,
+                                SUM(CASE WHEN HOUR(t1.npro_time)=9 THEN 1 ELSE 0 END)`10amn`,
+                                SUM(CASE WHEN HOUR(t1.npro_time)=10 THEN 1 ELSE 0 END)`11amn`,
+                                SUM(CASE WHEN HOUR(t1.npro_time)=11 THEN 1 ELSE 0 END)`12pmn`,
+                                SUM(CASE WHEN HOUR(t1.npro_time)=12 THEN 1 ELSE 0 END)`1pmn`,
+                                SUM(CASE WHEN HOUR(t1.npro_time)=13 THEN 1 ELSE 0 END)`2pmn`,
+                                SUM(CASE WHEN HOUR(t1.npro_time)=14 THEN 1 ELSE 0 END)`3pmn`,
+                                SUM(CASE WHEN HOUR(t1.npro_time)=15 THEN 1 ELSE 0 END)`4pmn`,
+                                SUM(CASE WHEN HOUR(t1.npro_time)=16 THEN 1 ELSE 0 END)`5pmn`,
+                                SUM(CASE WHEN HOUR(t1.npro_time)=17 THEN 1 ELSE 0 END)`6pmn`,
+                                SUM(CASE WHEN HOUR(t1.npro_time)=18 THEN 1 ELSE 0 END)`7pmn`,
+                                SUM(CASE WHEN HOUR(t1.npro_time)=19 THEN 1 ELSE 0 END)`8pmn`,
+                                SUM(CASE WHEN HOUR(t1.npro_time)>=20 THEN 1 ELSE 0 END)`9pmn`
+                                FROM (Select t1.npro_date,t1.aemp_id,t1.npro_time,t1.slgp_id from tt_npro t1
+                                where t1.npro_date='$c_date'  AND t1.site_id not in 
+                                (select site_id from tt_ordm where aemp_id=t1.aemp_id and ordm_date='$c_date' " .$group . $zone  .")
+                                Group By t1.site_id,t1.npro_date,t1.aemp_id) t1
+                                INNER JOIN tm_aemp t2 on t1.aemp_id=t2.id
+                                INNER JOIN tm_slgp t4 ON t2.slgp_id=t4.id
+                                INNER JOIN tm_zone t5 ON t2.zone_id=t5.id
+                                INNER JOIN tm_acmp t6 ON t4.acmp_id=t6.id
+                                Where 1 " .$zone . $group. "
+                                GROUP By t2.id,t2.aemp_name,t2.aemp_mob1,t2.aemp_usnm
+                                
+                                )p 
+                                GROUP BY p.id,p.aemp_name,p.aemp_mob1,p.aemp_usnm,p.acmp_id,p.acmp_name,p.slgp_id,p.slgp_name,p.zone_id,p.zone_name
+                            ");
+                        return $data;
+                    }
+                    else{
+    
+                        $q_z="";
+                        $q2_g="";
+                        if($dirg_id !=""){
+                            $q_z=" AND zone_id IN (".implode(',',$zone_list).")";
+                        }
+                        if ($zone_id != "") {
+                            $q_z = " AND zone_id = $zone_id";
+                        }
+                        if ($sales_group_id != "") {
+                            // $q2_g = " AND slgp_id = '$sales_group_id'";
+                            $q2_g ="AND slgp_id IN (".implode(',',$sales_group_id).")";
+                        }
+                        $data=DB::connection($this->db)->select("SELECT act_date,slgp_name,concat(t2.zone_code,'-',t2.zone_name)zone_name,aemp_usnm,replace(aemp_name,',','.')aemp_name,
+                        aemp_mob1,SUM(9am+9amn)9am,SUM(10am+10amn)10am,SUM(11am+11amn)11am,SUM(12pm+12pmn)12pm,SUM(1pm+1pmn)1pm,
+                            SUM(2pm+2pmn)2pm,SUM(3pm+3pmn)3pm,SUM(4pm+4pmn)4pm,SUM(5pm+5pmn)5pm,SUM(6pm+6pmn)6pm,SUM(7pm+7pmn)7pm,SUM(8pm+8pmn)8pm,SUM(9pm+9pmn)9pm
+                            FROM tbl_sr_activity_summary t1
+                            INNER JOIN tm_zone t2 ON t1.zone_id=t2.id
+                            WHERE act_date BETWEEN '$start_date' AND '$end_date'".$q2_g.$q_z."
+                            GROUP BY act_date,slgp_name,zone_name,aemp_usnm,aemp_name,aemp_mob1 ORDER BY act_date asc");
+                        return $data;
+    
+                        //return $final;
+                    }
+                    break;
+            case "sr_activity_hourly_visit_bk":
                 if($time_period==0){
                     $q_z="";
                     $q2_g="";
@@ -1426,6 +1536,8 @@ public function getSurveyImage($id){
             case "attendance_report":
                 $q1='';
                 $q2='';
+                $q3='';
+                $attendance_type=$request->attendance_type;
                 if($dirg_id !=""){
                     $q2=" AND t2.zone_id IN (".implode(',',$zone_list).")";
                 }
@@ -1435,24 +1547,29 @@ public function getSurveyImage($id){
                 if ($sales_group_id != "") {
                     $q1= " AND t2.slgp_id IN (".implode(',',$sales_group_id).")";
                 }
+                if($attendance_type){
+                    $q3=" AND t1.type $attendance_type";
+                }
                 $data=DB::connection($this->db)->select("SELECT t1.attn_date,t1.slgp_name,t1.dirg_name,t1.zone_name,t1.aemp_id,t1.aemp_usnm,replace(t1.aemp_name,',','-')aemp_name,t1.aemp_mob1,t1.edsg_name,
-                    ifnull(t1.start_time,'0000-00-00 00:00:00') start_time,ifnull(t1.end_time,'0000-00-00 00:00:00') end_time,ifnull(t2.atyp_name,'Absent')status FROM
-                    (SELECT t2.id aemp_id,
-                    t1.dhbd_date attn_date,t4.slgp_name,t6.dirg_name,t5.zone_name,t2.aemp_usnm,t2.aemp_name,t2.aemp_mob1,t7.edsg_name,
-                    min(t3.attn_time) start_time,max(t3.attn_time) end_time,
-                    max(t3.atten_atyp) type
-                    FROM th_dhbd_5 t1
-                    INNER JOIN tm_aemp t2 ON t1.aemp_id=t2.id
-                    LEFT JOIN tt_attn t3 ON t2.id=t3.aemp_id AND t3.attn_date=t1.dhbd_date
-                    INNER JOIN tm_slgp t4 ON t2.slgp_id=t4.id
-                    INNER JOIN tm_zone t5 ON t2.zone_id=t5.id
-                    INNER JOIN tm_dirg t6 ON t5.dirg_id=t6.id
-                    INNER JOIN tm_edsg t7 ON t2.edsg_id=t7.id
-                    WHERE t1.dhbd_date between '$start_date' AND '$end_date'
-                    AND t2.lfcl_id=1 ".$q1.$q2."
-                    GROUP BY t1.dhbd_date,t4.slgp_name,t6.dirg_name,t5.zone_name,t2.id,t2.aemp_usnm,t2.aemp_name,t2.aemp_mob1
-                    ORDER BY t5.zone_code,t2.aemp_name,t1.dhbd_date ASC)t1
-                    LEFT JOIN tm_atyp t2 ON t1.type=t2.id");
+                            ifnull(t1.start_time,'0000-00-00 00:00:00') start_time,ifnull(t1.end_time,'0000-00-00 00:00:00') end_time,ifnull(t2.atyp_name,'Absent')status FROM
+                            (SELECT t2.id aemp_id,
+                            t1.dhbd_date attn_date,t4.slgp_name,t6.dirg_name,t5.zone_name,t2.aemp_usnm,t2.aemp_name,t2.aemp_mob1,t7.edsg_name,
+                            min(t3.attn_time) start_time,max(t3.attn_time) end_time,
+                            ifnull(max(t3.atten_atyp),50) type
+                            FROM th_dhbd_5 t1
+                            INNER JOIN tm_aemp t2 ON t1.aemp_id=t2.id
+                            LEFT JOIN tt_attn t3 ON t2.id=t3.aemp_id AND t3.attn_date=t1.dhbd_date
+                            INNER JOIN tm_slgp t4 ON t2.slgp_id=t4.id
+                            INNER JOIN tm_zone t5 ON t2.zone_id=t5.id
+                            INNER JOIN tm_dirg t6 ON t5.dirg_id=t6.id
+                            INNER JOIN tm_edsg t7 ON t2.edsg_id=t7.id
+                            WHERE t1.dhbd_date between '$start_date' AND '$end_date'
+                            AND t2.lfcl_id=1 ".$q1.$q2."
+                            GROUP BY t1.dhbd_date,t4.slgp_name,t6.dirg_name,t5.zone_name,t2.id,t2.aemp_usnm,t2.aemp_name,t2.aemp_mob1
+                            ORDER BY t5.zone_code,t2.aemp_name,t1.dhbd_date ASC)t1
+                            LEFT JOIN tm_atyp t2 ON t1.type=t2.id
+                            Where 1 ".$q3."
+                            ");
                 return $data;
                 break;
             case "note_report":
@@ -2774,7 +2891,10 @@ public function getSurveyImage($id){
                         t1.ordm_date,
                         t6.zone_name,
                         ROUND(SUM(t2.ordd_oamt),2) AS ordd_amt,
-                        ROUND(SUM(t2.ordd_odat),2) AS deli_amt
+                        ROUND(SUM(t2.ordd_odat),2) AS deli_amt,
+                        SUM(t2.ordd_inty) order_qty,
+                        SUM(t2.ordd_dqty) deli_qty,
+                        t4.amim_duft
                         FROM `tt_ordm` as t1,`tt_ordd`as t2,tm_amim as t4,
                         tm_aemp as t5 ,tm_zone as t6,tm_slgp t7
                         where t1.id between $min_id and $max_id
@@ -2785,6 +2905,7 @@ public function getSurveyImage($id){
                         t5.`aemp_usnm`,
                         t5.`aemp_mob1`,
                         t4.`amim_code`,
+                        t4.amim_duft,
                         t4.`amim_name`,
                         t1.ordm_date,
                         t6.zone_name");
@@ -3534,9 +3655,10 @@ public function getSurveyImage($id){
             return false;
         }
         $slgp_id=$request->slgp_id;
+        $details=1;
         switch ($request->reportType){
             case "sr_activity_sales_hierarchy":
-                if($request->dtls_sum==1){
+                if($details==1){
                     $sr_query='';
                     $slgp_id=$request->slgp_id;
                     if($id){
@@ -3547,7 +3669,7 @@ public function getSurveyImage($id){
                     }
                     DB::connection($this->db)->select(DB::raw("SET sql_mode=''"));
                     $data=DB::connection($this->db)->select("SELECT 
-                                t1.date dhbd_date,t1.aemp_id id,t1.aemp_code aemp_usnm,
+                                t1.date dhbd_date,t1.aemp_id,t1.aemp_code aemp_usnm,
                                 t1.aemp_name,
                                 ifnull(t1.rout_name,'N/A')rout_id,
                                 t1.t_outlet rout_olt,

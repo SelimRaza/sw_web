@@ -2,25 +2,27 @@
 
 namespace App\Http\Controllers\GroupDataSetup;
 
-use App\MasterData\Base;
-use App\MasterData\Division;
-use App\MasterData\PJP;
-use App\MasterData\Region;
-use App\MasterData\Route;
-use App\MasterData\RouteSite;
-use App\MasterData\RSMP;
-use App\MasterData\RouteSiteMapping;
-use App\MasterData\Site;
+use Excel;
+use Response;
 use App\Menu\SubMenu;
 use App\Menu\UserMenu;
+use App\MasterData\PJP;
+use App\MasterData\Base;
+use App\MasterData\RSMP;
+use App\MasterData\Site;
+use App\MasterData\Route;
+use App\MasterData\Region;
+use App\MasterData\Division;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+use App\MasterData\RouteSite;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\MasterData\RouteSiteMapping;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\MasterData\RouteSiteMappingRemove;
 use App\MasterData\SalesGroupZoneBaseMapping;
-use Response;
-use Excel;
+
 class RouteController extends Controller
 {
 
@@ -46,45 +48,7 @@ class RouteController extends Controller
         });
     }
 
-    public function index(Request $request){
-        if ($this->userMenu->wsmu_vsbl) {
-
-            $country_id = $this->currentUser->employee()->cont_id;
-
-            $empId = $this->currentUser->employee()->id;
-            $acmp = DB::connection($this->db)->select("SELECT DISTINCT acmp_id as id, acmp_name, acmp_code FROM `user_group_permission` WHERE `aemp_id`='$empId'");
-            $zone = DB::connection($this->db)->select("SELECT `zone_id`,CONCAT(`zone_code`, ' - ' , `zone_name`) as zone_name FROM `user_area_permission` WHERE `aemp_id`='$empId'");
-
-            return view('master_data.route.index')->with('permission', $this->userMenu)->with('acmp',$acmp)->with('zone',$zone);
-        }else {
-            return view('theme.access_limit');
-        }
-
-    }
-    public function routeFilter(Request $request){
-        $country_id = $this->currentUser->employee()->cont_id;
-        $acmp = $request->acmp_id;
-        $zone = $request->zone_id;
-        $q1="";
-        $q2="";
-        if ($q1!=""){
-            $q1 = "and t1.acmp_id='$acmp'";
-        }
-        if ($q2!=""){
-            $q2 = "and t2.zone_id='$zone'";
-        }
-
-        $query = "SELECT t1.id, t2.base_name, t2.base_code, t1.`rout_name`,
-t1.`rout_code` FROM `tm_rout` t1 inner join tm_base t2 on t1.base_id = t2.id inner 
-JOIN tm_zone t3 on t2.zone_id WHERE t1.cont_id='$country_id' ". $q1 . $q2. " limit 100" ;
-
-        DB::connection($this->db)->select(DB::raw("SET sql_mode=''"));
-        $srData = DB::connection($this->db)->select(DB::raw($query));
-        return $srData;
-
-    }
-
-    public function index2(Request $request)
+    public function index(Request $request)
     {
         if ($this->userMenu->wsmu_vsbl) {
             $country_id = $this->currentUser->employee()->cont_id;
@@ -148,9 +112,8 @@ WHERE t1.cont_id = $country_id");
 
 
     public function store(Request $request)
-    {
-        DB::beginTransaction();
-        try {
+    {       
+       try {
             $route = Route::on($this->db)->where(['rout_code' => $request->code])->first();
             if ($route == null) {
                 $route = new Route();
@@ -169,10 +132,9 @@ WHERE t1.cont_id = $country_id");
                 $route->attr3 = 0;
                 $route->attr4 = 0;
                 $route->save();
-                DB::commit();
                 return redirect()->back()->withInput()->with('success', 'successfully Created');
             }else{
-                return back()->withInput()->with('danger', 'Already Exit Code');
+                return back()->withInput()->with('danger', 'Already Exist This Code');
             }
 
         } catch (\Exception $e) {
@@ -255,7 +217,7 @@ FROM tm_acmp AS t1 where t1.cont_id = $country_id");
     {
         if ($this->userMenu->wsmu_read) {
             $route = Route::on($this->db)->findorfail($id);
-            $routeSites = RouteSite::on($this->db)->where('rout_id', '=', $id)->get();
+            $routeSites = RouteSite::on($this->db)->where('rout_id', '=', $id)->where('lfcl_id', 1)->get();
             return view('master_data.route.site_assign')->with("routeSites", $routeSites)->with("route", $route)->with('permission', $this->userMenu);
         } else {
             return redirect()->back()->with('danger', 'Access Limited');
@@ -379,6 +341,20 @@ FROM tm_acmp AS t1 where t1.cont_id = $country_id");
         }
     }
 
+
+
+    public function filterRoute(Request $request)
+    {
+        $divisions = DB::connection($this->db)->select("SELECT
+  t1.id as id,
+  t1.name as name
+FROM tbld_route AS t1 INNER JOIN tbld_sales_group_employee AS t2 ON t1.sales_group_id = t2.sales_group_id
+WHERE t2.sales_group_id=$request->sales_group_id
+GROUP BY t1.id,t1.name");
+        return Response::json($divisions);
+    }
+
+
     public function routeBaseMapping()
     {
         if ($this->userMenu->wsmu_crat) {
@@ -474,16 +450,26 @@ FROM tm_acmp AS t1 where t1.cont_id = $country_id");
         }
     }
 
-
-
-    public function filterRoute(Request $request)
+    public function routeSiteMappingRemove(Request $request)
     {
-        $divisions = DB::connection($this->db)->select("SELECT
-  t1.id as id,
-  t1.name as name
-FROM tbld_route AS t1 INNER JOIN tbld_sales_group_employee AS t2 ON t1.sales_group_id = t2.sales_group_id
-WHERE t2.sales_group_id=$request->sales_group_id
-GROUP BY t1.id,t1.name");
-        return Response::json($divisions);
+        if ($this->userMenu->wsmu_crat) {
+            if ($request->hasFile('import_file')) {
+                DB::beginTransaction();
+                // try {
+                    // Excel::import(new RSMP(), $request->file('import_file'));
+                    Excel::import(new RouteSiteMappingRemove(), $request->file('import_file'));
+                    DB::commit();
+                    return redirect()->back()->with('success', 'Successfully Removed');
+                // } catch (\Exception $e) {
+                    DB::rollback();
+                    return redirect()->back()->with('danger', ' Data wrong ' .$e->getMessage());
+                // }
+            }
+            return back()->with('danger', ' File Not Found');
+        } else {
+            return redirect()->back()->with('danger', 'Access Limited');
+        }
+       // Excel::import(new RSMP(), $request->file('import_file'));
+
     }
 }

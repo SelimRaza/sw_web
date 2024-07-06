@@ -290,9 +290,9 @@ function roundPayableForUae($amount) {
                                                         </table>
                                                     </td>
                                                     <td align="center">
-                                                        <img src="{{ asset("theme/image/logo.png")}}" alt="" width="100" height="60" style="margin-top:2px!important;"/>
+                                                      <!--  <img src="{{ asset("theme/image/logo.png")}}" alt="" width="100" height="60" style="margin-top:2px!important;"/>
                                                     
-													
+													-->
 													
 													</td>
                                                 </tr>

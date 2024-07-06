@@ -169,17 +169,17 @@ class EmployeeController extends Controller
                     $imageName = $this->currentUser->country()->cont_imgf . "/master/profile/" . uniqid() . '.' . $request->input_img->getClientOriginalExtension();
                     $s3 = AWS::createClient('s3');
                     $s3->putObject(array(
-                        'Bucket' => 'prgfms',
+                        'Bucket' => 'sw-bucket',
                         'Key' => $imageName,
                         'SourceFile' => $file,
-                        'ACL' => 'public-read',
+                        'ACL' => 'public-read-write',
                         'ContentType' => $file->getMimeType(),
                     ));
                     $s3->putObject(array(
-                        'Bucket' => 'prgfms',
+                        'Bucket' => 'sw-bucket',
                         'Key' => $imageIcon,
                         'SourceFile' => $file,
-                        'ACL' => 'public-read',
+                        'ACL' => 'public-read-write',
                         'ContentType' => $file->getMimeType(),
                     ));
                     $emp->aemp_pimg = $imageName;
@@ -406,17 +406,17 @@ WHERE t1.aemp_id = $id;");
                 $imageName = $this->currentUser->country()->cont_imgf . "/master/profile/" . uniqid() . '.' . $request->input_img->getClientOriginalExtension();
                 $s3 = AWS::createClient('s3');
                 $s3->putObject(array(
-                    'Bucket' => 'prgfms',
+                    'Bucket' => 'sw-bucket',
                     'Key' => $imageName,
                     'SourceFile' => $file,
-                    'ACL' => 'public-read',
+                    'ACL' => 'public-read-write',
                     'ContentType' => $file->getMimeType(),
                 ));
                 $s3->putObject(array(
-                    'Bucket' => 'prgfms',
+                    'Bucket' => 'sw-bucket',
                     'Key' => $imageIcon,
                     'SourceFile' => $file,
-                    'ACL' => 'public-read',
+                     'ACL' => 'public-read-write',
                     'ContentType' => $file->getMimeType(),
                 ));
                 $emp->aemp_pimg = $imageName;
@@ -507,17 +507,17 @@ WHERE t1.aemp_id = $id;");
                     $imageName = $this->currentUser->country()->cont_imgf . "/master/profile/" . uniqid() . '.' . $request->input_img->getClientOriginalExtension();
                     $s3 = AWS::createClient('s3');
                     $s3->putObject(array(
-                        'Bucket' => 'prgfms',
+                        'Bucket' => 'sw-bucket',
                         'Key' => $imageName,
                         'SourceFile' => $file,
-                        'ACL' => 'public-read',
+                         'ACL' => 'public-read-write',
                         'ContentType' => $file->getMimeType(),
                     ));
                     $s3->putObject(array(
-                        'Bucket' => 'prgfms',
+                        'Bucket' => 'sw-bucket',
                         'Key' => $imageIcon,
                         'SourceFile' => $file,
-                        'ACL' => 'public-read',
+                         'ACL' => 'public-read-write',
                         'ContentType' => $file->getMimeType(),
                     ));
                     $emp->aemp_pimg = $imageName;

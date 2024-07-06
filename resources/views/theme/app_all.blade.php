@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="{{ asset("theme/images/favicon.ico")}}" type="image/ico"/>
 
-    <title>{{ config('app.name', 'BS').' '.Auth::user()->country()->cont_name }}</title>
+    <title>{{ config('app.name', 'SalesWheel').' '.Auth::user()->country()->cont_name }}</title>
 
     <!-- Bootstrap -->
     <link href="{{ asset("theme/vendors/bootstrap/dist/css/bootstrap.min.css")}}" rel="stylesheet">
@@ -47,11 +47,6 @@
             pointer-events: none;
             cursor: default;
         }
-        .nav li.current-page{
-            background-color: white!important;
-            color:black!important;
-        }
-
         .select2 {
             width: 100% !important;
         }
@@ -84,6 +79,45 @@
         .pg_bar_percen{
             width:48%;
          }
+         .rp_type_div{
+            min-height:150px;
+            padding:10px 40px 15px 10px;
+            -webkit-box-shadow: 1px 1px 5px 2px rgba(0,0,0,0.21); 
+            box-shadow: 1px 1px 5px 2px rgba(0,0,0,0.21);
+            margin-bottom:15px;
+        }
+        /* Overwrite Style */
+
+        .tbl_header{
+            background-color:#6491EA!important;
+            color: white !important;
+        }
+        .btn-success {
+            background:#6491EA !important;
+            border: 1px solid #169F85;
+            color:#142862!important;
+        }
+        .left_col {
+            background-color: #142862!important;
+        }
+        .scroll-view{
+            width:100% !important;
+        }
+        .main_container{
+            background-color:#163172!important;
+        }
+        .nav.side-menu>li.active>a{
+            background:none;
+        }
+        #exTab1 .nav-pills > li.active>a{
+            background-color:#163172!important;
+        }
+        .nav.side-menu>li.active, .nav.side-menu>li.current-page{
+            border-right:5px solid yellow;
+        }
+
+        /* OverWrite Style End */
+
         
     </style>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-82H28TLBFS"></script>
@@ -100,11 +134,11 @@
 <div id="ajax_load" style="display:none;">
     <img src="{{ asset("theme/production/images/gif-load.gif")}}" class="ajax-loader"/>
 </div>
-<div class="container body">
+<!-- <div class="container body">
     <div class="main_container">
         <div class="col-md-3 left_col">
             <div class="left_col scroll-view">
-                <div class=" " style="border: 0;background-color:black!important;">
+                <div class=" ">
                     <a href="{{ URL::to('/')}}" class="site_title"><i class="fa fa-globe"></i>
                         <span>{{ config('app.name', 'FMS').' '.Auth::user()->country()->cont_name }}</span></a>
 
@@ -113,34 +147,40 @@
                 <div class="clearfix"></div>
 
                 <!-- menu profile quick info -->
-            @include('theme.profile')
+            <!-- @include('theme.profile') -->
             <!-- /menu profile quick info -->
 
                 <br/>
 
                 <!-- sidebar menu -->
-            @include('theme.menu')
+            <!-- @include('theme.menu') -->
             <!-- /sidebar menu -->
 
                 <!-- /menu footer buttons -->
-            @include('theme.menu_footer')
+            <!-- @include('theme.menu_footer') -->
             <!-- /menu footer buttons -->
-            </div>
-        </div>
+            <!-- </div>
+        </div> -->
 
         <!-- top navigation -->
-    @include('theme.top_nav')
+    <!-- @include('theme.top_nav') -->
     <!-- /top navigation -->
 
         <!-- page content -->
-    @yield('content')
+    <!-- @yield('content') -->
 
     <!-- /page content -->
 
         <!-- footer content -->
-    @include('theme.footer')
+    <!-- @include('theme.footer') -->
     <!-- /footer content -->
-    </div>
+    <!-- </div>
+</div>  -->
+<div class="container body">
+    @include('theme.top_nav_menu')
+    @yield('content')
+    @include('theme.footer')
+
 </div>
 
 <!-- FastClick -->

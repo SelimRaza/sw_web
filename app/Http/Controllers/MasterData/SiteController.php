@@ -627,7 +627,7 @@ class SiteController extends Controller
         if($flag==1){
             DB::connection($this->db)->select("Update tm_site SET lfcl_id=2 WHERE id IN (".implode(',',$unv_sites).")");
         }else{
-            $slgp_list=DB::connection($this->db)->select("Select id,plmt_id,acmp_id FROM tm_slgp Where lfcl_id=1 Order by id asc");
+            $slgp_list=DB::connection($this->db)->select("Select id,plmt_id,acmp_id FROM tm_slgp Where lfcl_id=1 and id=6 Order by id asc");
            // DB::connection($this->db)->beginTransaction();
             try{
                 for($i=0;$i<count($unv_sites);$i++){

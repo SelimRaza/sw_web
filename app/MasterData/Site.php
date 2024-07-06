@@ -58,7 +58,7 @@ class Site extends Model implements WithHeadings, ToModel, WithHeadingRow
         if($site_exist){
             $site_exist->site_name = $request->name;
             // $site_exist->site_code = $request->code;
-            $site_exist->outl_id = $outlet->id;
+            //$site_exist->outl_id = $site_exist->outl_id;
             $site_exist->site_olnm = $request->ln_name != "" ? $request->ln_name : '';
             $site_exist->site_adrs = $request->address != "" ? $request->address : '';
             $site_exist->site_olad = $request->ln_address != "" ? $request->ln_address : '';

@@ -22,7 +22,11 @@ class TestController extends Controller
         
         
     }
-    public function home() {
+	public function home(){
+		return view('index');
+	}
+	// It will be dashboard
+    public function dashboard() {
     
     	$this->db = Auth::user()->country()->cont_conn;
     	//$country= Auth::user()->country()->id;

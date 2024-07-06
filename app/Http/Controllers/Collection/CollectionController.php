@@ -2,21 +2,16 @@
 
 namespace App\Http\Controllers\Collection;
 
-/**
- * Created by PhpStorm.
- * User: 205206
- * Date: 12/24/2018
- * Time: 6:10 PM
- */
 
 use Excel;
+use App\MasterData\Site;
 use App\Menu\SubMenu;
 use App\Menu\UserMenu;
 use App\MasterData\Country;
 use App\MasterData\Employee;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
+use Illuminate\Http\Response;
 use App\MasterData\DmCollection;
 use App\BusinessObject\Department;
 use App\BusinessObject\SalesGroup;
@@ -24,8 +19,8 @@ use Illuminate\Support\Facades\DB;
 use App\BusinessObject\OrderMaster;
 use App\BusinessObject\SiteBalance;
 use App\MasterData\DmCollectionLog;
-use App\Http\Controllers\Controller;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Mapping\EmployeeManagerUpload;
 use App\BusinessObject\OutletCollection;
@@ -628,13 +623,13 @@ GROUP BY t1.id,
 
   public function transferDues()
   {
-    if ($this->userMenu->wsmu_vsbl) {
+    // if ($this->userMenu->wsmu_vsbl) {
       $collections = DB::connection($this->db)->select("SELECT `ID`, `ACMP_CODE`, `COLL_DATE`, `COLL_NUMBER`  FROM `dm_collection`  WHERE COLL_NUMBER LIKE '%coll_no%' limit 10 ");
       $slgpList = DB::connection($this->db)->select("SELECT `slgp_name`, `slgp_code`, `id` FROM `tm_slgp`");
       return view('collection.transfer_dues')->with('permission', $this->userMenu)->with('slgpList', $slgpList)->with('collections', $collections);
-    } else {
-      return view('theme.access_limit');
-    }
+    // } else {
+    //   return view('theme.access_limit');
+    // }
   }
 
   public function transferDuesEdit($id)
@@ -699,7 +694,7 @@ GROUP BY t1.id,
   public function transferDuesFileUpload(Request $request)
   {
     // dd($request->all());
-    if ($this->userMenu->wsmu_crat) {
+    // if ($this->userMenu->wsmu_crat) {
       if ($request->hasFile('transfer_dues_file')) {
         DB::connection($this->db)->beginTransaction();
         try {
@@ -712,18 +707,18 @@ GROUP BY t1.id,
         }
       }
       return back()->with('danger', ' File Not Found');
-    } else {
-      return redirect()->back()->with('danger', 'Access Limited');
-    }
+    // } else {
+    //   return redirect()->back()->with('danger', 'Access Limited');
+    // }
   }
 
   public function transferDuesFileUploadFormat(Request $request)
   {
-    if ($this->userMenu->wsmu_crat) {
+    // if ($this->userMenu->wsmu_crat) {
       return Excel::download(new DmCollection(), 'transfer_dues_upload_format_' . date("Y-m-d H:i:s") . '.xlsx');
-    } else {
-      return redirect()->back()->with('danger', 'Access Limited');
-    }
+    // } else {
+    //   return redirect()->back()->with('danger', 'Access Limited');
+    // }
   }
 
 
@@ -791,4 +786,112 @@ GROUP BY t1.id,
 
     return $data;
   }
+
+  public function srBalance()
+    {
+      return view('collection.sr_balance');
+    }
+    public function srBalanceFilter(Request $request)
+    {
+      // return $request->all();
+
+      $staff_id = $request->staff_id;
+      $site_code = $request->site_code;
+      $site_code2 = $request->site_code2;
+      $start_report_date = $request->start_report_date;
+      $end_report_date = $request->end_report_date;
+      $report_type = $request->report_type;
+
+      $emp= Employee::on($this->db)->where(['aemp_usnm'=>$staff_id])->first();
+      $site= Site::on($this->db)->where(['site_code' => $site_code])->first();
+
+      if(!$emp && !$site){
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Employee or Site not found'
+        ]);
+      }
+
+      $query = ' ';
+
+       if($report_type == 1){
+         $query .=  " t1.DELV_AMNT > 0";
+
+      }else if($report_type == 2){
+        $query .=  " (round(t1.DELV_AMNT,2) - round(t1.COLLECTION_AMNT,2)) = 0 ";
+      }else{
+        $query .=  " (round(t1.DELV_AMNT,2) - round(t1.COLLECTION_AMNT,2)) > 0.20 ";
+      }
+
+      // paid
+      // $query .=  " (round(t1.DELV_AMNT,2) - round(t1.COLLECTION_AMNT,2)) = 0 ";
+
+      // un paid
+      //$query .=  " (round(t1.DELV_AMNT,2) - round(t1.COLLECTION_AMNT,2)) > 0.20 ";
+
+      $query1= '';
+      if($start_report_date){
+        $query1 =  " AND t1.ORDM_DATE BETWEEN '$start_report_date' AND '$start_report_date' ";
+      }
+      if($start_report_date != '' && $end_report_date != ''){
+        $query1 =  " AND t1.ORDM_DATE BETWEEN '$start_report_date' AND '$end_report_date' ";
+      }else{
+        $query1 .='';
+      }
+
+      $query .= $query1;
+
+      if($emp){
+        $query .= " AND  t1.AEMP_USNM='$staff_id' ";
+      }
+      if($site){
+        $query .= " AND  t1.SITE_CODE BETWEEN '$site_code' AND '$site_code2' ";
+      }
+
+      $query_all = "SELECT t1.AEMP_USNM,t2.aemp_name,t1.SITE_CODE,t3.site_name,t1.ORDM_ORNM,
+              t1.ORDM_DATE,round(t1.DELV_AMNT,2)AS`DELV_AMNT`,round(t1.COLLECTION_AMNT,2)AS COLLECTION_AMNT, round(round(t1.DELV_AMNT,2)-round(t1.COLLECTION_AMNT,2),2)as due
+              FROM `dm_trip_master`t1 JOIN tm_aemp t2 ON t1.AEMP_ID=t2.id
+              JOIN tm_site t3 ON t1.SITE_ID=t3.id
+              WHERE $query ;";
+      
+      // return $query_all;
+      /* $query = "SELECT t1.AEMP_USNM,t2.aemp_name,t1.SITE_CODE,t3.site_name,t1.ORDM_ORNM,
+              t1.ORDM_DRDT,round(t1.DELV_AMNT,2)AS`DELV_AMNT`,round(t1.COLLECTION_AMNT,2)AS COLLECTION_AMNT,(floor(t1.DELV_AMNT)-floor(t1.COLLECTION_AMNT))as due
+              FROM `dm_trip_master`t1 JOIN tm_aemp t2 ON t1.AEMP_ID=t2.id
+              JOIN tm_site t3 ON t1.SITE_ID=t3.id
+              WHERE t1.AEMP_USNM='$staff_id' and (floor(t1.DELV_AMNT)-floor(t1.COLLECTION_AMNT))>0;"; */
+
+      DB::connection($this->db)->select(DB::raw("SET sql_mode=''"));
+      $data = DB::connection($this->db)->select(DB::raw($query_all));
+
+      return response()->json([
+          'status'  => 'success',
+          'data'    => $data
+        ]);
+
+    }
+    public function collectionReference(Request $request)
+    {
+      // return $request->all();
+
+      $ref_no = $request->ref_no;
+      $query  = '';
+
+      if($ref_no){
+        $query .= " t1.TRANSACTION_ID LIKE '$ref_no' ";
+      }
+
+      $query_all = "SELECT *  FROM dm_invoice_collection_mapp WHERE MAP_ID 
+              IN(SELECT MAP_ID FROM `dm_invoice_collection_mapp`t1 JOIN dm_collection t2 ON t1.MAP_ID=t2.COLL_NUMBER 
+              WHERE $query and t2.STATUS!=24 and t1.CRECIT_AMNT>0);";
+
+      DB::connection($this->db)->select(DB::raw("SET sql_mode=''"));
+      $data = DB::connection($this->db)->select(DB::raw($query_all));
+
+      return response()->json([
+          'status'  => 'success',
+          'data'    => $data
+        ]);
+
+    }
 }

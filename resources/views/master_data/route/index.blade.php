@@ -56,6 +56,7 @@
                                 <a class="btn btn-success btn-sm" href="{{ URL::to('/route/create')}}">Add New</a>
                                 <a class="btn btn-success btn-sm" href="{{ URL::to('route/routeMasterUpload')}}">Upload</a>
                             @endif
+                            <a class="btn btn-success btn-sm" href="{{ URL::to('route/routeBaseMapping')}}">Base Mapping</a>
                             <ul class="nav navbar-right panel_toolbox">
                                 <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                                 </li>

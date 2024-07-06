@@ -142,8 +142,7 @@ class SiteMappingController extends Controller
         DB::connection($this->db)->select("Delete FROM tl_rsmp WHERE id IN (".implode(',',$rmsite).") ");
         return 1;
     }
-    public function addSiteToRoute($rout_id, $site_code, $route_code){
-        
+    public function addSiteToRoute($rout_id, $site_code){
         if (isset($route_code)) {
             $rout_data=Route::on($this->db)->where(['rout_code'=>$route_code])->first();
             if($rout_data){

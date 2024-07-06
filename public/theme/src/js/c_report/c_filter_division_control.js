@@ -18,12 +18,17 @@ $("input[type='radio']").click(function () {
     console.log(reportType)
     switch (reportType){
         case "sr_activity_gvt_hierarchy":
+            hideFilterArea();
+            $('#history').show();
+            detailsSumValueAppend(2);
+            break;
         case "outlet_vs_item_coverage":
         case "sr_activity_sales_hierarchy":
             hideFilterArea();
             //$('#history_usr').show();
             $('#history').show();
             break;
+        case "tracking":
         case "activity_summary":
             hideFilterArea();
             $('#history').show();
@@ -73,7 +78,7 @@ $("input[type='radio']").click(function () {
             hideFilterArea();
             $('#sales_heirarchy').show();
             $('.outlet_weekly').show();
-            $('.start_date_period_div').hide();
+            // $('.start_date_period_div').hide();
             $('.gvt').hide();
             $('.zone_div').show();
             $('#dirg_id_div').show();
@@ -83,7 +88,7 @@ $("input[type='radio']").click(function () {
             $('#sales_heirarchy').show();
             $('.gvt').show();
             $('#single_start_date').hide();
-            $('.start_date_period_div').show();
+            // $('.start_date_period_div').show();
             $('.zone_div').hide();
             $('#dirg_id_div').hide();
             $('.outlet_stat').show();
@@ -93,6 +98,11 @@ $("input[type='radio']").click(function () {
             $('#sh_date_gvt').append(date_gvt_h);
             $('#sh_date').empty();
             $('#sh_date').append(date_sales_h);
+            break;
+        case "attendance_report":
+            hideFilterArea();
+            $('.attendance_type_div').show();
+            $('#sales_heirarchy').show();
             break;
         default:
             hideFilterArea();
@@ -113,6 +123,7 @@ function hideFilterArea(){
     $('#history_usr').hide();
     $('.outlet_weekly').hide();
     $('.outlet_stat').hide();
+    $('.attendance_type_div').hide();
 }
 function resetGetReportFunction(){
     $('#send').removeAttr('onclick');
@@ -129,8 +140,10 @@ function detailsSumValueAppend(type){
     }
     else{
         $('#dtls_sum').html(option);
+        $('#dtls_sum').html(option);
     }
     $('#dtls_sum_div').show();
+    $('#dtls_sum_div_h').show();
 
 }
 

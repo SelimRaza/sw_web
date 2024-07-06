@@ -166,14 +166,14 @@ function convert_number_to_words($number)
         }
 
         #tbldisc tr td {
-            border: 1px solid #d3d3d3;
+            border: 1px solid ;
 
         }
 
         #Disval tr td {
             width: 50%;
-            border-right: 1px solid #d3d3d3;
-            border: 1px solid #d3d3d3;
+            border-right: 1px solid ;
+            border: 1px solid ;
             border-collapse: collapse !important;
             visibility: visible;
 
@@ -189,13 +189,36 @@ function convert_number_to_words($number)
             visibility: hidden;
             display: none;
         }
+        @media print {
+            @page {
+                size: auto;
+                margin: 0;
+            }
+
+            @page :first {
+                margin: 0;
+            }
+
+            @page :last {
+                margin: 0;
+            }
+        }
+        
 
     </style>
     <script>
+        // window.addEventListener('beforeprint', function() {
+        //     document.querySelector('header').remove();
+        //     document.querySelector('footer').remove();
+        // });
         document.addEventListener("DOMContentLoaded", function () {
             window.print();
             // setTimeout('window.close()', 100);
         });
+        // window.onload = function() {
+        //     var header = document.querySelector('header');
+        //     header.innerHTML = '';
+        // }
     </script>
 </head>
 <body>
@@ -217,7 +240,7 @@ function convert_number_to_words($number)
                 <td align="center">
                     <table border="0" cellspacing="0" cellpadding="0" width="720px" style="padding: 0px 10px;">
                         <tr style="text-align: center">
-                            <span class="style4">Order</span>
+                            <span class="style4">{{$salesOrder->invoice_title}}</span>
 
                         </tr>
                         <tr>
@@ -229,32 +252,23 @@ function convert_number_to_words($number)
                                                 <tr>
                                                     <td>
                                                         <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                                            <tr>
+                                                            <!-- <tr style="text-align: center">
                                                                 <td>
-                                                                    <span class="style4"> SUPPLIERS DETAILS:</span>
+                                                                    <span class="style4"> SUPPLIERS DETAILS</span>
                                                                 </td>
 
-                                                            </tr>
-                                                            <tr>
+                                                            </tr> -->
+                                                            
+                                                            <tr style="text-align: center">
                                                                 <td>
                                                                     <span class="style4"><?php echo $salesOrder->ou_name; ?></span>
                                                                     <span class="style4"><?php echo $salesOrder->note; ?></span>
                                                                 </td>
                                                             </tr>
 
-                                                            <tr>
+                                                            <tr style="text-align: center">
                                                                 <td>Warehouse : {{$salesOrder->address}}
                                                                 </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>
-                                                                    <span class="style8"> <?php
-                                                                        if ($salesOrder->vat_status == '1') {
-                                                                            echo "Exice TRN:" . $salesOrder->tax_number;
-                                                                        }
-                                                                        ?></span>
-                                                                </td>
-
                                                             </tr>
                                                             <tr>
                                                                 <td>
@@ -265,14 +279,32 @@ function convert_number_to_words($number)
 
                                                                         ?></span>
                                                                 </td>
+                                                                <td>
+                                                                    <span class="style8"> <?php
+                                                                        if ($salesOrder->vat_status == '1') {
+                                                                            echo "Exice TRN:" . $salesOrder->tax_number;
+                                                                        }
+                                                                        ?></span>
+                                                                </td>
 
                                                             </tr>
+                                                            <!-- <tr>
+                                                                <td>
+                                                                    <span class="style8"> <?php
+                                                                        // if ($salesOrder->vat_status == '1') {
+                                                                        //     echo "VAT TRN:" . $salesOrder->vat_number;
+                                                                        // }
+
+                                                                        ?></span>
+                                                                </td>
+
+                                                            </tr> -->
 
 
                                                         </table>
                                                     </td>
                                                     <td align="center">
-                                                        <img src="{{ asset("theme/image/logo.png")}}" alt="" width="156" height="100"/>
+                                                        <!-- <img src="{{ asset("theme/image/logo.png")}}" alt="" width="156" height="100"/>-->
                                                     </td>
                                                 </tr>
 
@@ -288,19 +320,19 @@ function convert_number_to_words($number)
 
                                     <tr>
                                         <td height="30" style="width: 33.33%;" align="left">
-                                            <span class="style8">Order Date(تاريخ الطلب):</span>
+                                            <span class="style8">Order(تاريخ الطلب):</span>
                                             {{$salesOrder->order_date}}
                                         </td>
                                         <!--</tr>
                                         <tr>-->
                                         <td height="30" style="width: 33.33%;" align="center">
-                                            <span class="style8">Invoice Date (تاريخ الفاتورة):&nbsp;</span>
+                                            <span class="style8">Invoice  (تاريخ الفاتورة):&nbsp;</span>
                                             {{$salesOrder->delivery_date}}
                                         </td>
                                         <!--</tr>
                                         <tr>-->
                                         <td height="30" style="width: 33.33%;" align="right">
-                                            <span class="style8"> Delivery Date (تاريخ التوصيل):&nbsp;</span>
+                                            <span class="style8"> Delivery  (تاريخ التوصيل):&nbsp;</span>
                                             {{$salesOrder->delivery_date}}
                                         </td>
                                     </tr>
@@ -338,22 +370,20 @@ function convert_number_to_words($number)
                         <tr style="border: none;">
                             <td width="100%">
                                 <table width="100%" border="1" cellpadding="0" cellspacing="0"
-                                       bordercolor="#d3d3d3">
+                                      >
                                     <tr>
-                                        <td width="100" valign="top">
-                                            <span class="style4">&nbsp;SHIP TO</span><br/>
-
-                                            <span class="style4 invoiceArabic">&nbsp;توريد لــــ</span>
+                                        <td width="100" valign="top"  style="text-align:center;">
+                                            <span class="style4">&nbsp;Delivery Address </span><br/>
+                                            <span class="style4 invoiceArabic">&nbsp;وجهة الشحن</span>
                                         </td>
                                         <td width="350">
                                             {{$salesOrder->Site_Name}}
                                             <br/>{{$salesOrder->site_address}}
 
                                         </td>
-                                        <td width="100" valign="top">
-                                            <span class="style4">&nbsp;BILL TO</span><br/>
-
-                                            <span class="style4 invoiceArabic">&nbsp;فاتورة لــــ</span>
+                                        <td width="100" valign="top"  style="text-align:center;">
+                                            <span class="style4">&nbsp;Billing Address</span><br/>
+                                            <span class="style4 invoiceArabic">&nbsp;وجهة الفوترة</span>
                                         </td>
                                         <td width="350">
                                             {{$salesOrder->Outlet_Name}}
@@ -367,12 +397,12 @@ function convert_number_to_words($number)
                         <tr>
                             <td width="100%">
                                 <table width="100%" height="24" border="1" cellpadding="0" cellspacing="0"
-                                       bordercolor="#d3d3d3"
+                                       
                                        style="border-top: none;">
                                     <tr>
 
                                         <td>
-                                            <span class="style8">Supplier Ref. No:{{$salesOrder->Order_ID}} </span>
+                                            <span class="style8"> Reference No: {{$salesOrder->Order_ID}} </span>
                                         </td>
                                     </tr>
 
@@ -381,10 +411,10 @@ function convert_number_to_words($number)
                         </tr>
                         <tr>
                             <td>
-                                <table width="100%" border="1" cellpadding="0" cellspacing="0" bordercolor="#d3d3d3">
-                                    <tr bgcolor="#b0c4de">
+                                <table width="100%"  border="1" cellpadding="0" cellspacing="0" >
+                                    <tr style="text-align:center;">
                                         <td width="100">
-                                            <span style="font-size:12px;" class="style12">SALES MAN</span><br/>
+                                            <span style="font-size:12px;" class="style12">SR</span><br/>
                                             <span style="font-size:12px;" class="style12">مندوب المبيعات</span>
                                         </td>
                                         <td width="90">
@@ -438,24 +468,24 @@ function convert_number_to_words($number)
                         <tr>
                             <td width="100%">
 
-                                <table width="100%" border="1" cellpadding="0" cellspacing="0" bordercolor="#d3d3d3">
-                                    <tr bgcolor="#b0c4de">
+                                <table width="100%" border="1" cellpadding="0" cellspacing="0" >
+                                    <tr>
                                         <!-- <td width="35" height="23" rowspan="2">
                                              <span style="font-size:12px;" class="style12">&nbsp;SL#</span><br/>
 
                                              <span style="font-size:12px;" class="style12 invoiceArabic">&nbsp;الرقم التسلسلي</span>
                                          </td>-->
                                         <td width="65" height="23" rowspan="2">
-                                            <span style="font-size:12px;" class="style12">&nbsp;ITEM CODE</span><br/>
+                                            <span style="font-size:12px;" class="style12">&nbsp;PRODUCT CODE</span><br/>
                                             <span style="font-size:12px;"
                                                   class="style12 invoiceArabic">&nbsp;رمز الصنف</span>
                                         </td>
                                         <td width="50" height="23" rowspan="2">
-                                            <span style="font-size:12px;" class="style12">UOM</span><br/>
+                                            <span style="font-size:12px;" class="style12">FACTOR</span><br/>
                                             <span style="font-size:12px;" class="style12 invoiceArabic">&nbsp;وحدة القياس</span>
                                         </td>
                                         <td colspan="2">
-                                            <span class="style12" style="font-size:12px;" style="margin-left:44px;">&nbsp;Quantity</span><br/>
+                                            <span class="style12" style="font-size:12px;" style="margin-left:44px;">&nbsp;QUANTITY</span><br/>
                                             <span style="font-size:12px;" class="style12 invoiceArabic"
                                                   style="text-align:center">&nbsp;الكمية</span>
                                         </td>
@@ -466,12 +496,12 @@ function convert_number_to_words($number)
                                                   class="style12 invoiceArabic">&nbsp;سعر الوحدة</span>
                                         </td>
                                         <td width="60" height="23" rowspan="2">
-                                            <span style="font-size:12px;" class="style12">&nbsp;GROSS Amnt</span><br/>
+                                            <span style="font-size:12px;" class="style12">&nbsp;GROSS</span><br/>
                                             <span style="font-size:12px;"
                                                   class="style12 invoiceArabic">&nbsp;سعر الوحدة</span>
                                         </td>
                                         <td width="60" height="23" rowspan="2">
-                                            <span class="style12">&nbsp;Total Excise Duty</span><br/>
+                                            <span class="style12">&nbsp;Total Excise</span><br/>
                                             <span class="style12 invoiceArabic">&nbsp;</span>
                                         </td>
                                         <td colspan="2">
@@ -484,13 +514,13 @@ function convert_number_to_words($number)
                                             <span style="font-size:12px;" class="style12">VAT %</span>
                                         </td>
                                         <td width="60" height="23" rowspan="2">
-                                            <span style="font-size:12px;" class="style12">VAT Amt</span>
+                                            <span style="font-size:12px;" class="style12">VAT</span>
                                         </td>
                                         <td width="60" height="23" rowspan="2">
-                                            <span style="font-size:12px;" class="style12">Total Incl Excise +VAT</span>
+                                            <span style="font-size:12px;" class="style12">Total (Excise +Vat)</span>
                                         </td>
                                     </tr>
-                                    <tr bgcolor="#b0c4de">
+                                    <tr >
                                         <td><span style="font-size:12px;"
                                                   class="style12">CTN</span></td>
                                         <td><span style="font-size:12px;"
@@ -499,7 +529,7 @@ function convert_number_to_words($number)
                                         <td><span style="font-size:12px;"
                                                   class="style12">Dis%</span></td>
                                         <td><span style="font-size:12px;"
-                                                  class="style12">DisVal</span></td>
+                                                  class="style12">Dis Amnt</span></td>
                                     </tr>
                                     <?php
                                     $exciseDuty = 0;
@@ -603,7 +633,7 @@ function convert_number_to_words($number)
 
                         <tr>
                             <td>
-                                <table width="100%" border="0" cellpadding="0" cellspacing="0" bordercolor="#d3d3d3">
+                                <table width="100%" border="0" cellpadding="0" cellspacing="0">
                                     <tr>
                                         <td width="58%" height="26">
                                                     <span id="rpSalesInvoice_spnCurrency_0">
@@ -637,11 +667,11 @@ function convert_number_to_words($number)
 
                         <tr>
                             <td width="100%">
-                                <table width="100%" border="1" cellspacing="0" cellpadding="0"
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0"
                                        style="text-align: left;">
                                     <tr>
                                         <td>
-                                                    <span style="font-size:12px;" class="style8" style="float: left;">&nbsp;<u>Terms and Conditions</u>&nbsp;(<u>الشروط
+                                                    <span style="font-size:12px;" class="style8" style="float: left;">&nbsp;<u>Terms of Service and Usage Agreement</u>&nbsp;(<u>الشروط
                                                             والأحكام</u>)</span>
 
                                         </td>
@@ -649,10 +679,9 @@ function convert_number_to_words($number)
                                     <tr>
                                         <td>
                                             <ul style="margin: 6px 0px;">
-                                                <li>Received complete invoiced quantity in good condition</li>
-                                                <li>Official receipt is mandatory for payments</li>
-                                                <li>Please issue cheque on behalf
-                                                    of <?php echo $salesOrder->ou_name; ?></li>
+                                                <li>Check the order for completeness and good condition upon receipt.</li>
+                                                <li>Official receipt required for payments.</li>
+                                                <li>Make checks payable to {{$salesOrder->ou_name;}}</li>
                                             </ul>
 
                                         </td>
@@ -669,7 +698,7 @@ function convert_number_to_words($number)
                                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                     <tr>
                                         <td width="360" align="left">
-                                            <table width="360" height="40" border="2" cellpadding="0" cellspacing="0"
+                                            <table width="360" height="40" border="0" cellpadding="0" cellspacing="0"
                                                    style="margin: 0px 0px;">
                                                 <tr>
                                                     <td valign="top">
@@ -679,7 +708,7 @@ function convert_number_to_words($number)
                                             </table>
                                         </td>
                                         <td width="360" align="right">
-                                            <table width="355" height="40" border="2" cellpadding="0" cellspacing="0"
+                                            <table width="250" height="40" border="0" cellpadding="0" cellspacing="0"
                                                    style="margin: 0px 0px;">
                                                 <tr>
                                                     <td valign="top">
@@ -699,8 +728,7 @@ function convert_number_to_words($number)
                         <tr>
                             <td align="center">
                                         <span style="font-size:12px;" class="style5"
-                                              style="font-size: 20px; font-weight: bold;">Thank you for your
-                                            business</span>
+                                              style="font-size: 20px; font-weight: bold;">Thanks for cooperating</span>
                             </td>
                         </tr>
                     </table>
@@ -713,5 +741,6 @@ function convert_number_to_words($number)
 <script type="text/javascript">
     // window.print();
     // setTimeout('window.close()', 100);
+    
 </script>
 </html>

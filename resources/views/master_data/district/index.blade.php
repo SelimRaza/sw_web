@@ -66,6 +66,7 @@
                                 <thead>
                                 <tr class="tbl_header_light">
                                     <th class="cell_left_border">SL</th>
+                                    <th>District ID</th>
                                     <th>Name</th>
                                     <th>Code</th>
                                     <th>Division</th>
@@ -77,6 +78,7 @@
                                 @foreach($districts as $index => $district)
                                     <tr class="tbl_body_gray">
                                         <td class="cell_left_border">{{$index+1}}</td>
+                                        <td>{{$district->id}}</td>
                                         <td>{{$district->dsct_name}}</td>
                                         <td>{{$district->dsct_code}}</td>
                                         <td>{{$district->division()->disn_name}}</td>

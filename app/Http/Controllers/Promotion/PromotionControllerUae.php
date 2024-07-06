@@ -428,6 +428,18 @@ INNER JOIN tm_issc t2 ON t1.issc_id=t2.id WHERE t1.slgp_id='$slgp_id' ORDER BY `
             $than="";
             $distr="";
 
+            $site_query="";
+
+           // return $request->all();
+        //    dd(
+        //     isset($request['category']) ? $request['category'] : null,
+        //     isset($request['sub_channel']) ? $request['sub_channel'] : null,
+        //     isset($request['channel']) ? $request['channel'] : null,
+        //     isset($request['thana_id']) ? $request['thana_id'] : null,
+        //     isset($request['district']) ? $request['district'] : null
+        // );
+        
+
             //name Code promotion_label discount_type promotion_type  offer_type offer_category  qualifier_type endDate startDate slgp_idds
             $p_name = $request['promotion_name'];
             $Code = $request['promotion_code'];
@@ -470,22 +482,29 @@ INNER JOIN tm_issc t2 ON t1.issc_id=t2.id WHERE t1.slgp_id='$slgp_id' ORDER BY `
             if (isset($request['category'])) {
                 $cat = $request['category'];
                 $category = " and t1.otcg_id IN (".implode(',',$cat).")";
+                
+                $site_query.=$category;
             }
             if (isset($request['sub_channel'])) {
+                
                 $sub_cha = $request['sub_channel'];
                 $sub_channel = " and t1.scnl_id IN (".implode(',',$sub_cha).")";
+                $site_query.=$sub_channel;
             }
             if (isset($request['channel'])) {
                 $cha = $request['channel'];
                 $channel = " AND t3.id IN (".implode(',',$cha).")";
+                $site_query.=$channel;
             }
             if (isset($request['thana_id'])) {
                 $thana = $request['thana_id'];
                 $than = " AND t7.id IN (".implode(',',$thana).")";
+                $site_query.=$than;
             }
             if (isset($request['district'])) {
                 $dist = $request['district'];
                 $distr = " AND t8.id IN (".implode(',',$dist).")";
+                $site_query.=$distr;
             }
 
             $endDate = $request['endDate'];
@@ -598,7 +617,7 @@ INNER JOIN tm_issc t2 ON t1.issc_id=t2.id WHERE t1.slgp_id='$slgp_id' ORDER BY `
                     INNER JOIN tm_chnl t3 ON t2.chnl_id=t3.id 
                     INNER JOIN tm_otcg t4 ON t1.otcg_id=t4.id INNER JOIN tm_mktm t5 ON t1.mktm_id=t5.id 
                     INNER JOIN tm_ward t6 ON t5.ward_id=t6.id INNER JOIN tm_than t7 ON t6.than_id=t7.id 
-                    INNER JOIN tm_dsct t8 ON t8.id=t7.dsct_id WHERE t1.lfcl_id='1' ". $category. $sub_channel. $channel. $than. $distr."
+                    INNER JOIN tm_dsct t8 ON t8.id=t7.dsct_id WHERE t1.lfcl_id='1' ". $site_query."
                     GROUP BY t1.id ";
             DB::connection($this->db)->select($site);
             $empId = $this->currentUser->employee()->id;
@@ -606,7 +625,7 @@ INNER JOIN tm_issc t2 ON t1.issc_id=t2.id WHERE t1.slgp_id='$slgp_id' ORDER BY `
             return redirect()->back()->with('success', 'Promotion Created Successfully')->with('permission', $this->userMenu)->with('acmp', $acmp);
         }catch(\Exception $e){
             $error_message="Something Went Wrong !!!! Please provide all essential Info";
-            return redirect()->back()->with('danger',$error_message);
+            return redirect()->back()->with('danger',$e->getMessage());
         }
 
     }
@@ -799,12 +818,20 @@ INNER JOIN tm_issc t2 ON t1.issc_id=t2.id WHERE t1.slgp_id='$slgp_id' ORDER BY `
                 //                                     WHERE t2.lfcl_id=1 AND t2.prms_edat>=curdate()
                 //                                 )
                 //                 ORDER BY t2.amim_code ASC;");
-        $items = DB::connection($this->db)->select("SELECT 
-                t1.id,t2.itsg_name issc_name,
-                t1.amim_code item_code,t1.amim_name item_name
-                FROM tm_amim t1
-                INNER JOIN tm_itsg t2 ON t1.itsg_id=t2.id
-                WHERE t1.lfcl_id=1 AND t1.itsg_id={$issc_id}  ORDER BY t1.amim_code ASC;");
+        // $items = DB::connection($this->db)->select("SELECT 
+                // t1.id,t2.itsg_name issc_name,
+                // t1.amim_code item_code,t1.amim_name item_name
+        //         FROM tm_amim t1
+        //         INNER JOIN tm_itsg t2 ON t1.itsg_id=t2.id
+        //         WHERE t1.lfcl_id=1 AND t1.itsg_id={$issc_id}  ORDER BY t1.amim_code ASC;");
+
+        $items = DB::connection($this->db)->select("SELECT  
+                    t1.id,t2.issc_name issc_name,
+                    t1.amim_code item_code,t1.amim_name item_name
+                    FROM tl_sgit t3
+                    INNER JOIN tm_amim t1 ON t3.amim_id=t1.id
+                    INNER JOIN tm_issc t2 ON t3.issc_id=t2.id
+                    WHERE t1.lfcl_id=1 AND t3.issc_id={$issc_id}  GROUP BY t1.id,t2.issc_name,t1.amim_code,t1.amim_name ORDER BY t1.amim_code ASC");
 
         return Response::json($items);
     }

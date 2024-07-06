@@ -64,6 +64,7 @@
                                 <thead>
                                 <tr class="tbl_header_light">
                                     <th class="cell_left_border ">SL</th>
+                                    <th>Ward ID</th>
                                     <th>Ward Name</th>
                                     <th>Ward Code</th>
                                     <th>Thana</th>
@@ -75,6 +76,7 @@
                                 @foreach($wards as $index => $ward)
                                     <tr class="tbl_body_gray">
                                         <td class="cell_left_border">{{$index+1}}</td>
+                                        <td>{{$ward->id}}</td>
                                         <td>{{$ward->ward_name}}</td>
                                         <td>{{$ward->ward_code}}</td>
                                         <td>{{$ward->than_name}}</td>

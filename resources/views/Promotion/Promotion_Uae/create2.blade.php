@@ -238,9 +238,9 @@
                                                     <span class="required">*</span>
                                                 </label>
                                                 <div class="col-md-4 col-sm-4 col-xs-12">
-                                                    <select class="form-control" name="slgp_idds[]" id="slgp_idds"
+                                                    <select class="form-control" name="slgp_idds" id="slgp_idds"
                                                             onchange="getCategory(this.value)"
-                                                            multiple="multiple" >
+                                                             >
 
                                                         <option value="">Select Sales Group</option>
                                                         @foreach ($salesGroups as $salesGroups)
@@ -705,6 +705,7 @@
             var _token = $("#_token").val();
             var slgp_id = $("#slgp_idds").val();
             $('#ajax_load').css("display", "block");
+            console.log(category_id);
             $.ajax({
                 type: "POST",
                 url: "{{ URL::to('/')}}/promotion/UAE/getCategoryItem",

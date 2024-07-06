@@ -3,23 +3,6 @@
 
     <div class="right_col" role="main" style="color:black !important;">
         <div class="">
-            <!-- <div class="page-title">
-                <div class="title_left">
-                    <ol class="breadcrumb">
-                        <li>
-                            <a href="{{ URL::to('/')}}"><i class="fa fa-home"></i>Home</a>
-                        </li>
-                        <li class="active">
-                            <strong>Report</strong>
-                        </li>
-
-                    </ol>
-                </div>
-                <div class="title_right">
-
-                </div>
-            </div> -->
-
             <div class="clearfix"></div>
             <div class="row">
                 @if(Session::has('success'))
@@ -69,9 +52,9 @@
                                                         <li><a href="#3a" data-toggle="tab" onclick="getOrderReport()">
                                                                 Order</a>
                                                         </li>
-                                                        <li><a href="#4a" data-toggle="tab"
+                                                        <!-- <li><a href="#4a" data-toggle="tab"
                                                                onclick="getDeviationReport()">
-                                                                Deviation</a>
+                                                                Deviation</a></li> -->
                                                         <li><a href="#4a" data-toggle="tab" onclick="getNoteReport()">
                                                                 Activity</a>
                                                         </li>
@@ -208,7 +191,7 @@
                                                         Summary(Govt. Hierarchy)
                                                     </label>
                                                 </div>
-                                                <div class="col-md-6 col-sm-6 ">
+                                                <!-- <div class="col-md-6 col-sm-6 ">
                                                     <label>
                                                         <input type="radio" class="flat emp_tracking_input"
                                                                name="emp_tracking_reportType"
@@ -217,7 +200,7 @@
                                                                onclick="getEmpAttendanceReport(this.value)"/>&nbsp;&nbsp;Employee
                                                         Attendance
                                                     </label>
-                                                </div>
+                                                </div> -->
 
                                             </div>
                                             <!-- employee tracking report selection div -->
@@ -485,20 +468,20 @@
                                                                value="sr_wise_order_details"/> Order Details Report
                                                     </label>
                                                 </div>
-                                                <div class="col-md-6 col-sm-6 ">
+                                                <!-- <div class="col-md-6 col-sm-6 ">
                                                     <label>
                                                         <input type="radio" class="flat" name="reportType"
                                                                id="reportType"
                                                                value="item_coverage"/> Item Coverage
                                                     </label>
-                                                </div>
-                                                <div class="col-md-6 col-sm-6 ">
+                                                </div> -->
+                                                <!-- <div class="col-md-6 col-sm-6 ">
                                                     <label>
                                                         <input type="radio" class="flat" name="reportType"
                                                                id="reportType"
                                                                value="item_summary"/> Item Summary
                                                     </label>
-                                                </div>
+                                                </div> -->
                                                 @if(Auth::user()->country()->module_type==2)
                                                 <div class="col-md-6 col-sm-6 ">
                                                     <label>
@@ -515,13 +498,13 @@
                                                     </label>
                                                 </div>
                                                 @endif
-                                                <div class="col-md-6 col-sm-6 ">
+                                                <!-- <div class="col-md-6 col-sm-6 ">
                                                     <label>
                                                         <input type="radio" class="flat" name="reportType"
                                                                id="reportType"
                                                                value="asset_summary"/> Asset Summary
                                                     </label>
-                                                </div>
+                                                </div> -->
                                                 <!-- <div class="col-md-6 col-sm-6 ">
                                                     <label>
                                                         <input type="radio" class="flat" name="reportType"
@@ -529,13 +512,13 @@
                                                                value="asset_order"/> Asset Details[Pivot]
                                                     </label>
                                                 </div> -->
-                                                <div class="col-md-6 col-sm-6 ">
+                                                <!-- <div class="col-md-6 col-sm-6 ">
                                                     <label>
                                                         <input type="radio" class="flat" name="reportType"
                                                                id="reportType"
                                                                value="asset_details"/> Asset Details
                                                     </label>
-                                                </div>
+                                                </div> -->
 
                                             </div>
                                             <div id="note_report"
@@ -556,14 +539,14 @@
                                                         (Order)
                                                     </label>
                                                 </div>
-                                                <div class="col-md-6 col-sm-6 ">
+                                                <!-- <div class="col-md-6 col-sm-6 ">
                                                     <label>
                                                         <input type="radio" class="flat" name="reportType"
                                                                id="reportType"
                                                                value="sr_hourly_activity"/> SR Hourly Activity
                                             
                                                     </label>
-                                                </div>
+                                                </div> -->
                                                 <div class="col-md-6 col-sm-6 ">
                                                     <label>
                                                         <input type="radio" class="flat" name="reportType"
@@ -599,14 +582,21 @@
                                                                value="activity_summary"/> Supervisor Activity
                                                     </label>
                                                 </div>
-
                                                 <div class="col-md-6 col-sm-6 ">
+                                                    <label>
+                                                        <input type="radio" class="flat" name="reportType"
+                                                                id="reportType"
+                                                               value="tracking"/> Tracking
+                                                    </label>
+                                                </div>
+
+                                                <!-- <div class="col-md-6 col-sm-6 ">
                                                     <label>
                                                         <input type="radio" class="flat" name="reportType"
                                                                 id="reportType"
                                                                value="outlet_vs_item_coverage"/> Outlet VS Item Coverage
                                                     </label>
-                                                </div>
+                                                </div> -->
 
                                             </div>
                                             <div id="top_bottom"
@@ -872,7 +862,8 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="form-group col-md-6 start_date_div" style="display:none;" id="single_start_date_div">
+                                                <div class="form-group col-md-6 ">
+                                                    <!-- start_date_div" style="display:none;" id="single_start_date_div" -->
                                                     <label class="control-label col-md-4 col-sm-4 col-xs-12"
                                                            for="start_date">Start Date<span class="required">*</span>
                                                     </label>
@@ -883,7 +874,8 @@
                                                                autocomplete="off"/>
                                                     </div>
                                                 </div>
-                                                <div class="form-group col-md-6 start_date_div" style="display:none;">
+                                                <div class="form-group col-md-6">
+                                                    <!-- start_date_div" style="display:none;" -->
                                                     <label class="control-label col-md-4 col-sm-4 col-xs-12"
                                                            for="start_date">End Date<span class="required">*</span>
                                                     </label>
@@ -894,7 +886,38 @@
                                                                autocomplete="off"/>
                                                     </div>
                                                 </div>
-                                                <div class="form-group col-md-6 start_date_period_div">
+                                                <div class="form-group col-md-6 attendance_type_div"  id="attendance_type_div">
+                                                    <label class="control-label col-md-4 col-sm-4 col-xs-12"
+                                                           for="attendance_type">Attendance<span
+                                                                class="required"></span>
+                                                    </label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <select class="form-control cmn_select2" name="attendance_type"
+                                                                id="attendance_type">
+                                                                <option value="">Both</option>
+                                                                <option value="=1">Present</option>
+                                                                <option value="!=1">Absent</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6 attendance_type_div"  id="attendance_type_div">
+                                                    <label class="control-label col-md-4 col-sm-4 col-xs-12"
+                                                           for="attendance_type">Designation<span
+                                                                class="required"></span>
+                                                    </label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <select class="form-control cmn_select2" name="edsg_id"
+                                                                id="edsg_id">
+                                                                <option value="">All</option>
+                                                                @foreach($edsg_list as $edsg)
+                                                                <option value="{{$edsg->id}}">{{$edsg->edsg_name}}
+                                                                   </option>
+                                                                @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- <div class="form-group col-md-6 start_date_period_div">
                                                     <label class="control-label col-md-4 col-sm-4 col-xs-12"
                                                            for="start_date_period">Select Period<span
                                                                 class="required">*</span>
@@ -909,7 +932,7 @@
 
                                                     </div>
 
-                                                </div>
+                                                </div> -->
                                                 <div class="form-group col-md-6 ord_flag_div"  id="sr_zone_div">
                                                     <label class="control-label col-md-4 col-sm-4 col-xs-12"
                                                            for="dtls_sum">SR/Zone<span
@@ -979,11 +1002,11 @@
 
                                                 <div class="form-group col-md-12 col-sm-12 col-xs-12"
                                                      style="margin-top: 15px;">
-                                                    <div class="pull-right" style="margin-right:5%; margin-top:2%;">
+                                                    <!-- <div class="pull-right" style="margin-right:5%; margin-top:2%;">
                                                         <a href="#" onclick="getRequestedReportList()"
                                                            class="request_report_check">Click here to see requested
                                                             report status</a>
-                                                    </div>
+                                                    </div> -->
 
 
                                                 </div>
@@ -1051,6 +1074,19 @@
                                                                 id="than_id_h"
                                                                 onchange="getSR(this.value,2)">
                                                             <option value="">Select Thana</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6 ord_flag_div"  id="">
+                                                    <label class="control-label col-md-4 col-sm-4 col-xs-12"
+                                                           for="dtls_sum">R Type<span
+                                                                class="required"></span>
+                                                    </label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <select class="form-control cmn_select2" name=""
+                                                                id="history_dtls_sum_div">
+                                                                <option value="1">Details</option>
+                                                                <option value="2">Summary</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -1180,7 +1216,32 @@
 
 
                     <!-- outlet vs item coverage report  end-->
+                    <div id="tableDiv_sr_history" class="div_hide">
+                        <div class="x_panel">
 
+                            <div class="x_content">
+                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:700px;overflow: auto;">
+                                    <div align="right">
+
+                                    </div>
+                                    <table id="tbl_sr_history" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
+                                           data-page-length='100'>
+                                        <thead id="head_history" style="position:sticky; inset-block-start:0;"
+                                               class="tbl_header">
+
+                                        </thead>
+                                        <tbody id="cont_history">
+
+                                        </tbody>
+                                        <tfoot id="foot_history"
+                                               style="position:sticky;inset-block-end:0;">
+
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <!-- outlet vs item coverage report  end-->
                     <div class="modal fade" id="tableDiv_outlet_vs_item_coverage" role="dialog">
                         <div class="modal-dialog" style="width:90%;">
@@ -1217,826 +1278,13 @@
 
                         </div>
                     </div>
-                    <!-- outlet vs item coverage report  end-->
-
-                    {{--outlet with class --}}
-                    <div id="tableDiv" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;max-height:700px;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_zone_0" class="table table-bordered table-responsive" border="1"
-                                           style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead>
-                                        <tr class="tbl_header" style="position:sticky; inset-block-start:0;">
-                                            <th>Date</th>
-                                            <th>Zone Name</th>
-                                            <th>T.SR</th>
-                                            <th>Pr.SR</th>
-                                            <th>Attn %</th>
-                                            <th>LV/IOM</th>
-                                            <th>Ab.SR</th>
-                                            <th>P.SR</th>
-                                            <th>Np.SR</th>
-                                            <th>T.Olt</th>
-                                            <th>Visit</th>
-                                            <th>Visit %</th>
-                                            <th>S.Olt</th>
-                                            <th>S.Rate %</th>
-                                            <th>LPC</th>
-                                            <th>Avg.SR(K)</th>
-                                            <th>Olt/SR</th>
-                                            <th>V.Olt/SR</th>
-                                            <th>Amount(K)</th>
-                                        </tr>
-
-                                        </thead>
-                                        <tbody id="cont">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--outlet with item --}}
-                    <div id="tableDiv_sr_productivity" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;max-height:650px;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_productivity_0" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;">
-                                        <thead>
-                                        {{--`acmp_name`, `slgp_name`, `dirg_name`, `zone_name`, `aemp_name`, `aemp_usnm`,
-                                        `aemp_mob1`, `site_code`, `site_name`, `site_mob1`, `itcl_name`, `ordd_oamt`,`ordd_qnty`--}}
-                                        <tr class="tbl_header" id="sr_productivity_head" style="position:sticky; inset-block-start:0;">
-                                            <th>Date</th>
-                                            <th>Zone Name</th>
-                                            <th>Base Name</th>
-                                            <th>SV Name</th>
-                                            <th>SR ID</th>
-                                            <th>SR Name</th>
-                                            <th>SR Mobile</th>
-                                            <th>Route Name</th>
-                                            <th>T.Olt</th>
-                                            <th>Visit</th>
-
-                                            <th>Visit%</th>
-                                            <th>S.Olt</th>
-                                            <th>S.Rate%</th>
-                                            <th>Np.Olt</th>
-                                            <th>Order(K)</th>
-                                            <th>Avg.Olt (K)</th>
-                                            <th>LPC</th>
-                                            <th>In Time</th>
-                                            <th>First Order</th>
-                                            <th>Last Order</th>
-                                            <th>Work Time</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="cont_sr_productivity">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="tableDiv_sr_productivity_summary" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;max-height:700px;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_sr_productivity_summary" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead>
-                                        <tr class="tbl_header" style="position:sticky; inset-block-start:0;">
-                                            <th>Zone Name</th>
-                                            <th>Base Name</th>
-                                            <th>SV Name</th>
-                                            <th>SR ID</th>
-                                            <th>SR Name</th>
-                                            <th>SR Mobile</th>
-                                            <th>T.Olt</th>
-                                            <th>Visit</th>
-                                            <th>Visit%</th>
-                                            <th>S.Olt</th>
-                                            <th>S.Rate%</th>
-                                            <th>Np.Olt</th>
-                                            <th>Order(K)</th>
-                                            <th>Avg.Olt (K)</th>
-                                            <th>LPC</th>
-                                            
-                                        </tr>
-                                        </thead>
-                                        <tbody id="cont_sr_productivity_summary">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--without outlet with class --}}
-                    <div id="tableDiv_sr_non_productivity" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_sr_non_productive" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead>
-                                        {{--`acmp_name`, `slgp_name`, `dirg_name`, `zone_name`, `aemp_name`, `aemp_usnm`,
-                                        `aemp_mob1`, `site_code`, `site_name`, `site_mob1`, `itcl_name`, `ordd_oamt`,`ordd_qnty`--}}
-                                        <tr class="">
-                                        <tr class="">
-                                            <th>SI</th>
-                                            <th>Date</th>
-                                            <th>Group Name</th>
-                                            <th>Region Name</th>
-                                            <th>Zone Name</th>
-                                            <th>SV Name</th>
-                                            <th>SR ID</th>
-                                            <th>SR Name</th>
-                                            <th>SR Mobile</th>
-                                            <th>In Time</th>
-                                        </tr>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="cont_sr_non_productivity">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--outlet with class --}}
-                    <div id="tableDiv_sr_summary_by_group" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_sr_summary_by_group" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           
-                                           data-page-length='100'>
-                                        <thead>
-                                        {{--`acmp_name`, `slgp_name`, `dirg_name`, `zone_name`, `aemp_name`, `aemp_usnm`,
-                                        `aemp_mob1`, `site_code`, `site_name`, `site_mob1`, `itcl_name`, `ordd_oamt`,`ordd_qnty`--}}
-                                        <tr class="">
-                                            <th>SI</th>
-                                            <th>Date</th>
-                                            <th>Group Name</th>
-                                            <th>T.SR</th>
-                                            <th>Pr.SR</th>
-                                            <th>Attn %</th>
-                                            <th>LV/IOM</th>
-                                            <th>Ab SR</th>
-                                            <th>P.SR</th>
-                                            <th>Np.SR</th>
-                                            <th>T.Olt</th>
-                                            <th>Visit</th>
-                                            <th>Visit %</th>
-                                            <th>S.Olt</th>
-                                            <th>S.Rate %</th>
-                                            <th>LPC</th>
-                                            <th>Avg.SR(K)</th>
-                                            <th>Olt/SR</th>
-                                            <th>V.Olt/SR</th>
-                                            <th>Amount in (K)</th>
-                                        </tr>
-
-                                        </thead>
-                                        <tbody id="cont_sr_summary_by_group">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--without outlet with item--}}
-                    <div id="tableDiv_sr_activity_hourly_order" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;max-height:650px;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_sr_activity_hourly_order" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead>
-                                        <tr class="tbl_header" id="sr_activity_hourly_order_header" class="tbl_header" style="position:sticky; inset-block-start:0;">
-                                            <th>Order Date</th>
-                                            <th>Group</th>
-                                            <th>Zone</th>
-                                            <th>SR ID</th>
-                                            <th>SR Name</th>
-                                            <th>SR Mobile</th>
-                                            <th>09AM</th>
-                                            <th>10AM</th>
-                                            <th>11AM</th>
-                                            <th>12PM</th>
-                                            <th>01PM</th>
-                                            <th>02PM</th>
-                                            <th>03PM</th>
-                                            <th>04PM</th>
-                                            <th>05PM</th>
-                                            <th>06PM</th>
-                                            <th>07PM</th>
-                                            <th>08PM</th>
-                                            <th>09PM</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="cont_sr_activity_hourly_order">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="tableDiv_sr_activity_hourly_visit" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;max-height:650px;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_sr_activity_hourly_visit" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead>
-
-                                        <tr class="tbl_header" id="sr_activity_hourly_visit_header" class="tbl_header" style="position:sticky; inset-block-start:0;">
-                                            <th>Order Date</th>
-                                            <th>Group</th>
-                                            <th>Zone</th>
-                                            <th>SR ID</th>
-                                            <th>SR Name</th>
-                                            <th>SR Mobile</th>
-                                            <th>09AM</th>
-                                            <th>10AM</th>
-                                            <th>11AM</th>
-                                            <th>12PM</th>
-                                            <th>01PM</th>
-                                            <th>02PM</th>
-                                            <th>03PM</th>
-                                            <th>04PM</th>
-                                            <th>05PM</th>
-                                            <th>06PM</th>
-                                            <th>07PM</th>
-                                            <th>08PM</th>
-                                            <th>09PM</th>
-                                        </tr>
-
-                                        </thead>
-
-                                        <tbody id="cont_sr_activity_hourly_visit">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="sr_hourly_report_div" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;max-height:650px;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="sr_hourly_report_tb" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead id="sr_hourly_head" class="text-center tbl_header" class="tbl_header" style="position:sticky; inset-block-start:0;">
-                                        </thead>
-                                        <tbody id="sr_hourly_cont">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{--sr with class--}}
-                    <div id="tableDivd_market_outlet_sr_outlet" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_market_outlet_sr_outlet" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead>
-                                        {{--`acmp_name`, `slgp_name`, `dirg_name`, `zone_name`, `aemp_name`, `aemp_usnm`,
-                                        `aemp_mob1`, `site_code`, `site_name`, `site_mob1`, `itcl_name`, `ordd_oamt`,`ordd_qnty`--}}
-                                        <tr class="">
-                                            <th>SI</th>
-                                            <th>District</th>
-                                            <th>Thana</th>
-                                            <th>Ward</th>
-                                            <th>Market</th>
-                                            <th>Available Outlet Quantity</th>
-                                            <th>Route Outlets</th>
-
-
-                                        </tr>
-                                        </thead>
-                                        <tbody id="contd_market_outlet_sr_outlet">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="div_outlet_coverage" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;max-height:700px;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_outlet_coverage" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead style="position:sticky; inset-block-start:0;" class="tbl_header">
-                                        <tr class="">
-                                            <th>Sl</th>
-                                            <th>Group</th>
-                                            <th>District</th>
-                                            <th>Thana</th>
-                                            <th>T.Olt</th>
-                                            <th>R.Olt</th>
-                                            <th>C.Olt</th>
-                                            <th>Order</th>
-                                            <th>Exp</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="cont_outlet_coverage">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--sr wise item summary report--}}
-
-                    <div id="tablediv_sr_wise_item_summary_report" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_sr_wise_item_summary_report" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead>
-                                        <tr id="sr_wise_item_summary_report_head">
-                                        </tr>
-                                        </thead>
-                                        <tbody id="contd_sr_wise_item_summary_report">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--sr with item--}}
-                    {{--Attendance Report Start--}}
-                    <div id="tablediv_attendance_report" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="attendance_report" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead>
-                                        <tr class="">
-                                            <th>Sl</th>
-                                            <th>Date</th>
-                                            <th>Group</th>
-                                            <th>Region</th>
-                                            <th>Zone</th>
-                                            <th>Staff Id</th>
-                                            <th>Emp Name</th>
-                                            <th>Designation</th>
-                                            <th>Mobile</th>
-                                            <th>Start Time</th>
-                                            <th>End Time</th>
-                                            <th>Status</th>
-                                            <th>Loc</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="cont_attendance_report">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{--Attendance Report END--}}
-
-                    {{--order details report for bahrain start --}}
-
-                    <div id="tablediv_order_details_report" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="order_details_report" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead>
-                                        
-                                        <tr class="">
-                                            <th>SI</th>
-                                            <th>Date</th>
-                                            <th>SR ID</th>
-                                            <th>SR Name</th>
-                                            <th>Outlet Code</th>
-                                            <th>Outlet Name</th>
-                                            <th>Item Code</th>
-                                            <th>Item Name(CTN)</th>
-                                            <th>Quantity</th>
-                                            <th>Amount</th>
-                                            <th>Order Time</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="contd_order_details_report">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--order details report for bahrain end --}}
-                    <div id="tableDiv_sr_wise_order_delivery" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:650px;overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_sr_wise_order_delivery" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead  style="position:sticky; inset-block-start:0;" class="tbl_header">
-                                        <tr class="">
-                                            <th>SI</th>
-                                            <th>Date</th>
-                                            <th>Group Name</th>
-                                            <th>Zone Name</th>
-                                            <th>SR ID</th>
-                                            <th>SR Name</th>
-                                            <th>SR Mobile</th>
-                                            <th>Order Amount</th>
-                                            <th>Delivery Amount</th>
-
-                                        </tr>
-                                        </thead>
-                                        <tbody id="cont_sr_wise_order_delivery">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--sr with item--}}
-                <!-- zone wise order delivery summary -->
-                    <div id="tableDiv_zone_wise_order_delivery_summary" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:650px;overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_zone_wise_order_delivery_summary" class="table table-bordered table-responsive"  border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead  style="position:sticky; inset-block-start:0;" class="tbl_header">
-                                        {{--` t1.ordm_date, t1.`acmp_name`, t1.`slgp_name`, t1.`dirg_name`, t1.`zone_name`, sum(t1.`ordd_oamt`) as ordd_oamt,
-                                                 sum(t1.`ordd_odat`) as ordd_Amnt `--}}
-                                        <tr class="">
-                                            <th>SI</th>
-                                            <th>Date</th>
-                                            <th>Group Name</th>
-                                            <th>Zone Name </th>
-                                            <th>Zone Code</th>
-                                            <th>Order Amount</th>
-                                            <th>Delivery Amount</th>
-
-                                        </tr>
-                                        </thead>
-                                        <tbody id="cont_zone_wise_order_delivery_summary">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{--traking report gvt --}}
-
-                <!-- zone wise order delivery summary -->
-                    <div id="tableDiv_sku_wise_order_delivery" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:650px;overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_sku_wise_order_delivery" class="table table-striped table-bordered " border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                    >
-
-                                        <thead  style="position:sticky; inset-block-start:0;" class="tbl_header">
-                                        {{--`acmp_name`, `slgp_name`, `dirg_name`, `zone_name`, `aemp_name`, `aemp_usnm`,
-                                        `aemp_mob1`, `site_code`, `site_name`, `site_mob1`, `itcl_name`, `ordd_oamt`,`ordd_qnty`--}}
-                                        <tr class="">
-                                            <th>SI</th>
-                                            <th>Date</th>
-                                            <th>Group Name</th>
-                                            <th>Zone Name</th>
-                                            <th>SR ID</th>
-                                            <th>SR Name</th>
-                                            <th>SR Mobile</th>
-                                            <th>Item Code</th>
-                                            <th>Item Name</th>
-                                            <th>Order Amount</th>
-                                            <th>Delivery Amount</th>
-
-
-                                        </tr>
-                                        </thead>
-                                        <tbody id="cont_sku_wise_order_delivery">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--class wise order summary amount--}}
-                    <div id="tableDiv_class_wise_order_summary" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:650px;overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_class_wise_order_summary" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <tr id="class_wise_order_summary_amount_headings"
-                                            style="position:sticky; inset-block-start:0;" class="tbl_header">
-
-                                        </tr>
-
-                                        <tbody id="cont_class_wise_order_summary" >
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--class wise order summary memo--}}
-                    <div id="tableDiv_class_wise_order_summary_memo" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:650px;overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_class_wise_order_summary_memo" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <tr id="class_wise_order_summary_memo_headings" class="tbl_header" style="position:sticky; inset-block-start:0;">
-
-                                        </tr>
-                                        <tbody id="cont_class_wise_order_summary_memo">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="tableDiv_sr_route_outlet" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:700px;overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_sr_route_outlet" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead>
-                                        <tr class="">
-                                            <th>SI</th>
-                                            <th>SR ID</th>
-                                            <th>SR Name</th>
-                                            <th>SR Mobile</th>
-                                            <th>Zone Name</th>
-                                            <th>Route Outlet</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="cont_sr_route_outlet">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div id="tableDiv_group_wise_route_outlet" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:700px;overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_group_wise_route_outlet" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead>
-                                        <tr class="">
-                                            <th>SI</th>
-                                            <th>Group</th>
-                                            <th>Total Route</th>
-                                            <th>Total SR</th>
-                                            <th>Below 60</th>
-                                            <th>60 ~ 120</th>
-                                            <th>Above 120</th>
-                                            <th>Abnormal %</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="cont_group_wise_route_outlet">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="tableDiv_sr_history" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:700px;overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_sr_history" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead id="head_history" style="position:sticky; inset-block-start:0;"
-                                               class="tbl_header">
-
-                                        </thead>
-                                        <tbody id="cont_history">
-
-                                        </tbody>
-                                        <tfoot id="foot_history"
-                                               style="position:sticky;inset-block-end:0;">
-
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <!-- modal started for visited outlet category -->
-                    <!-- Note Report  Start-->
-                    <div id="tableDiv_note_report" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:700px;overflow: auto;">
-                                    <div align="right">
-
-                                    </div>
-                                    <table id="tbl_note_report" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead id="head_note_report" class="tbl_header">
-
-                                        </thead>
-                                        <tbody id="cont_note_report">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Note Report  End-->
-                    <!-- asset report start -->
-                    <div id="tblDiv_asset_report" class="div_hide">
-                        <div class="x_panel">
-
-                            <div class="x_content">
-                            
-                                    <!-- <div style="float:left;"><p
-                                            style="font-weight:bold; margin-right:3px;"><span
-                                                id="asst_click_head"></span></p>
-                                    </div>
-
-                                    <div class="btn-group dropright" style="float:left;">
-                                        <a href="#" class=" dropdown-toggle " data-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false"
-                                            style="font-size:15px;font-weight:bold;background-color:#169F85; color:white;">
-                                            ALL &nbsp;
-                                        </a>
-                                        <ul class="dropdown-menu" aria-labelledby="about-us"
-                                            style="margin-left:35px;margin-top:-20px;"
-                                            id="asset_dp_content">
-                                        </ul>
-                                    </div> -->
-                              
-                            
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="height:700px;overflow: auto;">
-
-                                <div align="right">
-
-                                </div> 
-                                    <table id="tbl_asset_report" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
-                                           data-page-length='100'>
-                                        <thead id="asset_report_head"  style="position:sticky; inset-block-start:0;" class="tbl_header">
-                                            <tr>
-                                                <th>Group</th>
-                                                <th>Zone Name</th>
-                                                <th>Staff Id</th>
-                                                <th>SR Name</th>
-                                                <th>Site Name</th>
-                                                <th>T.Order</th>
-                                                <th>Ast.Order</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="cont_asset_report">
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div id="tbl_dynamic" class="div_hide">
                         <div class="x_panel">
 
                             <div class="x_content">
                                 <div class="col-md-12 col-sm-12 col-xs-12" style="height:280px;overflow:auto;" >
                                     <div align="right" id="export_option_div">
-
+                                        
                                     </div>
                                     <table id="tl_dynamic" class="table table-bordered table-responsive" border="1" style="overflow-x: auto; overflow-y:auto; border-collapse: collapse;"
                                            data-page-length='100'>
@@ -2369,21 +1617,43 @@
     </div>
 
     <div class="modal fade" id="attn_loc" role="dialog" data-backdrop="false">
-        <div class="modal-dialog modal-lg" style="width:90%;margin-top:-220px;">
+        <div class="modal-dialog modal-lg" style="width:80%;margin-top:-200px;">
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                     <h4 class="modal-title text-center">Attendance Location</h4>
                     <p class="modal-title text-center">
-                        Start Location:<img src="{{asset('theme/image/map_icon/pv.png')}}">&nbsp;&nbsp;&nbsp;&nbsp;
-                        ||&nbsp;&nbsp;&nbsp;&nbsp;Ending Location:<img src="{{asset('theme/image/map_icon/npv.png')}}">
+                        Start Location:<img src="{{asset('theme/image/map_icon/start.png')}}">&nbsp;&nbsp;&nbsp;&nbsp;
+                        ||&nbsp;&nbsp;&nbsp;&nbsp;Ending Location:<img src="{{asset('theme/image/map_icon/end.png')}}">
                        
                     </p>
                 </div>
                 <div class="modal-body" id="attn_loc_body" style="height:680px;">
                     <div class="loader" id="attn_loc_load" style="display:none; margin-left:45%;"></div>
                     <div id="attn_loc_map" style="height:90%;"></div>
+                    <div class="modal-footer">
+                        
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="attn_image" role="dialog" data-backdrop="false">
+        <div class="modal-dialog modal-lg" style="width:80%;margin-top:-100px;">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title text-center">Image</h4>
+                </div>
+                <div class="modal-body" id="attn_loc_body" style="height:440px;">
+                    <div class="loader" id="attn_loc_load" style="display:none; margin-left:45%;"></div>
+                    <div id="attn_image_div" style="height:80%;">
+                    
+                    </div>
                     <div class="modal-footer">
                         
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -2573,34 +1843,84 @@
             $('.scrollbar').css('position', 'static');
         }
         });
-        function emptyContentAndAppendData(head,content){
+        function exportTableToCsv(filename, tableId) {
+                // alert(tableId);
+                var csv = [];
+                var rows = document.querySelectorAll('#' + tableId + '  tr');
+                for (var i = 0; i < rows.length; i++) {
+                    var row = [], cols = rows[i].querySelectorAll("td, th");
+                    for (var j = 0; j < cols.length; j++)
+                        row.push(cols[j].innerText);
+                    csv.push(row.join(","));
+                }
+                downloadCSV(csv.join("\n"), filename);
+            }
+
+            function downloadCSV(csv, filename) {
+                var csvFile;
+                var downloadLink;
+                csvFile = new Blob([csv], {type: "text/csv"});
+                downloadLink = document.createElement("a");
+                downloadLink.download = filename;
+                downloadLink.href = window.URL.createObjectURL(csvFile);
+                downloadLink.style.display = "none";
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+            }
+        // function exportTableToExcel(elem,filename, tableId){
+        //     var BOM = "\uFEFF";
+        //     var table=document.getElementById(tableId);
+        //     var html = table.outerHTML;
+        //     // var url = 'data:application/vnd.ms-excel,' + encodeURI(BOM+html); // Set your html table into url 
+        //     var url = 'data:application/vnd.ms-excel,' + escape(html); // Set your html table into url 
+            
+        //     elem.setAttribute("href", url);
+        //     $(elem).attr("download",filename);
+        //     return false;
+        // }
+        function exportTableToExcel(elem, filename, tableId) {
+            var table = document.getElementById(tableId);
+            var html = table.outerHTML;
+
+            // Create a Blob object to handle the data with proper encoding
+            var blob = new Blob([html], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
+            });
+
+            // Create a URL for the Blob object
+            var url = URL.createObjectURL(blob);
+
+            elem.setAttribute('href', url);
+            elem.setAttribute('download', filename);
+            return false;
+        }
+
+
+        function emptyContentAndAppendData(head, content, filename = 'ExportData') {
+            var currentDate = '{{ date("Y_m_d") }}';
+            var exportLink = '<a onclick="exportTableToExcel(this, \'' + filename + currentDate + '.xls\', \'tl_dynamic\')" class="btn btn-sm" style="background-color:green;color:white;">Excel</a>';
+                //exportLink+='<a onclick="exportTableToCsv(\'' + filename + currentDate + '.csv\', \'tl_dynamic\')" class="btn btn-warning btn-sm" >Csv</a>';
             $('#tl_dynamic_head').empty();
             $('#tl_dynamic_cont').empty();
+            $('#export_option_div').empty();
+            $('#export_option_div').append(exportLink);
             $('#tl_dynamic_head').append(head);
             $('#tl_dynamic_cont').append(content);
             $('#tbl_dynamic').show();
-            var height = $(window).height();
-            $('#tbl_dynamic').excelTableFilter();
-           // $('#tbl_dynamic').doubleScroll();
-            $('.dropdown-filter-item').css('color', 'black');
-            $('.dropdown-filter-dropdown').css({'margin-top': '3px', 'height': '23px', 'padding': '0px', 'gap': '1px' });
-            $('.arrow-down').css('display', 'none');
-            $('.dropdown-filter-icon').css('border', '1px solid white');
-            $('th').css({'vertical-align': 'top', 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'width': '100% !important', 'padding': '2px 10px'});
-
         }
+
         function emptyContentAndAppendDataTrack(head,content){
             $('#tableDiv_tracking_gvt_header1').empty();
             $('#cont_traking_gvt').empty();
             $('#tableDiv_tracking_gvt_header1').append(head);
             $('#cont_traking_gvt').append(content);
             $('#tableDiv_traking_gvt').show();
-            $('#tableDiv_traking_gvt').excelTableFilter();
-            $('.dropdown-filter-item').css('color', 'black');
-            $('.dropdown-filter-dropdown').css({'margin-top': '3px', 'height': '23px', 'padding': '0px', 'gap': '1px' });
-            $('.arrow-down').css('display', 'none');
-            $('.dropdown-filter-icon').css('border', '1px solid white');
-            $('th').css({'vertical-align': 'top', 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'width': '100% !important', 'padding': '2px 10px'});
+            // $('#tableDiv_traking_gvt').excelTableFilter();
+            // $('.dropdown-filter-item').css('color', 'black');
+            // $('.dropdown-filter-dropdown').css({'margin-top': '3px', 'height': '23px', 'padding': '0px', 'gap': '1px' });
+            // $('.arrow-down').css('display', 'none');
+            // $('.dropdown-filter-icon').css('border', '1px solid white');
+            // $('th').css({'vertical-align': 'top', 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'width': '100% !important', 'padding': '2px 10px'});
         }
         function emptyContentAndAppendDataTrack1(head,content){
             $('#head_tracking_dev_note_task').empty();
@@ -2608,12 +1928,12 @@
             $('#head_tracking_dev_note_task').append(head);
             $('#cont_traking').append(content);
             $('#tableDiv_traking').show();
-            $('#tableDiv_traking').excelTableFilter();
-            $('.dropdown-filter-item').css('color', 'black');
-            $('.dropdown-filter-dropdown').css({'margin-top': '3px', 'height': '23px', 'padding': '0px', 'gap': '1px' });
-            $('.arrow-down').css('display', 'none');
-            $('.dropdown-filter-icon').css('border', '1px solid white');
-            $('th').css({'vertical-align': 'top', 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'width': '100% !important', 'padding': '2px 10px'});
+            // $('#tableDiv_traking').excelTableFilter();
+            // $('.dropdown-filter-item').css('color', 'black');
+            // $('.dropdown-filter-dropdown').css({'margin-top': '3px', 'height': '23px', 'padding': '0px', 'gap': '1px' });
+            // $('.arrow-down').css('display', 'none');
+            // $('.dropdown-filter-icon').css('border', '1px solid white');
+            // $('th').css({'vertical-align': 'top', 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'width': '100% !important', 'padding': '2px 10px'});
 
         }
         function hide_me() {
@@ -2677,6 +1997,7 @@
             $('#dtls_sum_div').hide();
             $('#sr_sv_div').hide();
             $('#sr_zone_div').hide();
+            $('.attendance_type_div').hide();
             $('.start_date_period_div').show();
             $("input[name='reportType']").attr('checked', false);
             $('#send').removeAttr('onclick');
@@ -3368,7 +2689,7 @@
                 });
             }
         }
-        function validateInputField(reportType, acmp_id, sales_group_id, start_date_period,
+        function validateInputField(reportType, acmp_id, sales_group_id,
         ...all
         )
         {
@@ -3396,23 +2717,17 @@
                 return true;
             }
         }
-        // function emptyContentAndAppendData(head,content){
-        //     $('#tl_dynamic_head').empty();
-        //     $('#tl_dynamic_cont').empty();
-        //     $('#tl_dynamic_head').append(head);
-        //     $('#tl_dynamic_cont').append(content);
-        //     $('#tbl_dynamic').show();
-        // }
         function getSummaryReport() {
 
             hide_me();
             var reportType = $("input[name='reportType']:checked").val();
             var outlet_stat_vo = $("input[name='outlet_stat_vo']:checked").val();
             var acmp_id = $('#acmp_id').val();
+            var edsg_id = $('#edsg_id').val();
             var dirg_id = $('#dirg_id').val();
             var sales_group_id = $('#sales_group_id').val();
             var zone_id = $('#zone_id').val();
-            var time_period = $('#start_date_period').val()
+            var time_period = $('#start_date_period').val()??''
             var dist_id = $('#dist_id').val();
             var than_id = $('#than_id').val();
             var astm_id = $('#astm_id').val();
@@ -3422,8 +2737,10 @@
             var utype=$('#sr_sv').val();
             var sr_zone=$('#sr_zone').val();
             var start_date=$('#start_date').val();
+            var end_date=$('#end_date').val();
             var weekly_olt_sr=$('#sr_id').val();
             var year_mnth=$('#year_mnth').val();
+            var attendance_type=$('#attendance_type').val();
             var validityCheck = false;
 
             if (time_period == '') {
@@ -3439,11 +2756,11 @@
             }
             if (reportType == 'market_outlet_sr_outlet') {
                 time_period = $('#start_date').val();
-                validityCheck = validateInputField(reportType, acmp_id, sales_group_id, start_date_period, dist_id, than_id);
+                validityCheck = validateInputField(reportType, acmp_id, sales_group_id, dist_id, than_id);
             }
 
             else {
-                validityCheck = validateInputField(reportType, acmp_id, sales_group_id, start_date_period);
+                validityCheck = validateInputField(reportType, acmp_id, sales_group_id);
                 if(reportType=="asset_order"){
                     if(dirg_id==""||zone_id==""){
                         alert("Please select Region & Zone");
@@ -3465,6 +2782,7 @@
                                 sales_group_id: sales_group_id,
                                 time_period: time_period,
                                 start_date: start_date,
+                                end_date: end_date,
                                 dirg_id: dirg_id,
                                 _token: _token
                             },
@@ -3533,12 +2851,6 @@
                                         count++;
                                     }
                                 }
-                                // $('#ajax_load').css("display", "none");
-                                // $("#contd_sr_wise_item_summary_report").empty();
-                                // $("#sr_wise_item_summary_report_head").empty();
-                                // $("#contd_sr_wise_item_summary_report").append(html);
-                                // $("#sr_wise_item_summary_report_head").append(heading);
-                                // $('#tablediv_sr_wise_item_summary_report').show();
                                 emptyContentAndAppendData(heading,html);
                             }, error: function (error) {
                                 $('#ajax_load').css("display", "none");
@@ -3564,6 +2876,7 @@
                             sales_group_id: sales_group_id,
                             time_period: time_period,
                             start_date: start_date,
+                            end_date: end_date,
                             dirg_id: dirg_id,
                             _token: _token
                         },
@@ -3577,7 +2890,7 @@
 
                                 html += '<tr>' +
                                     '<td>' + count + '</td>' +
-                                    '<td>' + data[i]['ordm_date'] + '</td>' +
+                                    '<td>' + data[i]['Date'] + '</td>' +
                                     '<td>' + data[i]['aemp_usnm'] + '</td>' +
                                     '<td>' + data[i]['aemp_name'] + '</td>' +
                                     '<td>' + data[i]['site_code'] + '</td>' +
@@ -3628,7 +2941,9 @@
                             zone_id: zone_id,
                             sales_group_id: sales_group_id,
                             time_period: time_period,
+                            edsg_id: edsg_id,
                             start_date: start_date,
+                            end_date: end_date,
                             dist_id: dist_id,
                             than_id: than_id,
                             dirg_id: dirg_id,
@@ -3640,6 +2955,7 @@
                             year_mnth:year_mnth,
                             sr_zone:sr_zone,
                             outlet_stat_vo:outlet_stat_vo,
+                            attendance_type:attendance_type,
                         },
                         cache: false,
                         dataType: "json",
@@ -4586,7 +3902,8 @@
                                             '<td>' + data[i]['start_time'] + '</td>' +
                                             '<td>' + data[i]['end_time'] + '</td>' +
                                             '<td>' + data[i]['status'] + '</td>';
-                                        html += "<td><a aemp_id='"+data[i].aemp_id+"' attn_date='"+data[i].attn_date+"' onclick='getAttendanceLocation(this)' class='btn btn-info btn-xs' data-toggle='modal' data-target='#attn_loc'><i class='fa fa-map-marker fa-2x' style='color:red;'></i> </a></tr>";
+                                        html += "<td><a start_image='"+data[i].start_image+"' end_image='"+data[i].end_image+"' onclick='getAttendanceImage(this)' class='btn btn-info btn-xs' data-toggle='modal' data-target='#attn_image'><i class='fa fa-eye fa-2x' style='color:red;'></i> </a></td>";
+                                        html += "<td><a aemp_id='"+data[i].aemp_id+"' attn_date='"+data[i].attn_date+"' onclick='getAttendanceLocation(this)' class='btn btn-info btn-xs' data-toggle='modal' data-target='#attn_loc'><i class='fa fa-map-marker fa-2x' style='color:red;'></i> </a></td></tr>";
                                         //href='attendance/location/" + data[i].aemp_id +"/"+data[i].attn_date+"'
                                         count++;
                                     }
@@ -4603,6 +3920,7 @@
                                                 <th>Start Time</th>
                                                 <th>End Time</th>
                                                 <th>Status</th>
+                                                <th>Image</th>
                                                 <th>Loc</th>`;
                                     emptyContentAndAppendData(head,html);
                                     break;
@@ -5018,42 +4336,46 @@
                                         emptyContentAndAppendData(head,html)
                                     break;
                                 case "sku_wise_order_delivery":
-                                   // $('#tableDiv_sku_wise_order_delivery').show();
-                                    var gt=data.gt;
-                                    var data=data.data;
-                                    for (var i = 0; i < data.length; i++) {
-                                        html += '<tr>' +
-                                            '<td>' + count + '</td>' +
-                                            '<td>' + data[i]['ordm_date'] + '</td>' +
-                                            '<td>' + data[i]['slgp_name'] + '</td>' +
-                                            '<td>' + data[i]['zone_name'] + '</td>' +
-                                            '<td>' + data[i]['aemp_usnm'] + '</td>' +
-                                            '<td>' + data[i]['aemp_name'] + '</td>' +
-                                            '<td>' + data[i]['aemp_mob1'] + '</td>' +
-                                            '<td>' + data[i]['amim_code'] + '</td>' +
-                                            '<td>' + data[i]['amim_name'] + '</td>' +
-                                            '<td>' + data[i]['ordd_amt'] + '</td>' +
-                                            '<td>' + data[i]['deli_amt'] + '</td>' +
-                                            '</tr>';
-                                        count++;
-                                    }
-                                    html+='<tr><td>GT</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>'+
-                                            '<td>'+gt['t_order']+'</td>'+
-                                            '<td>'+gt['t_deli']+'</td></tr>';
-                                    var head=`<th>SI</th>
-                                        <th>Date</th>
-                                        <th>Group Name</th>
-                                        <th>Zone Name</th>
-                                        <th>SR ID</th>
-                                        <th>SR Name</th>
-                                        <th>SR Mobile</th>
-                                        <th>Item Code</th>
-                                        <th>Item Name</th>
-                                        <th>Order Amount</th>
-                                        <th>Delivery Amount</th>`;
-                                    // $("#cont_sku_wise_order_delivery").empty();
-                                    // $("#cont_sku_wise_order_delivery").append(html);
-                                    emptyContentAndAppendData(head,html)
+                                var count=0;
+                                        var head=`<tr><th>SI</th>
+                                            <th>Date</th>
+                                            <th>Group Name</th>
+                                            <th>Zone Name</th>
+                                            <th>SR ID</th>
+                                            <th>SR Name</th>
+                                            <th>SR Mobile</th>
+                                            <th>Item Code</th>
+                                            <th>Item Name</th>
+                                            <th>Factor</th>
+                                            <th>Order Qty</th>
+                                            <th>Deli Qty</th>
+                                            <th>Order Amount</th>
+                                            <th>Delivery Amount</th></tr>`;
+                                        var gt=data.gt;
+                                        var data=data.data;
+                                        for (var i = 0; i < data.length; i++) {
+                                            html += '<tr>' +
+                                                '<td>' + count + '</td>' +
+                                                '<td>' + data[i]['ordm_date'] + '</td>' +
+                                                '<td>' + data[i]['slgp_name'] + '</td>' +
+                                                '<td>' + data[i]['zone_name'] + '</td>' +
+                                                '<td>' + data[i]['aemp_usnm'] + '</td>' +
+                                                '<td>' + data[i]['aemp_name'] + '</td>' +
+                                                '<td>' + data[i]['aemp_mob1'] + '</td>' +
+                                                '<td>' + data[i]['amim_code'] + '</td>' +
+                                                '<td>' + data[i]['amim_name'] + '</td>' +
+                                                '<td>' + data[i]['amim_duft'] + '</td>' +
+                                                '<td>' + data[i]['order_qty'] + '</td>' +
+                                                '<td>' + data[i]['deli_qty'] + '</td>' +
+                                                '<td>' + data[i]['ordd_amt'] + '</td>' +
+                                                '<td>' + data[i]['deli_amt'] + '</td>' +
+                                                '</tr>';
+                                            count++;
+                                        }
+                                        html+='<tr><td>GT</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>'+
+                                                '<td>'+gt['t_order']+'</td>'+
+                                                '<td>'+gt['t_deli']+'</td></tr>';
+                                        emptyContentAndAppendData(head,html,'SKU_WISE_ORDER_VS_DELIVERY');
                                     break;
                                 case "class_wise_order_report_amt":
                                     if(ord_flag==1){
@@ -7966,52 +7288,66 @@
             }
         }
         function getAttendanceLocation(v){
-        var aemp_id=$(v).attr('aemp_id');
-        var attn_date=$(v).attr('attn_date');
-        $(v).css('style','background-color:red;')
-        $.ajax({
-            type:"GET",
-            url:"attendance/location/"+aemp_id+"/"+attn_date,
-            success:function(res){
-                $('#attn_loc_map').empty();
-                var  npv=window.location.origin+ "/theme/image/map_icon/npv.png";
-                var  pv= window.location.origin+"/theme/image/map_icon/pv.png";
-                var data=res[0];
-                console.log(data)
-                var start_loc=data.start_loc.split(',');
+            var aemp_id=$(v).attr('aemp_id');
+            var attn_date=$(v).attr('attn_date');
+            $(v).css('style','background-color:red;')
+            $.ajax({
+                type:"GET",
+                url:"attendance/location/"+aemp_id+"/"+attn_date,
+                success:function(res){
+                    $('#attn_loc_map').empty();
+                    var  npv=window.location.origin+ "/theme/image/map_icon/end.png";
+                    var  pv= window.location.origin+"/theme/image/map_icon/start.png";
+                    var data=res[0];
+                    var start_loc=data.start_loc.split(',');
 
-                var latlon=[];
-                latlon.push({ lat:start_loc[0], lng: start_loc[1] })
-                if(data.end_loc){
-                    var end_loc=data.end_loc.split(',');
-                    latlon.push({ lat:end_loc[0], lng: end_loc[1] });
-                }
-                console.log(latlon)
-                var map = new google.maps.Map(document.getElementById('attn_loc_map'), {
-                        zoom: 15,
-                        center: new google.maps.LatLng(start_loc[0], start_loc[1]),
-                        mapTypeId: google.maps.MapTypeId.ROADMAP
-                });
-                var marker;
-                for (i = 0; i < latlon.length; i++) {
-
-                    marker = new google.maps.Marker({
-                        position: new google.maps.LatLng(latlon[i]['lat'], latlon[i]['lng']),
-                        map: map
-                    });
-                    if(i==0){
-                        marker.setIcon(pv);
-                    }else{
-                        marker.setIcon(npv);
+                    var latlon=[];
+                    latlon.push({ lat:start_loc[0], lng: start_loc[1] })
+                    if(data.end_loc){
+                        var end_loc=data.end_loc.split(',');
+                        latlon.push({ lat:end_loc[0], lng: end_loc[1] });
                     }
+                    console.log(latlon)
+                    var map = new google.maps.Map(document.getElementById('attn_loc_map'), {
+                            zoom: 15,
+                            center: new google.maps.LatLng(start_loc[0], start_loc[1]),
+                            mapTypeId: google.maps.MapTypeId.ROADMAP
+                    });
+                    var marker;
+                    for (i = 0; i < latlon.length; i++) {
+
+                        marker = new google.maps.Marker({
+                            position: new google.maps.LatLng(latlon[i]['lat'], latlon[i]['lng']),
+                            map: map
+                        });
+                        if(i==0){
+                            marker.setIcon(pv);
+                        }else{
+                            marker.setIcon(npv);
+                        }
+                    }
+
+
+                },error:function(error){
+                    console.log(error)
                 }
-
-
-            },error:function(error){
-                console.log(error)
-            }
-        });
-    }
+            });
+        }
+        function getAttendanceImage(v){
+            var start_image=$(v).attr('start_image');
+            var end_image=$(v).attr('end_image');
+            var html=`<div class="col-md-6">
+                        <img src="https://sw-bucket.sgp1.cdn.digitaloceanspaces.com/${start_image}" height="350" width="350">
+                        <p>Start Image</p>
+                    </div>
+                    <div class="col-md-6">
+                        <img src="https://sw-bucket.sgp1.cdn.digitaloceanspaces.com/${end_image}" height="350" width="350">
+                        <p>End Image</p>
+                    </div>
+            `;
+            $('#attn_image_div').html(html);          
+           
+        }
 
         function getNoteImage(v){
             let note_id=$(v).attr('id');
@@ -8030,7 +7366,7 @@
                     let carousel_items = ''
                     let multiple_images = (data.length > 1) ? '' : `style="display: none"`;
 
-                    let image_src='https://images.sihirbox.com/';
+                    let image_src='https://sw-bucket.sgp1.cdn.digitaloceanspaces.com/';
 
                     $('#note_image_modal_load').hide();
 
@@ -8049,7 +7385,7 @@
                                         <blockquote>
                                           <div class="row">
                                             <div class="text-center">
-                                              <img class="carousel_img" src="https://images.sihirbox.com/${img}">
+                                              <img class="carousel_img" src="https://sw-bucket.sgp1.cdn.digitaloceanspaces.com/${img}">
                                             </div>
                                           </div>
                                         </blockquote>

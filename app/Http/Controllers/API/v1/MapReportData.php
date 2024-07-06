@@ -211,29 +211,78 @@ WHERE t1.geo_lon != 0 AND TIMESTAMPDIFF(MINUTE, t1.lloc_time,'$time') < 120 AND 
         if ($country) {
             $time = date('Y-m-d H:i:s');
             $tst = DB::connection($country->cont_conn)->select("SELECT
-                  t1.id        AS site_id,
-                  ''           AS site_name,
-                  ''           AS mobile,
-                  t1.geo_lat   AS lat,
-                  t1.geo_lon   AS lon,
-                  ''           AS region_name,
-                  ''           AS zone_name,
-                  ''           AS base_name,
-                  ''           AS emp_name,
-                  ''           AS sv_name,
-                  0            AS dist_dif,
-                  0           AS time_dif,
-                  1            AS type,
-                  t1.hloc_time AS last_time,
-                  1            AS is_verified,
-                  ''           AS user_name,
-                  0           AS emp_id,
-                  0           AS emp_code,
-                  0            AS role_id,
-                  0            AS channel_id
-                FROM th_hloc AS t1
-                WHERE t1.hloc_date = '$request->date' AND t1.aemp_id = $request->emp_id
-                ORDER BY t1.id DESC");
+    t1.id        AS site_id,
+    ''           AS site_name,
+    ''           AS mobile,
+    t1.geo_lat   AS lat,
+    t1.geo_lon   AS lon,
+    ''           AS region_name,
+    ''           AS zone_name,
+    ''           AS base_name,
+    ''           AS emp_name,
+    ''           AS sv_name,
+    0            AS dist_dif,
+    0            AS time_dif,
+    1            AS type,
+    t1.hloc_time AS last_time,
+    1            AS is_verified,
+    ''           AS user_name,
+    0            AS emp_id,
+    0            AS emp_code,
+    0            AS role_id,
+    0            AS channel_id
+FROM th_hloc AS t1
+WHERE t1.hloc_date ='$request->date' AND t1.aemp_id = $request->emp_id
+UNION ALL
+SELECT
+    t1.id        AS site_id,
+    ''           AS site_name,
+    ''           AS mobile,
+    t1.geo_lat   AS lat,
+    t1.geo_lon   AS lon,
+    ''           AS region_name,
+    ''           AS zone_name,
+    ''           AS base_name,
+    ''           AS emp_name,
+    ''           AS sv_name,
+    0            AS dist_dif,
+    0            AS time_dif,
+    1            AS type,
+    t1.`note_dtim` AS last_time,
+    1            AS is_verified,
+    ''           AS user_name,
+    0            AS emp_id,
+    0            AS emp_code,
+    0            AS role_id,
+    0            AS channel_id
+FROM tt_note AS t1
+WHERE t1.`note_date`='$request->date' AND t1.aemp_id = $request->emp_id
+UNION ALL
+SELECT
+    t1.id        AS site_id,
+    ''           AS site_name,
+    ''           AS mobile,
+    t1.geo_lat   AS lat,
+    t1.geo_lon   AS lon,
+    ''           AS region_name,
+    ''           AS zone_name,
+    ''           AS base_name,
+    ''           AS emp_name,
+    ''           AS sv_name,
+    0            AS dist_dif,
+    0            AS time_dif,
+    1            AS type,
+    t1.`attn_time` AS last_time,
+    1            AS is_verified,
+    ''           AS user_name,
+    0            AS emp_id,
+    0            AS emp_code,
+    0            AS role_id,
+    0            AS channel_id
+FROM tt_attn AS t1
+WHERE t1.attn_date= '$request->date' AND t1.aemp_id = $request->emp_id
+ORDER BY last_time DESC, site_id DESC
+				");
             return Array("receive_data" => array("data" => $tst, "action" => $request->emp_id));
         }
     }
@@ -256,7 +305,8 @@ WHERE t1.geo_lon != 0 AND TIMESTAMPDIFF(MINUTE, t1.lloc_time,'$time') < 120 AND 
             if (isset($request->role_name)) {
                 $whereCondition .= " and t7.role_name ='$request->role_name' ";
             }
-            $query = "SELECT *
+			           
+	 $query = "SELECT *
 FROM (
    SELECT
   t1.id                                                                      AS site_id,
@@ -269,7 +319,14 @@ FROM (
   ''                                                                         AS base_name,
   t2.aemp_name                                                               AS emp_name,
   ''                                                                         AS sv_name,
-  getDistance(t1.geo_lat, t1.geo_lon, $lat, $lon)                            AS dist_dif,
+  ( ACOS( COS( RADIANS($lat) )
+                 * COS( RADIANS( t1.geo_lat ) )
+                 * COS( RADIANS( t1.geo_lon ) - RADIANS($lon) )
+                 + SIN( RADIANS($lat) )
+                   * SIN( RADIANS( t1.geo_lat ) )
+           )
+           * 6371
+         )                           AS dist_dif,
   TIMESTAMPDIFF(MINUTE, t1.lloc_time, CONVERT_TZ(now(), '+00:00', '+06:00')) AS time_dif,
   1                                                                          AS type,
   t1.lloc_time                                                               AS last_time,

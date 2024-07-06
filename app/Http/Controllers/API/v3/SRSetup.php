@@ -26,6 +26,7 @@ class SRSetup extends Controller
     }
 
     public function getPendingSRList(Request $request){
+//        dd($request->all());
         $start_time=date('Y-m-d h:i:s');
         try{
             $country = (new Country())->country($request->country_id);
@@ -160,12 +161,15 @@ class SRSetup extends Controller
     }
     public function getThanaList(Request $request){
         $start_time=date('Y-m-d h:i:s');
+        $data=array();
         try{
             $country = (new Country())->country($request->country_id);
             $db_conn = $country->cont_conn;
             //$district_code=$request->district_code;
             $district_code=json_decode($request->district_code,true);
-            $data=DB::connection($db_conn)->select(" SELECT id,than_code,than_name FROM tm_than WHERE dsct_id IN (".implode(',',$district_code).") ORDER BY than_code ASC");
+            if($district_code){
+                $data=DB::connection($db_conn)->select(" SELECT id,than_code,than_name FROM tm_than WHERE dsct_id IN (".implode(',',$district_code).") ORDER BY than_code ASC");
+            }          
             return array(
                 'success'=>1,
                 'thana_list'=>$data,
@@ -329,20 +333,22 @@ class SRSetup extends Controller
 
     }
     public function storeSRData(Request $request){
+        // return 'ok';
+        return $request->all();
         $start_time=date('Y-m-d h:i:s');
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         $country_id=$request->country_id;
-        if($country_id==5){
-            return array(
-                'success'=>0,
-                'message'=>'Please wait we are working on it!! ',
-                'request_time'=>$start_time,
-                'response_time'=>date('Y-m-d h:i:s'),
-                'status'=>422,
-                'errors'=>$e->getMessage()
-            );
-        }
+        // if($country_id==5){
+        //     return array(
+        //         'success'=>0,
+        //         'message'=>'Please wait we are working on it!! ',
+        //         'request_time'=>$start_time,
+        //         'response_time'=>date('Y-m-d h:i:s'),
+        //         'status'=>422,
+        //         'errors'=>''
+        //     );
+        // }
         DB::connection($db_conn)->beginTransaction();
         try{
             $emp_id=$request->emp_id;
@@ -351,6 +357,7 @@ class SRSetup extends Controller
             $dlrm_list=json_decode($request->dlrm_list,true);
             $rpln_list=json_decode($request->rpln_list,true);
             // 0 for fresh route, 1 for replace route, 2 for copy route
+            //New Update 1 =>Copy, 2=> Replace
             //Extracted Data
             $emp_details=$this->getEmployeeDetails($sr_id,$db_conn);
             $zone_id=$emp_details->zone_id;
@@ -367,19 +374,17 @@ class SRSetup extends Controller
             DB::connection($db_conn)->select("INSERT IGNORE INTO `tl_srth`(`aemp_id`, `than_id`, `cont_id`, `lfcl_id`, `aemp_iusr`, `aemp_eusr`)
                                             SELECT {$sr_id},id,{$country_id},1,{$emp_id},{$emp_id} FROM tm_than WHERE id IN (".implode(',',$thana_list).")");
             
-
-            
             ## Route Plan Setup
             // Route Setup
             foreach($rpln_list as $rpln){
-                if($rpln['status']==1){
+                if($rpln['status']==2){
                     $rplu_rpln=RplnH::on($db_conn)->where(['rout_id'=>$rpln['rout_id'],'rpln_day'=>$rpln['day_name'],'aemp_id'=>$rpln['rplu_id']])->first();
                     if($rplu_rpln){
                         $rplu_rpln->aemp_id=$sr_id;
                         $rplu_rpln->save();
                     }
                 }
-                if($rpln['status']==2){
+                if($rpln['status']==1){
                     $base_mapping=$this->getBaseId($rpln['rout_id'],$db_conn);
                     $zone_base_group=$this->getSlgpZone($sr_id,$db_conn); 
 
@@ -390,7 +395,9 @@ class SRSetup extends Controller
                     $dt = date('YmdHi');
                     $now = now();
                     $unique_number    = substr($now->timestamp . $now->milli, 10);
-                    $rout_name      = $slgp_name."-" . $zone_name."-".$base_mapping->base_name;
+                    //$rout_name      = $slgp_name."-" . $zone_name."-".$base_mapping->base_name;
+                    $rout_info=$this->getRouteCode($rpln['rout_id'],$db_conn);
+                    $rout_name=$rout_info->rout_name;
                     $rout_code      ="RT-".$dt . '-' . $unique_number;
                     // New Route Create
                     $route = new Route();
@@ -551,6 +558,16 @@ class SRSetup extends Controller
                     INNER JOIN tm_zone t3 ON t1.zone_id=t3.id
                     WHERE t1.id={$id}");
         return $slgp_zone[0];
+    }
+
+    // Api Rate Limiting
+    public function checkLimit(){
+        try{
+            return "Hi";
+        }
+        catch(\Exception $e){
+            return $e->getMessage();
+        }
     }
 
 }

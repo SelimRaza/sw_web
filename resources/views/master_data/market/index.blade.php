@@ -65,6 +65,7 @@
                                 <thead>
                                 <tr class="tbl_header_light">
                                     <th class="cell_left_border">SL</th>
+                                    <th>Market ID</th>
                                     <th>Name</th>
                                     <th>Code</th>
                                     <th>Ward</th>
@@ -76,6 +77,7 @@
                                 @foreach($markets as $index => $market)
                                     <tr class="tbl_body_gray">
                                         <td  class="cell_left_border">{{$index+1}}</td>
+                                        <td>{{$market->mktm_id}}</td>
                                         <td>{{$market->mktm_name}}</td>
                                         <td>{{$market->mktm_code}}</td>
                                         <td>{{$market->ward_name}}</td>

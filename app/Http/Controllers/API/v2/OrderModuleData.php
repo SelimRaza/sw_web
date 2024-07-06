@@ -80,7 +80,7 @@ class OrderModuleData extends Controller
                         $orderMaster = new OrderMaster();
                         $orderMaster->setConnection($db_conn);
                         $orderLines = json_decode($request->line_data);
-                        $order_id = "O" . str_pad($employee->aemp_usnm, 10, '0', STR_PAD_LEFT) . '-' . $orderSequence->srsc_year . '-' . str_pad($orderSequence->srsc_ocnt + 1, 5, '0', STR_PAD_LEFT);
+                        $order_id = "I" . str_pad($employee->aemp_usnm, 10, '0', STR_PAD_LEFT) . '_' . $orderSequence->srsc_year . '_' . str_pad($orderSequence->srsc_ocnt + 1, 5, '0', STR_PAD_LEFT);
                         $order_amount = array_sum(array_column($orderLines, 'P_T_Price'));
                         $orderMaster->ordm_ornm = $order_id;
                         $orderMaster->aemp_id = $request->SR_ID;
@@ -173,7 +173,9 @@ class OrderModuleData extends Controller
                         $orderSyncLog->save();
                         $productive = 1;
                         $line_id = $request->ID;
+
                     }
+
                 } elseif ($request->Order_Type == 'Non_Productive') {
                     $nonProductive = new NonProductiveOutlet();
                     $nonProductive->setConnection($db_conn);
@@ -196,6 +198,7 @@ class OrderModuleData extends Controller
                     $nonProductive->save();
                     $productive = 0;
                     $line_id = $request->ID;
+
                 }
 
                 $siteVisit = SiteVisited::on($db_conn)->where(['site_id' => $request->Outlet_ID, 'ssvh_date' => $request->Date, 'aemp_id' => $request->SR_ID])->first();
@@ -223,7 +226,9 @@ class OrderModuleData extends Controller
                 return $e;
                 //throw $e;
             }
+
         }
+
     }
 
     public function dmTripWiseSROutletInfo(Request $request)
@@ -267,6 +272,7 @@ class OrderModuleData extends Controller
         ");*/
             return $trip_m;
         }
+
     }
 
     public function dmSiteWiseOrderDetails1(Request $request)
@@ -368,27 +374,37 @@ WHERE t2.rtan_rtnm='$order_code';
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
-            $site_code = $request->site_code;
+			
+			if ($request->country_id == 22 || $request->country_id == 23|| $request->country_id == 17){
+				$v_round='0.005) * 0.005,3';
+			}else if ($request->country_id == 3){
+				$v_round='0.0001) * 0.0001,2';
+			}else{
+			    $v_round='0.05) * 0.05,2';	
+			}
+			
+			$site_code = $request->site_code;
             $site_id = $request->site_id;
             $slgp_id = $request->slgp_id;
             $role_id = $request->role_id;
             $dm_code = $request->dm_code;
             if ($role_id == 10) { //DM
-
-                if ($request->country_id == 3) {
-
-                    $dm_code = $request->dm_code;
-
-                    $tm_aemp = DB::connection($db_conn)->table('tm_aemp')->where('aemp_usnm', $dm_code)->first();
-                    if ($tm_aemp->edsg_id == 14) {
-
-                        $Coll_Data = DB::connection($db_conn)->select("
+			
+                if ($request->country_id == 3){
+					
+				$dm_code = $request->dm_code;
+					 
+				$tm_aemp = DB::connection($db_conn)->table('tm_aemp')->where('aemp_usnm', $dm_code)->first();
+				   if ($tm_aemp->edsg_id == 14) { 
+				   
+				     $Coll_Data = DB::connection($db_conn)->select("
             SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
-            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-            round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,           
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+			round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM dm_trip_master t1
             JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
             JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
@@ -401,11 +417,12 @@ WHERE t2.rtan_rtnm='$order_code';
             and t6.lfcl_id IN(39,11)
             UNION ALL
                                 SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
-                                t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-                                round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+                                t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,                               
+								round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
                                 case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
                                 case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-                                case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+                                case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+								round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
                                 FROM dm_trip_master t1
                                 JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
                                 JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
@@ -421,11 +438,11 @@ WHERE t2.rtan_rtnm='$order_code';
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
-            t1.`IBS_INVOICE`,t1.slgp_id,t1.`INVT_ID` AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT - t1.COLL_REC_HO),4) AS DueAmnt,
+            t1.`IBS_INVOICE`,t1.slgp_id,t1.`INVT_ID` AS t_Type,t5.optp_id as p_type_id,      
+			round(CEIL((t1.COLLECTION_AMNT-t1.COLL_REC_HO) / $v_round)AS DueAmnt,
             case when t6.sreq_amnt>0 then IFNULL(round(t6.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
             case when t6.sapr_amnt>0 then IFNULL(round(t6.sapr_amnt,4),0)  else 0 end AS apprv,
-			8 CredStatus ,t1.COLL_DATE AS del_date
+			8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -439,9 +456,9 @@ WHERE t2.rtan_rtnm='$order_code';
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
-            t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+            t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,          
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -456,8 +473,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,19 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -469,31 +486,34 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_REC_HO=0 and t1.slgp_id=$slgp_id
             
            ");
-                    } else {
-
-
-                        $Coll_Data = DB::connection($db_conn)->select("
+			
+			}else{
+				
+				 
+				  $Coll_Data = DB::connection($db_conn)->select("
             SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
-            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-            round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,            
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+			round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM dm_trip_master t1
             JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
             JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
             JOIN tl_stcm t5 ON(t3.id=t5.site_id AND t5.slgp_id = t1.slgp_id)
             left join tl_cpcr t2 on t1.SITE_ID=t2.site_id and t1.ORDM_ORNM=t2.ordm_ornm
             left join tt_ordm t6 on t1.ORDM_ORNM=t6.ordm_ornm 
+			JOIN dm_trip t7 ON t1.TRIP_NO=t7.TRIP_NO and t7.STATUS='N'
             where t1.`SITE_ID`=$site_id and t1.DELV_AMNT-t1.COLLECTION_AMNT>0.1 and t1.DELIVERY_STATUS=11
             and t6.lfcl_id IN(39,11) AND t1.`DM_CODE`='$dm_code'
             UNION ALL
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
-            t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+            t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,          
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -507,8 +527,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,19 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -519,16 +539,17 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.INVT_ID IN(19)AND 
             t1.COLL_REC_HO=0 AND t1.`DM_CODE`='$dm_code'		            
            ");
-                    }
-                } else {
-
-                    $Coll_Data = DB::connection($db_conn)->select("
+				}
+			 }else{
+			 
+                $Coll_Data = DB::connection($db_conn)->select("
             SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
-            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-            round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,            			
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+			round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split			
             FROM dm_trip_master t1
             JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
             JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
@@ -541,24 +562,24 @@ WHERE t2.rtan_rtnm='$order_code';
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
-            t1.`IBS_INVOICE`,t1.slgp_id,t1.`INVT_ID` AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT - t1.COLL_REC_HO),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+            t1.`IBS_INVOICE`,t1.slgp_id,t1.`INVT_ID` AS t_Type,t5.optp_id as p_type_id,            
+			round((CEIL(t1.COLLECTION_AMNT - t1.COLL_REC_HO) / $v_round)AS DueAmnt,		
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
             JOIN tl_stcm t5 ON(t2.id=t5.site_id AND t5.slgp_id = t1.slgp_id)
             WHERE t1.SITE_ID=$site_id 
 			AND t1.INVT_ID IN(15)
-			AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO)>1 					
+			AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0 					
 			AND t1.slgp_id = $slgp_id	
             UNION ALL
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
-            t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+            t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,          			
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -571,9 +592,9 @@ WHERE t2.rtan_rtnm='$order_code';
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
-            t1.`IBS_INVOICE`,t1.slgp_id,19 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+            t1.`IBS_INVOICE`,t1.slgp_id,19 AS t_Type,t5.optp_id as p_type_id,           
+			 round(CEIL(t1.COLLECTION_AMNT / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -585,35 +606,38 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_REC_HO=0	
           		
            ");
-                }
+			  }
             } elseif ($role_id == 1) {
-                $Coll_Data = DB::connection($db_conn)->select("
+				//SR
+				if ($request->country_id == 14) {
+					$Coll_Data = DB::connection($db_conn)->select("
             SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-            round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+			round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM dm_trip_master t1
             JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
             JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
-            JOIN tl_stcm t5 ON(t3.id=t5.site_id AND t5.slgp_id = $slgp_id)
+            JOIN tl_stcm t5 ON(t3.id=t5.site_id)
             left join tl_cpcr t2 on t1.SITE_ID=t2.site_id and t1.ORDM_ORNM=t2.ordm_ornm
             left join tt_ordm t6 on t1.ORDM_ORNM=t6.ordm_ornm 
-            where t1.`SITE_ID`=$site_id AND t5.optp_id IN(1,2) and t1.slgp_id=$slgp_id and t1.DELV_AMNT-t1.COLLECTION_AMNT>0.1 and t1.DELIVERY_STATUS=11
+            where t1.`SITE_ID`=$site_id AND t5.optp_id IN(1,2) and t1.DELV_AMNT-t1.COLLECTION_AMNT>0.1 and t1.DELIVERY_STATUS=11
             and t6.lfcl_id IN(39,11)
 			 UNION ALL 
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
-            t1.`IBS_INVOICE`,t1.slgp_id,t1.`INVT_ID` AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT - t1.COLL_REC_HO),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+            t1.`IBS_INVOICE`,t1.slgp_id,t1.`INVT_ID` AS t_Type,t5.optp_id as p_type_id,           
+			round(CEIL((t1.COLLECTION_AMNT-t1.COLL_REC_HO) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
             JOIN tl_stcm t5 ON(t2.id=t5.site_id AND t5.slgp_id = t1.slgp_id)
-            WHERE t1.SITE_ID=$site_id 
+            WHERE t1.SITE_ID=$site_id AND t1.AEMP_USNM='$dm_code'
 			AND t1.INVT_ID IN(15)
 			AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0 					
 			AND t1.slgp_id = $slgp_id
@@ -622,8 +646,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -638,8 +662,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,19 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -651,14 +675,82 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_REC_HO=0 AND t1.slgp_id = $slgp_id
             
            ");
+				}else{
+                $Coll_Data = DB::connection($db_conn)->select("
+            SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
+            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
+            case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
+            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+			round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
+            FROM dm_trip_master t1
+            JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
+            JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
+            JOIN tl_stcm t5 ON(t3.id=t5.site_id AND t5.slgp_id = $slgp_id)
+            left join tl_cpcr t2 on t1.SITE_ID=t2.site_id and t1.ORDM_ORNM=t2.ordm_ornm
+            left join tt_ordm t6 on t1.ORDM_ORNM=t6.ordm_ornm 
+            where t1.`SITE_ID`=$site_id AND t5.optp_id IN(1,2) and t1.slgp_id=$slgp_id and t1.DELV_AMNT-t1.COLLECTION_AMNT>0.1 and t1.DELIVERY_STATUS=11
+            and t6.lfcl_id IN(39,11)
+			 UNION ALL 
+            SELECT t1.`ACMP_CODE`,
+            t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
+            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
+            t1.`IBS_INVOICE`,t1.slgp_id,t1.`INVT_ID` AS t_Type,t5.optp_id as p_type_id,            
+			round(CEIL((t1.COLLECTION_AMNT - t1.COLL_REC_HO) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
+            FROM `dm_collection`t1
+            JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
+            JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
+            JOIN tl_stcm t5 ON(t2.id=t5.site_id AND t5.slgp_id = t1.slgp_id)
+            WHERE t1.SITE_ID=$site_id AND t1.AEMP_USNM='$dm_code'
+			AND t1.INVT_ID IN(15)
+			AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0 					
+			AND t1.slgp_id = $slgp_id
+            UNION ALL
+            SELECT t1.`ACMP_CODE`,
+            t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
+            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
+            t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
+            FROM `dm_collection`t1
+            JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
+            JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
+            JOIN tl_stcm t5 ON(t2.id=t5.site_id AND t5.slgp_id = $slgp_id)
+            WHERE t1.SITE_ID=$site_id AND           
+            t1.slgp_id=$slgp_id AND      
+            t1.STATUS IN(11) AND 
+            t1.STATUS!=26 AND
+            t1.INVT_ID IN(5)
+            UNION ALL 
+            SELECT t1.`ACMP_CODE`,
+            t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
+            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
+            t1.`IBS_INVOICE`,t1.slgp_id,19 AS t_Type,t5.optp_id as p_type_id,
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
+            FROM `dm_collection`t1
+            JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
+            JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
+            JOIN tl_stcm t5 ON(t2.id=t5.site_id AND t5.slgp_id = t1.slgp_id)
+            WHERE t1.SITE_ID=$site_id AND          
+            t1.STATUS IN(40) AND 
+            t1.STATUS!=26 AND
+            t1.INVT_ID IN(19)AND 
+            t1.COLL_REC_HO=0 AND t1.slgp_id = $slgp_id
+            
+           ");
+			  }
             } else {
                 $Coll_Data = DB::connection($db_conn)->select("
             SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-            round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+			round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM dm_trip_master t1
             JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
             JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
@@ -672,8 +764,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,t1.`INVT_ID` AS t_Type,t5.optp_id as p_type_id,
-           round((t1.COLLECTION_AMNT - t1.COLL_REC_HO),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+		    round(CEIL((t1.COLLECTION_AMNT - t1.COLL_REC_HO) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -687,8 +779,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -697,14 +789,14 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.slgp_id=$slgp_id AND 
            t1.STATUS IN(11) AND 
             t1.STATUS!=26 AND
-            t1.INVT_ID IN(5)AND t1.COLLECTION_TYPE ='DN' 
+            t1.INVT_ID IN(5)
             UNION ALL 
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,19 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -743,6 +835,7 @@ WHERE t2.rtan_rtnm='$order_code';
 
             return $Coll_Data;
         }
+
     }
 
     public function groupPartyCollectionDetailsData_role(Request $request)
@@ -753,26 +846,38 @@ WHERE t2.rtan_rtnm='$order_code';
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
+			
+			
+			if ($request->country_id == 22 || $request->country_id == 23|| $request->country_id == 17){
+				$v_round='0.005) * 0.005,3';
+			}else if ($request->country_id == 3){
+				$v_round='0.0001) * 0.0001,2';
+			}else{
+			    $v_round='0.05) * 0.05,2';	
+			}
+			
             $site_code = $request->site_code;
             $site_id = $request->site_id;
             $slgp_id = $request->slgp_id;
             $role_id = $request->role_id;
+			$dm_code = $request->dm_code;
             if ($role_id == 10) { //DM
-
-                if ($request->country_id == 3) {
-
-                    $dm_code = $request->dm_code;
-
-                    $tm_aemp = DB::connection($db_conn)->table('tm_aemp')->where('aemp_usnm', $dm_code)->first();
-                    if ($tm_aemp->edsg_id == 14) {
-
-                        $Coll_Data = DB::connection($db_conn)->select("
+                
+                if ($request->country_id == 3){
+					
+				//$dm_code = $request->dm_code;
+					 
+				$tm_aemp = DB::connection($db_conn)->table('tm_aemp')->where('aemp_usnm', $dm_code)->first();
+				   if ($tm_aemp->edsg_id == 14) { 
+				   
+				     $Coll_Data = DB::connection($db_conn)->select("
             SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-            round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+			round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM dm_trip_master t1
             JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
             JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
@@ -786,10 +891,11 @@ WHERE t2.rtan_rtnm='$order_code';
             UNION ALL
                                 SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
                                 t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-                                round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+								round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
                                 case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
                                 case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-                                case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+                                case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+								round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
                                 FROM dm_trip_master t1
                                 JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
                                 JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
@@ -806,8 +912,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,t1.`INVT_ID` AS t_Type,t5.optp_id as p_type_id,
-           round((t1.COLLECTION_AMNT - t1.COLL_REC_HO),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+		    round(CEIL((t1.COLLECTION_AMNT - t1.COLL_REC_HO) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -820,9 +926,9 @@ WHERE t2.rtan_rtnm='$order_code';
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
-            t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+            t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,            
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -838,8 +944,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,19 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -851,16 +957,18 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_REC_HO=0 and t1.slgp_id=$slgp_id
             
            ");
-                    } else {
-
-
-                        $Coll_Data = DB::connection($db_conn)->select("
+			
+			}else{
+				
+				 
+				  $Coll_Data = DB::connection($db_conn)->select("
             SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-            round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+			round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM dm_trip_master t1
             JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
             JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
@@ -874,8 +982,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -889,8 +997,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,19 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -901,16 +1009,17 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.INVT_ID IN(19)AND 
             t1.COLL_REC_HO=0 AND t1.`DM_CODE`='$dm_code'		            
            ");
-                    }
-                } else {
-
-                    $Coll_Data = DB::connection($db_conn)->select("
+				}
+			}else{
+			 
+                $Coll_Data = DB::connection($db_conn)->select("
             SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-            round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+			round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM dm_trip_master t1
             JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
             JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
@@ -924,8 +1033,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,t1.`INVT_ID` AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT - t1.COLL_REC_HO),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT - t1.COLL_REC_HO) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -939,8 +1048,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -949,13 +1058,13 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.STATUS IN(11) AND 
             t1.STATUS!=26 AND
             t1.INVT_ID IN(5)AND t1.COLLECTION_TYPE!='DN'
-            UNION ALL 
+			UNION ALL             
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,19 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -967,15 +1076,40 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_REC_HO=0	
             		
            ");
-                }
+			  }	
+
             } elseif ($role_id == 1) {
+				 
+				if ($request->country_id == 14){
+					$Coll_Data = DB::connection($db_conn)->select("
+            SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
+            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
+            case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
+            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+			round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
+            FROM dm_trip_master t1
+            JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
+            JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
+            JOIN tl_stcm t5 ON(t3.id=t5.site_id )
+            left join tl_cpcr t2 on t1.SITE_ID=t2.site_id and t1.ORDM_ORNM=t2.ordm_ornm
+            left join tt_ordm t6 on t1.ORDM_ORNM=t6.ordm_ornm 
+            LEFT JOIN tl_site_party_mapping t9 ON t1.`SITE_CODE`=t9.site_code 
+            where t1.SITE_CODE=$site_code 
+            AND t5.optp_id IN(1,2) and t1.DELV_AMNT-t1.COLLECTION_AMNT>0.1 and t1.DELIVERY_STATUS=11
+            and t6.lfcl_id IN(39,11) GROUP BY t1.`ORDM_ORNM`            			            
+           ");
+				}else{
+													
                 $Coll_Data = DB::connection($db_conn)->select("
             SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-            round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+			round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM dm_trip_master t1
             JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
             JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
@@ -988,11 +1122,12 @@ WHERE t2.rtan_rtnm='$order_code';
             and t6.lfcl_id IN(39,11)
             UNION ALL
                                 SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
-                                t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-                                round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+                                t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,                                
+								round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
                                 case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
                                 case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-                                case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+                                case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,		
+								round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
                                 FROM dm_trip_master t1
                                 JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
                                 JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
@@ -1008,23 +1143,23 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,t1.`INVT_ID` AS t_Type,t5.optp_id as p_type_id,
-           round((t1.COLLECTION_AMNT - t1.COLL_REC_HO),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+		    round(CEIL((t1.COLLECTION_AMNT - t1.COLL_REC_HO) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
             JOIN tl_stcm t5 ON(t2.id=t5.site_id AND t5.slgp_id = t1.slgp_id)
             WHERE t1.SITE_ID=$site_id 
 			AND t1.INVT_ID IN(15)
-			AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO)>1 					
+			AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0.001 					
 			AND t1.slgp_id = $slgp_id				
             UNION ALL
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -1040,8 +1175,8 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,19 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -1053,14 +1188,49 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_REC_HO=0 and t1.slgp_id=$slgp_id
             
            ");
-            } else {
+			 }
+            } elseif ($role_id == 56){
+				 $Coll_Data = DB::connection($db_conn)->select("
+            SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
+            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, 2 as p_type_id,           			
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 AS reqAmnt,
+            0 AS apprv,
+            0 CredStatus ,
+			t1.ORDM_DRDT AS del_date,t1.DELV_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
+            FROM dm_trip_master t1
+            JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
+            JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)                                     
+            where t1.slgp_id=$slgp_id  and t1.SITE_ID=$site_id
+			and t1.DELV_AMNT-t1.COLLECTION_AMNT>0.1 
+			and t1.DELIVERY_STATUS=11           
+            UNION ALL                        
+            SELECT t1.`ACMP_CODE`,
+            t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
+            t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
+            t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,2 as p_type_id,
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
+            FROM `dm_collection`t1
+            JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
+            JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)            
+            WHERE t1.SITE_ID=$site_id AND 
+            t1.slgp_id=$slgp_id AND 
+            t1.STATUS IN(11) AND 
+            t1.STATUS!=26 AND
+            t1.INVT_ID IN(5)
+            
+            
+           ");
+			} else {
                 $Coll_Data = DB::connection($db_conn)->select("
             SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-            round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+			round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
             case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+            case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+			round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split			
             FROM dm_trip_master t1
             JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
             JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
@@ -1073,11 +1243,12 @@ WHERE t2.rtan_rtnm='$order_code';
             and t6.lfcl_id IN(39,11)
             UNION ALL
                                 SELECT t1.`ACMP_CODE`,t1.`ORDM_ORNM`,t1.`AEMP_ID`,t1.`AEMP_USNM`,t4.aemp_name,
-                                t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,
-                                round((t1.DELV_AMNT-t1.COLLECTION_AMNT),4)AS DueAmnt,
+                                t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t3.site_name,t1.`DM_CODE`,t1.`IBS_INVOICE`,t1.slgp_id, 1 AS t_Type, t5.optp_id as p_type_id,                               
+								round(CEIL((t1.DELV_AMNT-t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
                                 case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sreq_amnt,4),0)  else 0 end  AS reqAmnt,
                                 case when t1.COLLECTION_AMNT=0 then IFNULL(round(t2.sapr_amnt,4),0)  else 0 end AS apprv,
-                                case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date
+                                case when (t1.COLLECTION_AMNT>0 and t2.sapr_amnt>0) then 1  else 0 end CredStatus ,t1.ORDM_DRDT AS del_date,
+								round(CEIL((t1.DELV_AMNT) / $v_round)AS actual_inv_amt,t5.stcm_isfx as is_credit_split
                                 FROM dm_trip_master t1
                                 JOIN tm_site t3 ON(t1.SITE_ID=t3.id)
                                 JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
@@ -1093,23 +1264,23 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,t1.`INVT_ID` AS t_Type,t5.optp_id as p_type_id,
-           round((t1.COLLECTION_AMNT - t1.COLL_REC_HO),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+		   round(CEIL((t1.COLLECTION_AMNT - t1.COLL_REC_HO) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
             JOIN tl_stcm t5 ON(t2.id=t5.site_id AND t5.slgp_id = t1.slgp_id)
             WHERE t1.SITE_ID=$site_id 
 			AND t1.INVT_ID IN(15)
-			AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO)>1 					
+			AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0 					
 			AND t1.slgp_id = $slgp_id												
             UNION ALL
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,2 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -1118,14 +1289,14 @@ WHERE t2.rtan_rtnm='$order_code';
             t1.slgp_id=$slgp_id AND 
            t1.STATUS IN(11) AND 
             t1.STATUS!=26 AND
-            t1.INVT_ID IN(5) AND t1.COLLECTION_TYPE ='DN'
+            t1.INVT_ID IN(5) 
             UNION ALL 
             SELECT t1.`ACMP_CODE`,
             t1.COLL_NUMBER AS ORDM_ORNM,t1.AEMP_ID,t1.`AEMP_USNM`,t3.aemp_name,
             t1.`WH_ID`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t1.`DM_CODE`,
             t1.`IBS_INVOICE`,t1.slgp_id,19 AS t_Type,t5.optp_id as p_type_id,
-            round((t1.COLLECTION_AMNT),4) AS DueAmnt,
-            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date
+			round(CEIL((t1.COLLECTION_AMNT) / $v_round)AS DueAmnt,
+            0 reqAmnt,0 apprv,8 CredStatus ,t1.COLL_DATE AS del_date,t1.COLLECTION_AMNT as actual_inv_amt,t5.stcm_isfx as is_credit_split
             FROM `dm_collection`t1
             JOIN tm_site t2 ON(t1.SITE_ID=t2.id)
             JOIN tm_aemp t3 ON(t1.AEMP_ID=t3.id)
@@ -1141,6 +1312,7 @@ WHERE t2.rtan_rtnm='$order_code';
 
             return $Coll_Data;
         }
+
     }
 
     public function dmSiteWiseCollectionDetailsData(Request $request)
@@ -1212,6 +1384,8 @@ WHERE t2.rtan_rtnm='$order_code';
 
             return $Coll_Data;
         }
+
+
     }
 
 
@@ -1228,11 +1402,11 @@ WHERE t2.rtan_rtnm='$order_code';
 
             if ($role_id == '10') {
                 //DM				
-                if ($request->country_id == 3) {
-                    $dm_code = $request->emp_code;
-                    $tm_aemp = DB::connection($db_conn)->table('tm_aemp')->where('aemp_usnm', $dm_code)->first();
-                    if ($tm_aemp->edsg_id == 14) {
-                        $Coll_Data = DB::connection($db_conn)->select("
+				 if ($request->country_id == 3) {
+					 $dm_code = $request->emp_code;					 
+				$tm_aemp = DB::connection($db_conn)->table('tm_aemp')->where('aemp_usnm', $dm_code)->first();
+				   if ($tm_aemp->edsg_id == 14) { 
+				    $Coll_Data = DB::connection($db_conn)->select("
                                 SELECT t1.`TRIP_NO`,t6.slgp_id,t2.SITE_ID,t2.SITE_CODE,t3.site_name,t3.site_mob1 AS site_mobile,
                                 t2.AEMP_USNM,t4.id AS emp_id,t4.aemp_name,t3.geo_lat,t3.geo_lon, 
                                 count(distinct t2.ORDM_ORNM) totalINv,
@@ -1271,9 +1445,10 @@ WHERE t2.rtan_rtnm='$order_code';
                                     GROUP BY t1.slgp_id,t1.SITE_ID,t1.SITE_CODE,t2.site_name,t2.site_mob1,
                                     t1.`AEMP_USNM`,t1.`AEMP_ID`,t5.optp_id;
                                 ");
-                    } else {
-
-                        $Coll_Data = DB::connection($db_conn)->select("
+				   
+				}else{
+				
+                $Coll_Data = DB::connection($db_conn)->select("
             SELECT t1.`TRIP_NO`,t6.slgp_id,t2.SITE_ID,t2.SITE_CODE,t3.site_name,t3.site_mob1 AS site_mobile,
             t2.AEMP_USNM,t4.id AS emp_id,t4.aemp_name,t3.geo_lat,t3.geo_lon, 
             count(distinct t2.ORDM_ORNM) totalINv,
@@ -1289,10 +1464,32 @@ WHERE t2.rtan_rtnm='$order_code';
             GROUP by t2.SITE_ID,t1.`TRIP_NO`,t6.slgp_id,
 			t2.SITE_CODE,t2.AEMP_USNM,t4.id,t3.geo_lat,
 			t3.geo_lon,t2.TRIP_STATUS,t5.optp_id
+			UNION ALL 
+                SELECT ''AS `TRIP_NO`,t1.`slgp_id`,t1.`SITE_ID`,t1.`SITE_CODE`,t2.site_name,t2.site_mob1 AS site_mobile,t1.AEMP_USNM,
+                t1.AEMP_ID AS emp_id,t4.aemp_name,t2.geo_lat,t2.geo_lon, count(distinct t1.COLL_NUMBER) totalINv,0 AS Delin,t3.optp_id as p_type_id
+                FROM `dm_collection`t1 JOIN tm_site t2 ON(t1.`SITE_ID`=t2.id)
+                JOIN tl_stcm t3 ON(t3.site_id=t2.id)AND t3.slgp_id=t1.slgp_id
+                JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)AND t4.id=$emp_id
+                JOIN tl_rpln t5 ON(t4.id=t5.aemp_id)
+                JOIN tl_rsmp t6 ON(t6.rout_id=t5.rout_id) AND t6.site_id=t1.`SITE_ID`
+                WHERE t4.id=$emp_id AND (t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0 AND t1.INVT_ID=5
+                GROUP BY t1.slgp_id,t1.SITE_ID,t1.SITE_CODE,t2.site_name,t2.site_mob1 ,t1.AEMP_USNM,
+                t4.id ,t4.aemp_name,t2.geo_lat,t2.geo_lon, t1.COLL_NUMBER,t3.optp_id
+                UNION ALL 
+                SELECT '' AS`TRIP_NO`,t1.slgp_id,t1.SITE_ID,t1.SITE_CODE,t2.site_name,t2.site_mob1 AS site_mobile,
+                t1.`AEMP_USNM`,t1.`AEMP_ID` AS emp_id,'' AS aemp_name,0 AS geo_lat,0 AS geo_lon, 
+                1 AS totalINv,1 AS Delin,
+                t5.optp_id as p_type_id 
+                FROM dm_collection t1
+                JOIN tm_site t2 ON t1.`SITE_ID`=t2.id
+                join tl_stcm t5 ON(t5.site_id=t1.`SITE_ID`)AND t5.slgp_id=t1.slgp_id
+                WHERE t1.INVT_ID=15 AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0.1 AND t1.`AEMP_ID`=$emp_id
+				GROUP BY t1.slgp_id,t1.SITE_ID,t1.SITE_CODE,t2.site_name,t2.site_mob1,
+                t1.`AEMP_USNM`,t1.`AEMP_ID`,t5.optp_id;
 			 ");
-                    }
-                } else {
-                    $Coll_Data = DB::connection($db_conn)->select("
+			}					 
+				}else{
+						 $Coll_Data = DB::connection($db_conn)->select("
             SELECT t1.`TRIP_NO`,t6.slgp_id,t2.SITE_ID,t2.SITE_CODE,t3.site_name,t3.site_mob1 AS site_mobile,
             t2.AEMP_USNM,t4.id AS emp_id,t4.aemp_name,t3.geo_lat,t3.geo_lon, 
             count(distinct t2.ORDM_ORNM) totalINv,
@@ -1330,8 +1527,8 @@ WHERE t2.rtan_rtnm='$order_code';
                 WHERE t1.INVT_ID=15 AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0.1 AND t1.`AEMP_ID`=$emp_id
 				GROUP BY t1.slgp_id,t1.SITE_ID,t1.SITE_CODE,t2.site_name,t2.site_mob1,
                 t1.`AEMP_USNM`,t1.`AEMP_ID`,t5.optp_id;
-			 ");
-                }
+			 "); 
+				}	
             } elseif ($role_id == '1') {
                 //SR
                 $Coll_Data = DB::connection($db_conn)->select("
@@ -1343,7 +1540,7 @@ WHERE t2.rtan_rtnm='$order_code';
                 JOIN tm_aemp t4 ON(t1.AEMP_ID=t4.id)
                 JOIN tl_rpln t5 ON(t4.id=t5.aemp_id)
                 JOIN tl_rsmp t6 ON(t6.rout_id=t5.rout_id) AND t6.site_id=t1.`SITE_ID`
-                WHERE t1.`AEMP_ID`=$emp_id AND (t1.`DELV_AMNT`-t1.`COLLECTION_AMNT`)>0.1
+                WHERE t1.`AEMP_ID`=$emp_id AND (t1.`DELV_AMNT`-t1.`COLLECTION_AMNT`)>0
                 and t1.DELIVERY_STATUS IN(39,11)
                 GROUP BY t1.slgp_id,t1.SITE_ID,t1.SITE_CODE,t2.site_name,t2.site_mob1 ,t1.AEMP_USNM,
                 t4.id ,t4.aemp_name,t2.geo_lat,t2.geo_lon, t1.ORDM_ORNM,t3.optp_id
@@ -1366,7 +1563,7 @@ WHERE t2.rtan_rtnm='$order_code';
                 FROM dm_collection t1
                 JOIN tm_site t2 ON t1.`SITE_ID`=t2.id
                 join tl_stcm t5 ON(t5.site_id=t1.`SITE_ID`)AND t5.slgp_id=t1.slgp_id
-                WHERE t1.INVT_ID=15 AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0.1 AND t1.`AEMP_ID`=$emp_id
+                WHERE t1.INVT_ID=15 AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO)>0 AND t1.`AEMP_ID`=$emp_id
 				GROUP BY t1.slgp_id,t1.SITE_ID,t1.SITE_CODE,t2.site_name,t2.site_mob1,
                 t1.`AEMP_USNM`,t1.`AEMP_ID`,t5.optp_id;
                 ");
@@ -1404,7 +1601,7 @@ WHERE t2.rtan_rtnm='$order_code';
             FROM dm_collection t1
             JOIN tm_site t2 ON t1.`SITE_ID`=t2.id
             join tl_stcm t5 ON(t5.site_id=t1.`SITE_ID`)AND t5.slgp_id=t1.slgp_id
-            WHERE t1.INVT_ID=15 AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO) >0.1 AND t1.`AEMP_ID`=$emp_id
+            WHERE t1.INVT_ID=15 AND(t1.COLLECTION_AMNT - t1.COLL_REC_HO) >0 AND t1.`AEMP_ID`=$emp_id
 			GROUP BY t1.slgp_id,t1.SITE_ID,t1.SITE_CODE,t2.site_name,t2.site_mob1,
             t1.`AEMP_USNM`,t1.`AEMP_ID`,t5.optp_id
 			UNION ALL
@@ -1545,6 +1742,7 @@ WHERE t2.rtan_rtnm='$order_code';
        ");
             return $trip_m;
         }
+
     }
 
     public function dmTripSummeryReport(Request $request)
@@ -1575,10 +1773,116 @@ WHERE t2.rtan_rtnm='$order_code';
                 'totalDeliveryAmount' => $totalDeliveryAmount,
                 'totalCollectionAmount' => $totalCollectionAmount
             );
+
         }
     }
 
-    public function dmSiteWiseOrderDetails(Request $request)
+    public function dmSiteWiseOrderDetailsTerminate(Request $request)
+    {
+
+
+        $country = (new Country())->country($request->country_id);
+        $db_conn = $country->cont_conn;
+        if ($db_conn != '') {
+            $site_id = $request->site_id;
+            $trip_code = $request->trip_code;
+
+            /* $trip_m = DB::connection($db_conn)->select("
+         SELECT t3.id AS tpm_id,1 AS Type,t1.`TRIP_STATUS`AS Status,t1.`ORDM_ORNM`,t2.site_code,t2.site_name
+         FROM `dm_trip_detail`t1 JOIN tm_site t2 ON(t1.`SITE_ID`=t2.id)
+         JOIN dm_trip t3 ON (t1.TRIP_NO=t3.TRIP_NO)
+         WHERE t1.`TRIP_NO`='$trip_code'
+         AND t1.`SITE_ID`= $site_id
+         GROUP BY t1.`ORDM_ORNM`,t1.`TRIP_STATUS`
+         UNION ALL
+         SELECT t1.`id` AS tpm_id,2 AS Type,t1.`lfcl_id`AS Status,t1.`rtan_rtnm` AS ORDM_ORNM,t3.site_code,t3.site_name
+         FROM `tt_rtan`t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
+         JOIN tm_site t3 ON(t1.`site_id`=t3.id)
+         WHERE t1.`site_id`=$site_id AND t1.`lfcl_id`=1 AND t1.rtan_date>= SUBDATE(DATE(NOW()), 7)
+         GROUP BY t1.`rtan_rtnm`,t1.`lfcl_id`
+         UNION ALL
+         SELECT t1.`id` AS tpm_id,2 AS Type,t1.`lfcl_id`AS Status,t1.`rtan_rtnm` AS ORDM_ORNM,t3.site_code,t3.site_name
+         FROM `tt_rtan`t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
+         JOIN tm_site t3 ON(t1.`site_id`=t3.id)
+         WHERE t1.`site_id`=$site_id AND t1.dm_trip='$trip_code' AND t1.rtan_date>= SUBDATE(DATE(NOW()), 7)
+         GROUP BY t1.`rtan_rtnm`,t1.`lfcl_id`
+        ");*/
+
+            $trip_m = DB::connection($db_conn)->select("
+                    SELECT t3.id AS tpm_id,1 AS Type,t1.`TRIP_STATUS`AS Status,t1.`ORDM_ORNM`,t2.site_code,t2.site_name,t4.slgp_id,
+                    if(SUM(t5.CRECIT_AMNT)>0,1,0)AS coll_status,t2.site_mob1                                                                       
+                    FROM `dm_trip_master`t4 JOIN dm_trip_detail t1 ON t1.SITE_ID=t4.SITE_ID and t1.ORDM_ORNM=t4.ORDM_ORNM
+                    JOIN tm_site t2 ON(t1.`SITE_ID`=t2.id)
+                    JOIN dm_trip t3 ON (t1.TRIP_NO=t3.TRIP_NO)
+                    LEFT JOIN dm_invoice_collection_mapp t5 ON t1.ORDM_ORNM=t5.TRANSACTION_ID
+                    WHERE t1.`TRIP_NO`='$trip_code'
+                    AND t1.`SITE_ID`= '$site_id' 
+                    GROUP BY t1.`ORDM_ORNM`,t1.`TRIP_STATUS`,t4.slgp_id
+                UNION ALL
+                SELECT t1.`id` AS tpm_id,2 AS Type,t1.`lfcl_id`AS Status,t1.`rtan_rtnm` AS ORDM_ORNM,t3.site_code,t3.site_name,t1.slgp_id,0 AS coll_status,t3.site_mob1
+                FROM `tt_rtan`t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
+                JOIN tm_site t3 ON(t1.`site_id`=t3.id)
+                WHERE t1.`site_id`=$site_id AND t1.`lfcl_id`=1 AND t1.rtan_date>= SUBDATE(DATE(NOW()), 7)
+                GROUP BY t1.`rtan_rtnm`,t1.`lfcl_id`,t1.slgp_id
+                UNION ALL
+                SELECT t1.`id` AS tpm_id,2 AS Type,t1.`lfcl_id`AS Status,t1.`rtan_rtnm` AS ORDM_ORNM,t3.site_code,t3.site_name,t1.slgp_id,0 AS coll_status,t3.site_mob1
+                FROM `tt_rtan`t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
+                JOIN tm_site t3 ON(t1.`site_id`=t3.id)
+                WHERE t1.`site_id`=$site_id AND t1.dm_trip='$trip_code' AND t1.rtan_date>= SUBDATE(DATE(NOW()), 7)
+                GROUP BY t1.`rtan_rtnm`,t1.`lfcl_id`,t1.slgp_id;
+            ");
+
+            foreach ($trip_m as $index => $data1) {
+                $order_code = $data1->ORDM_ORNM;
+                $data2 = DB::connection($db_conn)->select("
+                        SELECT t1.`OID`AS trp_line,
+                        t1.`ORDM_ORNM`,
+                        t1.`ORDM_DRDT`,
+                        t1.`AMIM_ID`,
+                        t1.`AMIM_CODE`,
+                        t2.amim_name AS Item_Name,
+                        t1.ORDD_UPRC AS Rate,
+                        t1.ORDD_EXCS AS EXCS_Percent,
+                        t1.ORDD_OVAT AS VAT_Percent,
+                        t1.ORDD_OAMT AS totalOrderAmount,
+                        t1.`prom_id`,
+                        t1.`ORDD_QNTY`,
+                        t1.`INV_QNTY`,
+                        t1.`DELV_QNTY`,
+                        t1.DISCOUNT,
+                        t2.amim_duft AS Item_Factor
+                        FROM `dm_trip_detail`t1 JOIN tm_amim t2 ON(t1.`AMIM_ID`=t2.id)
+                        WHERE t1.`ORDM_ORNM`='$order_code' AND t1.`INV_QNTY`!=0
+                        GROUP BY t1.`OID`,t1.`AMIM_ID`
+                        UNION ALL 
+                        SELECT t2.id AS trp_line,
+                        t1.rtan_rtnm AS ORDM_ORNM,
+                        t2.`rtdd_edat` AS ORDM_DRDT,
+                        t2.amim_id AS AMIM_ID,
+                        t3.amim_code AS AMIM_CODE,
+                        t3.amim_name AS Item_Name,
+                        t2.rtdd_uprc AS Rate,
+                        t2.rtdd_excs AS EXCS_Percent,
+                        t2.rtdd_ovat AS VAT_Percent,
+                        t2.rtdd_oamt AS totalOrderAmount,
+                        0 AS prom_id,
+                        t2.rtdd_qnty AS ORDD_QNTY,
+                        t2.rtdd_qnty AS INV_QNTY,
+                        t2.rtdd_dqty AS DELV_QNTY,
+                        0 AS DISCOUNT,
+                        t3.amim_duft AS Item_Factor  
+                        FROM `tt_rtan`t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
+                        JOIN tm_amim t3 ON(t2.amim_id=t3.id)
+                        WHERE t1.`rtan_rtnm`='$order_code'
+                        GROUP BY t2.id,t2.amim_id
+                        ");
+
+                $trip_m[$index]->orderIdLists = $data2;
+            }
+            return $trip_m;
+        }
+    }
+    public function dmSiteWiseOrderDetails_olD(Request $request)
     {
 
 
@@ -1589,25 +1893,27 @@ WHERE t2.rtan_rtnm='$order_code';
             $trip_code = $request->trip_code;
 
             $trip_m = DB::connection($db_conn)->select("
-                            SELECT t3.id AS tpm_id,1 AS Type,t1.`TRIP_STATUS`AS Status,t1.`ORDM_ORNM`,t2.site_code,t2.site_name,t4.slgp_id,
-                            if(SUM(t5.CRECIT_AMNT)>0,1,0)AS coll_status                                                                        
+                            SELECT t3.id AS tpm_id,1 AS Type,if(t4.`DELIVERY_STATUS`=11,'D','N')AS Status,t1.`ORDM_ORNM`,t2.site_code,t2.site_name,t4.slgp_id,
+                            if(SUM(t5.CRECIT_AMNT)>0,1,0)AS coll_status,t2.site_mob1, t4.AEMP_USNM                                                                     
                             FROM `dm_trip_master`t4 JOIN dm_trip_detail t1 ON t1.SITE_ID=t4.SITE_ID and t1.ORDM_ORNM=t4.ORDM_ORNM
                             JOIN tm_site t2 ON(t1.`SITE_ID`=t2.id)
                             JOIN dm_trip t3 ON (t1.TRIP_NO=t3.TRIP_NO)
 							JOIN tt_ordm t9 ON t4.`ORDM_ORNM`=t9.ordm_ornm  
                             LEFT JOIN dm_invoice_collection_mapp t5 ON t1.ORDM_ORNM=t5.TRANSACTION_ID
                             WHERE t1.`TRIP_NO`='$trip_code'
-                            AND t1.`SITE_ID`= '$site_id' AND t9.lfcl_id!=17 
-                            GROUP BY t1.`ORDM_ORNM`,t1.`TRIP_STATUS`,t4.slgp_id
+                            AND t1.`SITE_ID`= '$site_id' AND t9.lfcl_id NOT IN(21,17) 
+                            GROUP BY t1.`ORDM_ORNM`,t4.`DELIVERY_STATUS`,t4.slgp_id
                         UNION ALL
-                        SELECT t1.`id` AS tpm_id,2 AS Type,t1.`lfcl_id`AS Status,t1.`rtan_rtnm` AS ORDM_ORNM,t3.site_code,t3.site_name,t1.slgp_id,0 AS coll_status
+                        SELECT t1.`id` AS tpm_id,2 AS Type,t1.`lfcl_id`AS Status,t1.`rtan_rtnm` AS ORDM_ORNM,t3.site_code,t3.site_name,t1.slgp_id,0 AS coll_status,t3.site_mob1, t4.aemp_usnm AS AEMP_USNM
                         FROM `tt_rtan`t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
+                        JOIN tm_aemp t4 ON(t4.id=t1.aemp_id)
                         JOIN tm_site t3 ON(t1.`site_id`=t3.id)
                         WHERE t1.`site_id`=$site_id AND t1.`lfcl_id`=1 AND t1.rtan_date>= SUBDATE(DATE(NOW()), 7)
                         GROUP BY t1.`rtan_rtnm`,t1.`lfcl_id`,t1.slgp_id
                         UNION ALL
-                        SELECT t1.`id` AS tpm_id,2 AS Type,t1.`lfcl_id`AS Status,t1.`rtan_rtnm` AS ORDM_ORNM,t3.site_code,t3.site_name,t1.slgp_id,0 AS coll_status
+                        SELECT t1.`id` AS tpm_id,2 AS Type,t1.`lfcl_id`AS Status,t1.`rtan_rtnm` AS ORDM_ORNM,t3.site_code,t3.site_name,t1.slgp_id,0 AS coll_status,t3.site_mob1, t4.aemp_usnm AS AEMP_USNM
                         FROM `tt_rtan`t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
+                        JOIN tm_aemp t4 ON(t4.id=t1.aemp_id)
                         JOIN tm_site t3 ON(t1.`site_id`=t3.id)
                         WHERE t1.`site_id`=$site_id AND t1.dm_trip='$trip_code' AND t1.rtan_date>= SUBDATE(DATE(NOW()), 7)
                         GROUP BY t1.`rtan_rtnm`,t1.`lfcl_id`,t1.slgp_id;
@@ -1657,6 +1963,141 @@ WHERE t2.rtan_rtnm='$order_code';
                                 t2.rtdd_dqty AS DELV_QNTY,
                                 0 AS DISCOUNT,
                                 t3.amim_duft AS Item_Factor
+                            FROM `tt_rtan` t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
+                            JOIN tm_amim t3 ON(t2.amim_id=t3.id)
+                            WHERE t1.`rtan_rtnm` IN ($order_code)
+                            GROUP BY t2.id, t2.amim_id
+                        ");
+            }
+
+            //$trip_m[$index]->orderIdLists = $data2;
+            foreach ($trip_m as $index => $data1) {
+                foreach ($data2 as $data2Index => $data2Item) {
+                    if ($trip_m[$index]->ORDM_ORNM == $data2Item->ORDM_ORNM) {
+                        $trip_m[$index]->orderIdLists[] = $data2Item;
+                    }
+                }
+            }
+
+            return $trip_m;
+        }
+    }
+
+    public function dmSiteWiseOrderDetails(Request $request)
+    {
+
+
+        $country = (new Country())->country($request->country_id);
+        $db_conn = $country->cont_conn;
+        if ($db_conn != '') {
+            $site_id = $request->site_id;
+            $trip_code = $request->trip_code;
+
+           /* $trip_m = DB::connection($db_conn)->select("
+                            SELECT t3.id AS tpm_id,1 AS Type,if(t4.`DELIVERY_STATUS`=11,'D','N')AS Status,t1.`ORDM_ORNM`,t2.site_code,t2.site_name,t4.slgp_id,
+                            if(SUM(t5.CRECIT_AMNT)>0,1,0)AS coll_status,t2.site_mob1, t4.AEMP_USNM                                                                     
+                            FROM `dm_trip_master`t4 JOIN dm_trip_detail t1 ON t1.SITE_ID=t4.SITE_ID and t1.ORDM_ORNM=t4.ORDM_ORNM
+                            JOIN tm_site t2 ON(t1.`SITE_ID`=t2.id)
+                            JOIN dm_trip t3 ON (t1.TRIP_NO=t3.TRIP_NO)
+							JOIN tt_ordm t9 ON t4.`ORDM_ORNM`=t9.ordm_ornm  
+                            LEFT JOIN dm_invoice_collection_mapp t5 ON t1.ORDM_ORNM=t5.TRANSACTION_ID
+                            WHERE t1.`TRIP_NO`='$trip_code'
+                            AND t1.`SITE_ID`= '$site_id' AND t9.lfcl_id NOT IN(21,17) 
+                            GROUP BY t1.`ORDM_ORNM`,t4.`DELIVERY_STATUS`,t4.slgp_id
+                        UNION ALL
+                        SELECT t1.`id` AS tpm_id,2 AS Type,t1.`lfcl_id`AS Status,t1.`rtan_rtnm` AS ORDM_ORNM,t3.site_code,t3.site_name,t1.slgp_id,0 AS coll_status,t3.site_mob1, t4.aemp_usnm AS AEMP_USNM
+                        FROM `tt_rtan`t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
+                        JOIN tm_aemp t4 ON(t4.id=t1.aemp_id)
+                        JOIN tm_site t3 ON(t1.`site_id`=t3.id)
+                        WHERE t1.`site_id`=$site_id AND t1.`lfcl_id`=1 AND t1.rtan_date>= SUBDATE(DATE(NOW()), 7)
+                        GROUP BY t1.`rtan_rtnm`,t1.`lfcl_id`,t1.slgp_id
+                        UNION ALL
+                        SELECT t1.`id` AS tpm_id,2 AS Type,t1.`lfcl_id`AS Status,t1.`rtan_rtnm` AS ORDM_ORNM,t3.site_code,t3.site_name,t1.slgp_id,0 AS coll_status,t3.site_mob1, t4.aemp_usnm AS AEMP_USNM
+                        FROM `tt_rtan`t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
+                        JOIN tm_aemp t4 ON(t4.id=t1.aemp_id)
+                        JOIN tm_site t3 ON(t1.`site_id`=t3.id)
+                        WHERE t1.`site_id`=$site_id AND t1.dm_trip='$trip_code' AND t1.rtan_date>= SUBDATE(DATE(NOW()), 7)
+                        GROUP BY t1.`rtan_rtnm`,t1.`lfcl_id`,t1.slgp_id;
+                    ");*/
+				 $trip_m = DB::connection($db_conn)->select("
+                            SELECT t3.id AS tpm_id,1 AS Type,if(t4.`DELIVERY_STATUS`=11,'D','N')AS Status,t1.`ORDM_ORNM`,t2.site_code,t2.site_name,t4.slgp_id,
+                            if(SUM(t4.COLLECTION_AMNT)>0,1,0)AS coll_status,t2.site_mob1, t4.AEMP_USNM                                                                     
+                            FROM `dm_trip_master`t4 JOIN dm_trip_detail t1 ON t1.SITE_ID=t4.SITE_ID and t1.ORDM_ORNM=t4.ORDM_ORNM
+                            JOIN tm_site t2 ON(t1.`SITE_ID`=t2.id)
+                            JOIN dm_trip t3 ON (t1.TRIP_NO=t3.TRIP_NO)
+							JOIN tt_ordm t9 ON t4.`ORDM_ORNM`=t9.ordm_ornm                             
+                            WHERE t1.`TRIP_NO`='$trip_code'
+                            AND t1.`SITE_ID`= '$site_id' AND t9.lfcl_id NOT IN(21,17) 
+                            GROUP BY t1.`ORDM_ORNM`,t4.`DELIVERY_STATUS`,t4.slgp_id
+                        UNION ALL
+                        SELECT t1.`id` AS tpm_id,2 AS Type,t1.`lfcl_id`AS Status,t1.`rtan_rtnm` AS ORDM_ORNM,t3.site_code,t3.site_name,t1.slgp_id,0 AS coll_status,t3.site_mob1, t4.aemp_usnm AS AEMP_USNM
+                        FROM `tt_rtan`t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
+                        JOIN tm_aemp t4 ON(t4.id=t1.aemp_id)
+                        JOIN tm_site t3 ON(t1.`site_id`=t3.id)
+                        WHERE t1.`site_id`=$site_id AND t1.`lfcl_id`=1 AND t1.rtan_date>= SUBDATE(DATE(NOW()), 7)
+                        GROUP BY t1.`rtan_rtnm`,t1.`lfcl_id`,t1.slgp_id
+                        UNION ALL
+                        SELECT t1.`id` AS tpm_id,2 AS Type,t1.`lfcl_id`AS Status,t1.`rtan_rtnm` AS ORDM_ORNM,t3.site_code,t3.site_name,t1.slgp_id,0 AS coll_status,t3.site_mob1, t4.aemp_usnm AS AEMP_USNM
+                        FROM `tt_rtan`t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
+                        JOIN tm_aemp t4 ON(t4.id=t1.aemp_id)
+                        JOIN tm_site t3 ON(t1.`site_id`=t3.id)
+                        WHERE t1.`site_id`=$site_id AND t1.dm_trip='$trip_code' AND t1.rtan_date>= SUBDATE(DATE(NOW()), 7)
+                        GROUP BY t1.`rtan_rtnm`,t1.`lfcl_id`,t1.slgp_id;
+                    ");	
+					
+            $order_code = '';
+            foreach ($trip_m as $index => $data1) {
+                $order_code .= "'" . $data1->ORDM_ORNM . "'";
+                if ($index != count($trip_m) - 1) {
+                    $order_code .= ',';
+                }
+            }
+            if (count($trip_m) > 0) {
+                $data2 = DB::connection($db_conn)->select("
+                            SELECT t1.`OID` AS trp_line,
+                                t1.`ORDM_ORNM`,
+                                t1.`ORDM_DRDT`,
+                                t1.`AMIM_ID`,
+                                t1.`AMIM_CODE`,
+                                t2.amim_name AS Item_Name,
+                                t1.ORDD_UPRC AS Rate,
+                                t1.ORDD_EXCS AS EXCS_Percent,
+                                t1.ORDD_OVAT AS VAT_Percent,
+                                t1.ORDD_OAMT AS totalOrderAmount,
+                                t1.`prom_id`,
+                                t1.`ORDD_QNTY`,
+                                t1.`INV_QNTY`,
+                                t1.`DELV_QNTY`,
+                                t1.DISCOUNT,
+                                t2.amim_duft AS Item_Factor,
+								0 AS rtdd_ptyp,
+								0 AS delv_bqty,
+								0 AS delv_gqty
+								
+                            FROM `dm_trip_detail` t1 JOIN tm_amim t2 ON(t1.`AMIM_ID`=t2.id)
+                            WHERE t1.`ORDM_ORNM` IN ($order_code) AND t1.`INV_QNTY` != 0
+                            GROUP BY t1.`OID`, t1.`AMIM_ID`
+                            UNION ALL 
+                            SELECT t2.id AS trp_line,
+                                t1.rtan_rtnm AS ORDM_ORNM,
+                                t2.`rtdd_edat` AS ORDM_DRDT,
+                                t2.amim_id AS AMIM_ID,
+                                t3.amim_code AS AMIM_CODE,
+                                t3.amim_name AS Item_Name,
+                                t2.rtdd_uprc AS Rate,
+                                t2.rtdd_excs AS EXCS_Percent,
+                                t2.rtdd_ovat AS VAT_Percent,
+                                t2.rtdd_oamt AS totalOrderAmount,
+                                0 AS prom_id,
+                                t2.rtdd_qnty AS ORDD_QNTY,
+                                t2.rtdd_qnty AS INV_QNTY,
+                                t2.rtdd_dqty AS DELV_QNTY,
+                                t2.rtdd_tdis AS DISCOUNT,
+                                t3.amim_duft AS Item_Factor,
+								t2.rtdd_ptyp AS rtdd_ptyp,
+								if(t2.rtdd_ptyp=1,t2.rtdd_qnty,0) AS delv_bqty,
+								if(t2.rtdd_ptyp=2,t2.rtdd_qnty,0) AS delv_gqty
+								
                             FROM `tt_rtan` t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
                             JOIN tm_amim t3 ON(t2.amim_id=t3.id)
                             WHERE t1.`rtan_rtnm` IN ($order_code)
@@ -1815,8 +2256,10 @@ WHERE t2.rtan_rtnm='$order_code';
                     return $e;
                     //throw $e;
                 }
+
             }
         }
+
     }
 
     public function updateOutletSerial(Request $request)
@@ -1831,10 +2274,9 @@ WHERE t2.rtan_rtnm='$order_code';
                 try {
 
                     foreach ($outletData_child as $outletData_1) {
-                        DB::connection($db_conn)->table('tl_rsmp')->where([
-                            'rout_id' => $outletData_1->Route_ID,
-                            'site_id' => $outletData_1->Outlet_ID
-                        ])->update(['rspm_serl' => $outletData_1->Outlet_Serial]);
+                        DB::connection($db_conn)->table('tl_rsmp')->where(['rout_id' => $outletData_1->Route_ID,
+                            'site_id' => $outletData_1->Outlet_ID])->update(['rspm_serl' => $outletData_1->Outlet_Serial]);
+
                     }
 
                     DB::connection($db_conn)->commit();
@@ -1848,6 +2290,7 @@ WHERE t2.rtan_rtnm='$order_code';
                     return $e;
                     //throw $e;
                 }
+
             }
         }
     }
@@ -1907,22 +2350,12 @@ WHERE t2.rtan_rtnm='$order_code';
                         if ($orderLineData->P_Total_Price == 0) {
                             $isFree_item1 = 1;
                         }
-                        $order_details = DB::connection($db_conn)->table('tt_ordm')->join(
-                            'tt_ordd',
-                            'tt_ordm.id',
-                            '=',
-                            'tt_ordd.ordm_id'
-                        )->where([
-                            'tt_ordm.aemp_id' => $orderLineData->SR_ID,
-                            'tt_ordm.ordm_date' => $orderLineData->Order_Date, 'tt_ordm.lfcl_id' => 1, 'tt_ordd.ordd_smpl' => $isFree_item1, 'tt_ordd.amim_id' => $orderLineData->P_ID
-                        ])
-                            ->select(
-                                'tt_ordd.id AS id',
-                                'tt_ordd.ordd_qnty AS ordd_qnty',
-                                'tt_ordd.ordd_opds AS ordd_opds',
-                                'tt_ordd.ordd_uprc AS ordd_uprc',
-                                'tt_ordd.ordd_smpl AS ordd_smpl'
-                            )->orderBy('tt_ordd.id')->get();
+                        $order_details = DB::connection($db_conn)->table('tt_ordm')->join('tt_ordd',
+                            'tt_ordm.id', '=', 'tt_ordd.ordm_id')->where(['tt_ordm.aemp_id' => $orderLineData->SR_ID,
+                            'tt_ordm.ordm_date' => $orderLineData->Order_Date, 'tt_ordm.lfcl_id' => 1, 'tt_ordd.ordd_smpl' => $isFree_item1, 'tt_ordd.amim_id' => $orderLineData->P_ID])
+                            ->select('tt_ordd.id AS id', 'tt_ordd.ordd_qnty AS ordd_qnty',
+                                'tt_ordd.ordd_opds AS ordd_opds', 'tt_ordd.ordd_uprc AS ordd_uprc',
+                                'tt_ordd.ordd_smpl AS ordd_smpl')->orderBy('tt_ordd.id')->get();
 
                         $del_qty = 0;
 
@@ -1939,10 +2372,10 @@ WHERE t2.rtan_rtnm='$order_code';
                                 }
 
 
-                                DB::connection($db_conn)->table('tt_ordd')->where([
-                                    'id' => $order_details1->id
+                                DB::connection($db_conn)->table('tt_ordd')->where(['id' => $order_details1->id
                                 ])->update(['ordd_dqty' => $order_details1->ordd_qnty, 'ordd_amnt' => $dd_amt, 'ordd_odat' => $order_details1->ordd_qnty * $order_details1->ordd_uprc]);
                                 $del_qty = $del_qty + $order_details1->ordd_qnty;
+
                             } else {
                                 $dd_amt = 0;
                                 $isFree_item = $order_details1->ordd_smpl;
@@ -1953,25 +2386,23 @@ WHERE t2.rtan_rtnm='$order_code';
                                 }
 
 
-                                DB::connection($db_conn)->table('tt_ordd')->where([
-                                    'id' => $order_details1->id
+                                DB::connection($db_conn)->table('tt_ordd')->where(['id' => $order_details1->id
                                 ])->update(['ordd_dqty' => $orderLineData->Delivery_P_Qty - $del_qty, 'ordd_amnt' => $dd_amt, 'ordd_odat' => ($orderLineData->Delivery_P_Qty - $del_qty) * $order_details1->ordd_uprc]);
 
                                 $del_qty = $del_qty + $orderLineData->Delivery_P_Qty - $del_qty;
                             }
 
 
-                            DB::connection($db_conn)->table('tt_ordd')->where([
-                                'id' => $order_details1->id
+                            DB::connection($db_conn)->table('tt_ordd')->where(['id' => $order_details1->id
                             ])->update(['ordd_amnt' => $dd_amt]);
+
                         }
+
                     }
 
 
-                    $order_master = DB::connection($db_conn)->table('tt_ordm')->where([
-                        'aemp_id' => $outletData_child[0]->SR_ID,
-                        'ordm_date' => $outletData_child[0]->Order_Date, 'lfcl_id' => 1
-                    ])->get();
+                    $order_master = DB::connection($db_conn)->table('tt_ordm')->where(['aemp_id' => $outletData_child[0]->SR_ID,
+                        'ordm_date' => $outletData_child[0]->Order_Date, 'lfcl_id' => 1])->get();
 
                     foreach ($order_master as $TripLineData) {
                         $Trip_master = new TripOrder();
@@ -1985,20 +2416,21 @@ WHERE t2.rtan_rtnm='$order_code';
                         $Trip_master->aemp_iusr = $request->up_emp_id;
                         $Trip_master->aemp_eusr = $request->up_emp_id;
                         $Trip_master->save();
+
                     }
 
                     $dl_date = date('Y-m-d');
-                    // Optimize delivery start
-                    $aemp_id = $outletData_child[0]->SR_ID;
-                    $ordm_date = $outletData_child[0]->Order_Date;
-
-                    $ordm_id_list = [];
-                    $order_ids = DB::connection($db_conn)->select("SELECT id FROM tt_ordm WHERE aemp_id={$aemp_id} AND ordm_date='{$ordm_date}' AND lfcl_id=1");
-                    for ($i = 0; $i < count($order_ids); $i++) {
-                        $ordm_id_list[$i] = $order_ids[$i]->id;
-                    }
-                    DB::connection($db_conn)->select("UPDATE tt_ordm SET lfcl_id=11, ordm_drdt='$dl_date' WHERE id IN (" . implode(',', $ordm_id_list) . ") ");
-
+                     // Optimize delivery start
+                     $aemp_id=$outletData_child[0]->SR_ID;
+                     $ordm_date=$outletData_child[0]->Order_Date;
+ 
+                     $ordm_id_list=[];
+                     $order_ids=DB::connection($db_conn)->select("SELECT id FROM tt_ordm WHERE aemp_id={$aemp_id} AND ordm_date='{$ordm_date}' AND lfcl_id=1");
+                     for($i=0;$i<count($order_ids);$i++){
+                         $ordm_id_list[$i]=$order_ids[$i]->id;
+                     }
+                    DB::connection($db_conn)->select("UPDATE tt_ordm SET lfcl_id=11, ordm_drdt='$dl_date' WHERE id IN (".implode(',',$ordm_id_list).") ");
+ 
                     //// Optimize delivery End
 
                     // DB::connection($db_conn)->table('tt_ordm')->where(['aemp_id' => $outletData_child[0]->SR_ID,
@@ -2015,6 +2447,7 @@ WHERE t2.rtan_rtnm='$order_code';
                     return $e;
                     //throw $e;
                 }
+
             }
         }
     }
@@ -2074,22 +2507,12 @@ WHERE t2.rtan_rtnm='$order_code';
                         if ($orderLineData->P_Total_Price == 0) {
                             $isFree_item1 = 1;
                         }*/
-                        $order_details = DB::connection($db_conn)->table('tt_ordm')->join(
-                            'tt_ordd',
-                            'tt_ordm.id',
-                            '=',
-                            'tt_ordd.ordm_id'
-                        )->where([
-                            'tt_ordm.ordm_date' => $request->order_date,
-                            'tt_ordm.lfcl_id' => 1, 'tt_ordm.id' => $orderLineData->invoiceId
-                        ])
-                            ->select(
-                                'tt_ordd.id AS id',
-                                'tt_ordd.ordd_qnty AS ordd_qnty',
-                                'tt_ordd.ordd_opds AS ordd_opds',
-                                'tt_ordd.ordd_uprc AS ordd_uprc',
-                                'tt_ordd.ordd_smpl AS ordd_smpl'
-                            )->orderBy('tt_ordd.id')->get();
+                        $order_details = DB::connection($db_conn)->table('tt_ordm')->join('tt_ordd',
+                            'tt_ordm.id', '=', 'tt_ordd.ordm_id')->where(['tt_ordm.ordm_date' => $request->order_date,
+                            'tt_ordm.lfcl_id' => 1, 'tt_ordm.id' => $orderLineData->invoiceId])
+                            ->select('tt_ordd.id AS id', 'tt_ordd.ordd_qnty AS ordd_qnty',
+                                'tt_ordd.ordd_opds AS ordd_opds', 'tt_ordd.ordd_uprc AS ordd_uprc',
+                                'tt_ordd.ordd_smpl AS ordd_smpl')->orderBy('tt_ordd.id')->get();
 
                         // foreach ($order_details as $order_details1) {
                         //  if ($order_details1->ordd_qnty < $orderLineData->Delivery_P_Qty) {
@@ -2102,8 +2525,7 @@ WHERE t2.rtan_rtnm='$order_code';
                             $dd_amt = ($orderLineData->deliveryQty * $orderLineData->unitPrice) - $orderLineData->promotionalDiscount;
                         }
                         // DB::connection($db_conn)->table('tt_ordd')->where(['id' => $order_details1->id, 'amim_id' => $orderLineData->itemId, 'ordd_uprc' => $orderLineData->unitPrice
-                        DB::connection($db_conn)->table('tt_ordd')->where([
-                            'ordm_id' => $orderLineData->invoiceId, 'amim_id' => $orderLineData->itemId, 'ordd_uprc' => $orderLineData->unitPrice, 'ordd_qnty' => $orderLineData->orderQty
+                        DB::connection($db_conn)->table('tt_ordd')->where(['ordm_id' => $orderLineData->invoiceId, 'amim_id' => $orderLineData->itemId, 'ordd_uprc' => $orderLineData->unitPrice, 'ordd_qnty' => $orderLineData->orderQty
                         ])->update(['ordd_dqty' => $orderLineData->deliveryQty, 'ordd_amnt' => $dd_amt, 'ordd_opds' => $orderLineData->promotionalDiscount, 'ordd_odat' => $orderLineData->deliveryQty * $orderLineData->unitPrice]);
 
 
@@ -2122,10 +2544,8 @@ WHERE t2.rtan_rtnm='$order_code';
                     $Trip_master->aemp_eusr = $request->SR_ID;
                     $Trip_master->save();
                     $dl_date = date('Y-m-d');
-                    DB::connection($db_conn)->table('tt_ordm')->where([
-                        'id' => $outletData_child[0]->invoiceId,
-                        'ordm_date' => $request->order_date, 'lfcl_id' => 1
-                    ])->update(['lfcl_id' => 11, 'ordm_drdt' => $dl_date]);
+                    DB::connection($db_conn)->table('tt_ordm')->where(['id' => $outletData_child[0]->invoiceId,
+                        'ordm_date' => $request->order_date, 'lfcl_id' => 1])->update(['lfcl_id' => 11, 'ordm_drdt' => $dl_date]);
 
                     DB::connection($db_conn)->commit();
                     return array(
@@ -2141,13 +2561,15 @@ WHERE t2.rtan_rtnm='$order_code';
         }
     }
 
-    public function searchDataList_New(Request $request)
+      public function searchDataList_New(Request $request)
     {
         $search_text = $request->search_text;
         $scan_code = $request->scan_code;
+       // $emp_id = $request->emp_id;
         $search_type = $request->search_type;
         $geo_lat = $request->geo_lat;
         $geo_lon = $request->geo_lon;
+		//AND t1.aemp_mngr=$emp_id
         // $geo_lat = '6.0335917';
         // $geo_lon = '102.2835833';
         $where1 = '';
@@ -2216,30 +2638,102 @@ FROM tm_aemp AS t1
 WHERE (t1.aemp_usnm LIKE '%$search_text%' OR t1.aemp_name LIKE '%$search_text%' OR t1.aemp_mob1 LIKE '%$search_text%') AND t1.lfcl_id=1 $where1
 LIMIT 20";
                 }
+            }else {
+                $data = "SELECT
+  t1.id                                   AS trn_id,
+  concat(t1.site_code, '-', t1.site_name) AS trn_name,
+  t1.site_code                            AS trn_code,
+  t1.site_ownm                            AS owner,
+  t1.site_mob1                            AS mobile,
+  t1.geo_lat                              AS lat,
+  t1.geo_lon                              AS lon,
+  3                                       AS type_id,
+  'Outlet'                                AS type_name
+FROM tm_site AS t1
+WHERE (t1.site_code LIKE '%$search_text%' OR t1.site_name LIKE '%$search_text%' OR t1.site_mob1 LIKE '%$search_text%') AND t1.lfcl_id=1 $where2 
+UNION ALL
+SELECT
+  t1.id                                   AS trn_id,
+  concat(t1.locd_code, '-', t1.locd_name) AS trn_name,
+  t1.locd_code                            AS trn_code,
+  ''                                      AS owner,
+  ''                                      AS mobile,
+  t1.geo_lat                              AS lat,
+  t1.geo_lon                              AS lon,
+  4                                       AS type_id,
+  'Location'                                AS type_name
+FROM tm_locd AS t1
+WHERE (t1.locd_code LIKE '%$search_text%' OR t1.locd_name LIKE '%$search_text%') $where3 LIMIT 200";
+
             } 
 
             $tst = DB::connection($country->cont_conn)->select($data);
             return array("receive_data" => array("data" => $tst, "action" => $request->country_id));
         }
     }
-
- public function user_wise_msp_item_report(Request $request)
+	
+	 public function user_wise_msp_item_report(Request $request)
     {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
+		$id=$request->aemp_id;
+        $role_id=DB::connection($db_conn)->select("SELECT role_id from tm_aemp where id=$id");
+        $role_id=$role_id[0]->role_id;
+        $sr_list='';
+        $list=$id;
+        if( $role_id>1){
+            while($list){
+                $list_to_check=DB::connection($db_conn)->select("Select id aemp_id,role_id from tm_aemp where aemp_mngr in ($list)");
+                $list='';
+                $cnt=0;
+                $cnt1=0;
+                foreach($list_to_check as $s){
+                    if($s->role_id <$role_id){
+                        if($s->role_id==1){
+                            if($cnt==0){
+                                $sr_list.=$s->aemp_id;
+                            }
+                            else{
+                                $sr_list.=','.$s->aemp_id;
+                            }
+                            $cnt++;
+                        }else if($s->role_id>=2){
+                            if($cnt1==0){
+                                $list.=$s->aemp_id;
+                                
+                            }else{
+                                $list.=','.$s->aemp_id;
+                            }
+                            $cnt1++;
+                            
+                        }
+                    }
+                }
+            }
+            
+        }else{
+            $sr_list=$id;
+        }	
+			// if(!$sr_list){
+				// $sr_list=0;
+			// }
+			
            $data = "SELECT t1.`ordm_date`,t1.`ordm_ornm`,
 t1.`site_id`,t4.site_code,t4.site_name,
 t5.itsg_code,t5.itsg_name,
 t1.`amim_id`,t2.amim_code,t2.amim_name,
-t1.`ordd_inty`,t1.`ordd_duft`,t1.`ordd_uprc`,round(t1.`ordd_inty`*t1.`ordd_uprc`,2)as amount
+t1.`ordd_inty`,t1.`ordd_duft`,t1.`ordd_uprc`,
+floor(t1.ordd_inty / t1.`ordd_duft`)  AS ctn,
+t1.ordd_inty % t1.`ordd_duft`       AS pcs,
+round(t1.`ordd_oamt`,2)as amount
 FROM `tl_summary_item_site`t1 
 JOIN tm_amim t2 ON t1.`amim_id`=t2.id
 JOIN tm_site t4 ON t1.`site_id`=t4.id
 JOIN tm_itsg t5 ON t2.itsg_id=t5.id
 JOIN tm_mspd t3 ON t1.`amim_id`=t3.amim_id
 JOIN tm_mspm t6 ON t3.mspm_id=t6.id and  t6.lfcl_id=1 AND t6.mspm_edat >= curdate()
-WHERE t1.`aemp_id` = $request->aemp_id 
+WHERE t1.`aemp_id` IN($sr_list)
 and t1.`ordm_date` BETWEEN '$request->start_date' and '$request->end_date'  
 ORDER BY `amount` DESC";
         
@@ -2253,18 +2747,64 @@ ORDER BY `amount` DESC";
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
+			
+		$id=$request->aemp_id;
+        $role_id=DB::connection($db_conn)->select("SELECT role_id from tm_aemp where id=$id");
+        $role_id=$role_id[0]->role_id;
+        $sr_list='';
+        $list=$id;
+        if( $role_id>1){
+            while($list){
+                $list_to_check=DB::connection($db_conn)->select("Select id aemp_id,role_id from tm_aemp where aemp_mngr in ($list) AND lfcl_id=1");
+                $list='';
+                $cnt=0;
+                $cnt1=0;
+                foreach($list_to_check as $s){
+                    if($s->role_id <$role_id){
+                        if($s->role_id==1){
+                            if($cnt==0){
+                                $sr_list.=$s->aemp_id;
+                            }
+                            else{
+                                $sr_list.=','.$s->aemp_id;
+                            }
+                            $cnt++;
+                        }else if($s->role_id>=2){
+                            if($cnt1==0){
+                                $list.=$s->aemp_id;
+                                
+                            }else{
+                                $list.=','.$s->aemp_id;
+                            }
+                            $cnt1++;
+                            
+                        }
+                    }
+                }
+            }
+            
+        }else{
+            $sr_list=$id;
+        }	
+		
+		// if(!$sr_list){
+				// $sr_list=0;
+			// }
            $data = "SELECT t1.`ordm_date`,t1.`ordm_ornm`,
-t1.`site_id`,t4.site_code,t4.site_name,
-t5.itsg_code,t5.itsg_name,
-t1.`amim_id`,t2.amim_code,t2.amim_name,
-t1.`ordd_inty`,t1.`ordd_duft`,t1.`ordd_uprc`,round(t1.`ordd_inty`*t1.`ordd_uprc`,2)as amount
-FROM `tl_summary_item_site`t1 
-JOIN tm_amim t2 ON t1.`amim_id`=t2.id
-JOIN tm_site t4 ON t1.`site_id`=t4.id
-JOIN tm_itsg t5 ON t2.itsg_id=t5.id
-WHERE t1.`aemp_id` = $request->aemp_id 
-and t1.`ordm_date` BETWEEN '$request->start_date' and '$request->end_date'   
-ORDER BY `amount` DESC";
+                    t1.`site_id`,t4.site_code,t4.site_name,
+                    t5.itsg_code,t5.itsg_name,
+                    t1.`amim_id`,t2.amim_code,t2.amim_name,
+                    t1.`ordd_inty`,t1.`ordd_duft`,t1.`ordd_uprc`,
+					floor(t1.ordd_inty / t1.`ordd_duft`)  AS ctn,
+                    t1.ordd_inty % t1.`ordd_duft`       AS pcs,
+					round(t1.`ordd_oamt`,2)as amount
+                    FROM `tl_summary_item_site`t1 
+                    JOIN tm_amim t2 ON t1.`amim_id`=t2.id
+                    JOIN tm_site t4 ON t1.`site_id`=t4.id
+                    JOIN tm_itsg t5 ON t2.itsg_id=t5.id
+                    WHERE t1.`aemp_id`IN($sr_list)
+                    and t1.`ordm_date` BETWEEN '$request->start_date' and '$request->end_date'   
+                    ORDER BY `amount` DESC";
         
 	 $tst = DB::connection($country->cont_conn)->select($data);
             return array("receive_data" => $tst, "action" => $request->country_id);	
@@ -2275,56 +2815,112 @@ ORDER BY `amount` DESC";
     {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
+		$id=$request->aemp_id;
+		$user_summary_data=array();
+		
         if ($db_conn != '') {
-			
-			//return $request;
-			
-			if($request->role_id > 2){												
-				$data = "SELECT t1.*,t2.* FROM
-                (SELECT t2.id,t2.aemp_name,t2.aemp_usnm,t2.role_id,
-				0 AS INV_AMNT,
-                0 AS DELV_AMNT,
-				0 AS COLLECTION_AMNT ,
-				0 AS DUE  
-                FROM `th_dhbd_5`t1 JOIN tm_aemp t2 ON t1.`AEMP_ID`=t2.id 
-                WHERE t1.`dhbd_date` = CURDATE() AND t2.aemp_mngr=$request->aemp_id 
-                GROUP BY t2.id,t2.aemp_name,t2.aemp_usnm,t2.role_id)t1 
-                JOIN (SELECT 
-                   t1.`aemp_id`, 
-                   ROUND(SUM(CASE WHEN t1.dhbd_date=curdate() THEN t1.`dhbd_tamt` ELSE 0 END),2) 'Today',
-                   ROUND(SUM(CASE WHEN t1.dhbd_date=curdate()-INTERVAL 1 DAY THEN t1.`dhbd_tamt` ELSE 0 END),2) 'Yesterday'
-                   FROM `th_dhbd_5`t1 WHERE 
-                   t1.`aemp_mngr` = $request->aemp_id 
-                   AND t1.`dhbd_date` BETWEEN CURDATE() - INTERVAL 1 DAY AND CURDATE()  
-                   GROUP BY t1.aemp_id)t2
-                   ON t1.id=t2.aemp_id;";
-			}elseif($request->role_id==2){
-				$data = "SELECT t1.*,t2.* FROM (SELECT t2.id,t2.aemp_name,t2.aemp_usnm,t2.role_id,
-				round(SUM(`INV_AMNT`),2)AS INV_AMNT,
-                round(SUM(`DELV_AMNT`),2)AS DELV_AMNT,
-				round(SUM(`COLLECTION_AMNT`),2)AS COLLECTION_AMNT ,
-				round(SUM(`DELV_AMNT`-`COLLECTION_AMNT`),2) AS DUE  
-                FROM `dm_trip_master`t1 JOIN tm_aemp t2 ON t1.`AEMP_ID`=t2.id 
-                WHERE `ORDM_DRDT` = CURDATE() AND t2.aemp_mngr=$request->aemp_id 
-                GROUP BY t2.id,t2.aemp_name,t2.aemp_usnm,t2.role_id)t1 JOIN (SELECT 
-                   t1.`aemp_id`, 
-                   ROUND(SUM(CASE WHEN t1.dhbd_date=curdate() THEN t1.`dhbd_tamt` ELSE 0 END),2) 'Today',
-                   ROUND(SUM(CASE WHEN t1.dhbd_date=curdate()-INTERVAL 1 DAY THEN t1.`dhbd_tamt` ELSE 0 END),2) 'Yesterday'
-                   FROM `th_dhbd_5`t1 WHERE 
-                   t1.`aemp_mngr` = $request->aemp_id
-                   AND t1.`dhbd_date` BETWEEN CURDATE() - INTERVAL 1 DAY AND CURDATE()  
-                   GROUP BY t1.aemp_id)t2 ON t1.id=t2.aemp_id;";
-			}elseif($request->role_id==1){
-				$data = "SELECT `ORDM_ORNM`,`ORDM_DRDT`,`WH_ID`,`SITE_CODE`,`INV_AMNT`,
-                `DELV_AMNT`,`COLLECTION_AMNT` ,`DELV_AMNT`-`COLLECTION_AMNT` AS DUE  
-                 FROM `dm_trip_master`
-                 WHERE `ORDM_DRDT` = CURDATE() AND `AEMP_ID`=$request->aemp_id;";
-			}
-                   
-	        $tst = DB::connection($country->cont_conn)->select($data);
-            return array("receive_data" =>$tst, "action" => $request->country_id);	
+			$un_emp_list=DB::connection($db_conn)->select("SELECT id,aemp_usnm,aemp_name,role_id FROM tm_aemp 
+						WHERE aemp_mngr=$id AND lfcl_id=1 ORDER BY aemp_name");
+				for($i=0;$i<count($un_emp_list);$i++){
+					$un_emp_id=$un_emp_list[$i]->id;
+					
+					$sr_list=$this->getSRList($db_conn,$un_emp_id);
+					        					
+					if($sr_list !=''){
+					$order_data=DB::connection($db_conn)->select("  SELECT round(SUM(`INV_AMNT`),2)AS INV_AMNT,
+									round(SUM(`DELV_AMNT`),2)AS DELV_AMNT,
+									round(SUM(`COLLECTION_AMNT`),2)AS COLLECTION_AMNT ,
+									round(SUM(`DELV_AMNT`-`COLLECTION_AMNT`),2) AS DUE,
+									SUM(t1.Today) 'Today',
+									SUM(t1.Yesterday)'Yesterday'
+									FROM 
+										(
+											SELECT 
+											round(SUM(`INV_AMNT`),2)AS INV_AMNT,
+											round(SUM(`DELV_AMNT`),2)AS DELV_AMNT,
+											round(SUM(`COLLECTION_AMNT`),2)AS COLLECTION_AMNT ,
+											round(SUM(`DELV_AMNT`-`COLLECTION_AMNT`),2) AS DUE,
+											0 'Today',
+											0 'Yesterday'
+											FROM `dm_trip_master`t1 
+											WHERE `ORDM_DRDT` = CURDATE() AND t1.AEMP_ID IN($sr_list) 
+											UNION ALL
+											SELECT 
+											0 INV_AMNT,
+											0 DELV_AMNT,
+											0 COLLECTION_AMNT,
+											0 DUE,
+											ROUND(SUM(CASE WHEN t1.dhbd_date=curdate() THEN t1.`dhbd_tamt` ELSE 0 END),2) 'Today',
+											ROUND(SUM(CASE WHEN t1.dhbd_date=curdate()-INTERVAL 1 DAY THEN t1.`dhbd_tamt` ELSE 0 END),2) 'Yesterday'
+											FROM `th_dhbd_5`t1 WHERE 
+											t1.`aemp_id`IN($sr_list)
+											AND t1.`dhbd_date` BETWEEN CURDATE() - INTERVAL 1 DAY AND CURDATE()  
+											)t1 ");
+					$single_user_data=array(
+						'aemp_id'=>$un_emp_list[$i]->id,
+						'aemp_usnm'=>$un_emp_list[$i]->aemp_usnm,
+						'aemp_name'=>$un_emp_list[$i]->aemp_name,
+						'role_id'=>$un_emp_list[$i]->role_id,
+						'INV_AMNT'=>$order_data[0]->INV_AMNT??0,						
+						'DELV_AMNT'=>$order_data[0]->DELV_AMNT??0,						
+						'COLLECTION_AMNT'=>$order_data[0]->COLLECTION_AMNT??0,						
+						'DUE'=>$order_data[0]->DUE??0,						
+						'Today'=>$order_data[0]->Today??0,					
+						'Yesterday'=>$order_data[0]->Yesterday??0					
+					);
+					array_push($user_summary_data,$single_user_data);
+					
+					}
+				}
+							
+            return array("receive_data" =>$user_summary_data, "action" => $request->country_id);	
         }
     } 
+	public function getSRList($db_conn,$id){
+        $role_id=DB::connection($db_conn)->select("SELECT role_id from tm_aemp where id=$id");
+        $role_id=$role_id[0]->role_id;
+        $sr_list='';
+        $list=$id;
+        if( $role_id>1){
+            while($list){
+                $list_to_check=DB::connection($db_conn)->select("Select id aemp_id,role_id from tm_aemp where aemp_mngr in ($list) AND lfcl_id=1");
+                $list='';
+                $cnt=0;
+                $cnt1=0;
+                foreach($list_to_check as $s){
+                    if($s->role_id <$role_id){
+                        if($s->role_id==1){
+                            if($cnt==0){
+                                $sr_list.=$s->aemp_id;
+                            }
+                            else{
+                                $sr_list.=','.$s->aemp_id;
+                            }
+                            $cnt++;
+                        }else if($s->role_id>=2){
+                            if($cnt1==0){
+                                $list.=$s->aemp_id;
+                                
+                            }else{
+                                $list.=','.$s->aemp_id;
+                            }
+                            $cnt1++;
+                            
+                        }
+                    }
+                }
+            }
+            
+        }else{
+            $sr_list=$id;
+        }
+		// if(!$sr_list){
+				// $sr_list=0;
+			// }
+		
+		return $sr_list;
+	}
+	
 	public function user_role_wise_summary_report(Request $request)
     {
         $country = (new Country())->country($request->country_id);
@@ -2336,14 +2932,15 @@ ORDER BY `amount` DESC";
 				$data = "SELECT `ORDM_ORNM`,`ORDM_DRDT`,`WH_ID`,`SITE_CODE`,`INV_AMNT`,
                 `DELV_AMNT`,`COLLECTION_AMNT` ,`DELV_AMNT`-`COLLECTION_AMNT` AS DUE  
                  FROM dm_trip_master
-                 WHERE ORDM_DRDT = CURDATE() AND AEMP_ID=$request->aemp_id ;";
+                 WHERE ORDM_DRDT BETWEEN '$request->start_date' AND '$request->end_date'
+				 AND AEMP_ID=$request->aemp_id ;";
 			}
                 // return $data;	  
 	        $tst = DB::connection($country->cont_conn)->select($data);
             return array("receive_data" =>$tst, "action" => $request->country_id);	
         }
     }
-
+	
     public function SubmitUseRewardPoint(Request $request)
     {
         $country = (new Country())->country($request->country_id);
@@ -2370,8 +2967,7 @@ ORDER BY `amount` DESC";
                 $epoint = $redM->rwdm_rpnt - $request->use_point;
                 $upoint = $redM->rwdm_upnt + $request->use_point;
 
-                DB::connection($db_conn)->table('tm_rwdm')->where([
-                    'id' => $redM->id
+                DB::connection($db_conn)->table('tm_rwdm')->where(['id' => $redM->id
                 ])->update(['rwdm_rpnt' => $epoint, 'rwdm_upnt' => $upoint]);
 
                 DB::connection($db_conn)->commit();
@@ -2404,14 +3000,23 @@ ORDER BY `amount` DESC";
             if ($db_conn != '') {
                 DB::connection($db_conn)->beginTransaction();
                 try {
-                    // if ($outletData->country_id = 5) {
-                    $site_code = '7' . str_pad($outletData->Outlet_Code, 9, '7', STR_PAD_LEFT);
-                    /*} else {
-                        $site_code = '9' . str_pad($outletData->Outlet_Code, 9, '9', STR_PAD_LEFT);
-                    }*/
-                    $site1 = Site::on($db_conn)->where(['site_mob1' => $outletData->Mobile_No_2])->first();
+					$site1 ='';					
+                    if ($outletData->country_id == 2) {
+                        // $site_code = '7' . str_pad($outletData->Outlet_Code, 9, '7', STR_PAD_LEFT);//26-07-2023
+                        $site_code = '8' . str_pad($outletData->Outlet_Code, 9, '8', STR_PAD_LEFT);
+						
+                        $site1 = Site::on($db_conn)
+                            ->where('site_mob1', $outletData->Mobile_No_2)
+                            ->where('attr4', 8)
+                            ->first(['id']);
+                    } else {
+                        $site_code = '7' . str_pad($outletData->Outlet_Code, 9, '7', STR_PAD_LEFT);
+                         $site1 = Site::on($db_conn)
+                            ->where('site_mob1', $outletData->Mobile_No_2)                          
+                            ->first(['id']);
+                    }
+                    // $site1 = Site::on($db_conn)->where(['site_mob1' => $outletData->Mobile_No_2])->first();
                     $site2 = Site::on($db_conn)->where(['site_code' => $site_code])->first();
-
 
                     if ($site1 == null) {
 
@@ -2446,9 +3051,16 @@ ORDER BY `amount` DESC";
                             $site->site_isfg = $outletData->Refrigerator == "Yes" ? 1 : 0;
                             $site->site_issg = $outletData->ShopSining == "Yes" ? 1 : 0;
                             $site->cont_id = $outletData->country_id;
+                            //$site->cont_id = 5;
                             $site->lfcl_id = 1;
                             $site->aemp_iusr = $outletData->up_emp_id;
                             $site->aemp_eusr = $outletData->up_emp_id;
+                            if ($outletData->country_id == 2) {
+                                $site->attr4 = 8;
+                            } else {
+								// $site->attr4 = 0;
+                            }
+
                             $site->save();
 
                             $SiteLog = new SiteLogRfl();
@@ -2475,13 +3087,23 @@ ORDER BY `amount` DESC";
                             );
                         }
                     } else {
-
-                        $existId = Site::on($db_conn)->where('site_mob1', $outletData->Mobile_No_2)->first(['id']);
-
-                        DB::connection($db_conn)->select("UPDATE tm_site SET lfcl_id=2 WHERE site_mob1='$outletData->Mobile_No_2'");
-
-                        $site5 = DB::connection($db_conn)->table('tm_site')->where([
-                            'id' => $existId->id
+                            $success=0;
+                            $message='';
+                        // $existId = Site::on($db_conn)->where('site_mob1', $outletData->Mobile_No_2)->first(['id']);
+                        if ($outletData->country_id == 2) {
+                            $existId = Site::on($db_conn)
+                                ->where('site_mob1', $outletData->Mobile_No_2)
+                                ->where('attr4', 8)
+                                ->first(['id']);
+								
+                           // DB::connection($db_conn)->select("UPDATE tm_site SET lfcl_id=2 WHERE site_mob1='$outletData->Mobile_No_2' and attr4=8");
+						   
+						   $message="Already this Outlet Mobile Number exist\nPlease Use Different Number";
+						   $success=0;
+                        } else {
+                            $existId = Site::on($db_conn)->where('site_mob1', $outletData->Mobile_No_2)->first(['id']);
+                            DB::connection($db_conn)->select("UPDATE tm_site SET lfcl_id=2 WHERE site_mob1='$outletData->Mobile_No_2'");
+							$site5 = DB::connection($db_conn)->table('tm_site')->where(['id' => $existId->id
                         ])->update([
                             'site_name' => $outletData->Outlet_Name,
                             'site_code' => $site_code,
@@ -2501,26 +3123,25 @@ ORDER BY `amount` DESC";
                             'updated_at' => date('Y-m-d H:i:s')
                         ]);
 
-                        DB::connection($db_conn)->table('tblg_otop')->where([
-                            'site_id' => $existId->id
+                        DB::connection($db_conn)->table('tblg_otop')->where(['site_id' => $existId->id
                         ])->update([
                             'aemp_iusr' => $outletData->up_emp_id,
                             'updated_at' => date('Y-m-d H:i:s')
                         ]);
-                        /*  $SiteLog = new SiteLogRfl();
-                          $SiteLog->setConnection($db_conn);
-                          $SiteLog->site_id = $existId->id;
-                          $SiteLog->aemp_iusr = $outletData->up_emp_id;
-                          $SiteLog->save();*/
+						 $message='Already this Outlet Mobile Number exist . Update Successful';
+						 $success=1;
+                       }                        
+                        
                         DB::connection($db_conn)->commit();
 
                         $result_data = array(
-                            'success' => 1,
-                            'message' => "Already this Outlet Mobile Number exist . Update Successful  ",
+                            'success' => $success,
+                            'message' => $message,
                             'code' => $site_code,
                             'id' => $existId->id,
                         );
                     }
+
                 } catch (Exception $e) {
                     DB::connection($db_conn)->rollback();
                     return $e;
@@ -2679,7 +3300,8 @@ ORDER BY `amount` DESC";
                             'message' => " Wrong QR Code\n Fail to Open Outlet !!! ",
                         );
                     }
-                } catch (\Exception $e) {
+                } catch
+                (\Exception $e) {
                     DB::connection($db_conn)->rollback();
                     return $e;
                 }
@@ -2699,8 +3321,10 @@ ORDER BY `amount` DESC";
             $data1 = DB::connection($db_conn)->select("
 SELECT COUNT(`id`)AS Open_Outlet_Qty FROM `tm_site`
 WHERE aemp_iusr='$SR_ID' AND Date(`created_at`)=CURDATE()");
+
         }
         return $data1;
+
     }
 
     public
@@ -2714,8 +3338,10 @@ WHERE aemp_iusr='$SR_ID' AND Date(`created_at`)=CURDATE()");
         if ($db_conn != '') {
             $data1 = DB::connection($db_conn)->select("
 SELECT concat('https://images.sihirbox.com/',`amim_imgl`)AS item_picture FROM `tm_amim` WHERE `amim_code`='$item_code' AND amim_imgl!=''");
+
         }
         return $data1;
+
     }
 
     public
@@ -2729,8 +3355,10 @@ SELECT concat('https://images.sihirbox.com/',`amim_imgl`)AS item_picture FROM `t
             $data1 = DB::connection($db_conn)->select("
 SELECT COUNT(`id`)AS Open_Outlet_Qty FROM `tm_site`
 WHERE (aemp_iusr='$SR_ID' OR aemp_eusr='$SR_ID') AND (Date(`created_at`)=CURDATE() OR Date(`updated_at`)=CURDATE())");
+
         }
         return $data1;
+
     }
 
     public
@@ -2744,8 +3372,10 @@ WHERE (aemp_iusr='$SR_ID' OR aemp_eusr='$SR_ID') AND (Date(`created_at`)=CURDATE
             $data1 = DB::connection($db_conn)->select("
 SELECT COUNT(`id`)AS Open_Outlet_Qty FROM `tm_msit`
 WHERE aemp_iusr='$SR_ID' AND Date(`created_at`)=CURDATE()");
+
         }
         return $data1;
+
     }
 
     public
@@ -2763,8 +3393,10 @@ t1.`geo_lat`,t1.`geo_lon`,t2.mktm_name,t2.id AS market_id,t1.site_mob1 AS mobile
 FROM `tm_msit`t1 JOIN tm_mktm t2 ON(t1.`mktm_id`=t2.id)
 WHERE  t1.aemp_iusr='$SR_ID' AND Date(t1.`created_at`)='$Date' 
 ");
+
         }
         return $data1;
+
     }
 
     public
@@ -2782,8 +3414,10 @@ t1.`geo_lat`,t1.`geo_lon`,t2.mktm_name,t2.id AS market_id,t1.site_mob1 AS mobile
 FROM `tm_site`t1 JOIN tm_mktm t2 ON(t1.`mktm_id`=t2.id)
 WHERE (t1.aemp_iusr='$SR_ID'OR t1.aemp_eusr='$SR_ID') AND (Date(t1.`created_at`)='$Date' OR Date(t1.`updated_at`)='$Date')
 ");
+
         }
         return $data1;
+
     }
 
     public
@@ -2801,8 +3435,10 @@ t1.`geo_lat`,t1.`geo_lon`,t2.mktm_name,t2.id AS market_id,t1.site_mob1 AS mobile
 FROM `tm_msit`t1 JOIN tm_mktm t2 ON(t1.`mktm_id`=t2.id)
 WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date' 
 ");
+
         }
         return $data1;
+
     }
 
     public
@@ -2821,8 +3457,10 @@ WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date'
           FROM `tm_site`
           WHERE `site_code`='$Scanned_outlet_id'
           ");
+
         }
         return $data1;
+
     }
 
     public
@@ -2843,8 +3481,10 @@ WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date'
           FROM `tm_msit`
           WHERE `site_code`='$Scanned_outlet_id'
           ");
+
         }
         return $data1;
+
     }
 
     public
@@ -2880,8 +3520,7 @@ WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date'
                             $tl_scmp = DB::connection($db_conn)->table('tl_scmp')->where(['site_id' => $site->id])->first();
                             if ($tl_scmp != null) {
 
-                                DB::connection($db_conn)->table('tl_scmp')->where([
-                                    'site_id' => $site->id
+                                DB::connection($db_conn)->table('tl_scmp')->where(['site_id' => $site->id
                                 ])->update(['cont_id' => $outletData->nationality]);
                             }
                         }
@@ -2916,6 +3555,7 @@ WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date'
                     return $e;
                     //throw $e;
                 }
+
             }
         }
     }
@@ -2969,6 +3609,7 @@ WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date'
                     return $e;
                     //throw $e;
                 }
+
             }
         }
     }
@@ -3004,6 +3645,7 @@ WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date'
                 return $e;
                 //throw $e;
             }
+
         }
     }
 
@@ -3012,7 +3654,7 @@ WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date'
     {
         $country = (new Country())->country($request->country_id);
 
-        if ($request->country_id == 14 || $request->country_id == 5) {
+        if ($request->country_id == 14 || $request->country_id == 5|| $request->country_id == 3) {
 
             $result_data = array(
                 'success' => 10,
@@ -3032,10 +3674,8 @@ WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date'
             $routeSite = RouteSite::on($db_conn)->where(['site_id' => $request->site_id, 'rout_id' => $request->route_id])->first();
             if ($routeSite != null) {
 
-                DB::connection($db_conn)->table('tl_rsmp')->where([
-                    'rout_id' => $request->route_id,
-                    'site_id' => $request->site_id
-                ])->delete();
+                DB::connection($db_conn)->table('tl_rsmp')->where(['rout_id' => $request->route_id,
+                    'site_id' => $request->site_id])->delete();
 
                 $result_data = array(
                     'success' => 1,
@@ -3127,8 +3767,8 @@ WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date'
                  }*/
                 $attendance = new Attendance();
                 $attendance->setConnection($db_conn);
-                $attendance->slgp_id = $request->Group_Id;; //$request->Group_Id;
-                $attendance->aemp_id = $request->SR_ID; // $request->SR_ID;
+                $attendance->slgp_id = $request->Group_Id;;//$request->Group_Id;
+                $attendance->aemp_id = $request->SR_ID;// $request->SR_ID;
                 $attendance->site_id = 2;
                 $attendance->site_name = '';
                 $attendance->attn_imge = $request->OutLet_Picture;
@@ -3161,6 +3801,7 @@ WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date'
                 //throw $e;
             }
         }
+
     }
 
     public
@@ -3186,8 +3827,8 @@ WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date'
                 }
                 $attendance = new Attendance();
                 $attendance->setConnection($db_conn);
-                $attendance->slgp_id = $request->Group_Id;; //$request->Group_Id;
-                $attendance->aemp_id = $request->SR_ID; // $request->SR_ID;
+                $attendance->slgp_id = $request->Group_Id;;//$request->Group_Id;
+                $attendance->aemp_id = $request->SR_ID;// $request->SR_ID;
                 $attendance->site_id = 2;
                 $attendance->site_name = '';
                 $attendance->attn_imge = $path_name;
@@ -3220,6 +3861,7 @@ WHERE  t1.aemp_eusr='$SR_ID' AND Date(t1.`updated_at`)='$Date'
                 //throw $e;
             }
         }
+
     }
 
     public
@@ -3369,7 +4011,7 @@ AND t2.prom_edat >=CURDATE()
         }
 
 
-        return array(
+        return Array(
             "SR_Group_Wise_Route_Table" => array("data" => $data1, "action" => $request->country_id),
             "RouteWise_Outlet_Table" => array("data" => $data2, "action" => $request->country_id),
             "Product_Info_Table" => array("data" => $data3, "action" => $request->country_id),
@@ -3378,6 +4020,7 @@ AND t2.prom_edat >=CURDATE()
             "Grv_Reason" => array("data" => $data7, "action" => $request->country_id),
             "FOC_Program_ALL_Info_Table" => array("data" => $data6, "action" => $request->country_id),
         );
+
     }
 
     public
@@ -3520,7 +4163,7 @@ AND t2.prom_edat >=CURDATE()
         }
 
 
-        return array(
+        return Array(
             "SR_Group_Wise_Route_Table" => array("data" => $data1, "action" => $request->country_id),
             "RouteWise_Outlet_Table" => array("data" => $data2, "action" => $request->country_id),
             "Product_Info_Table" => array("data" => $data3, "action" => $request->country_id),
@@ -3528,6 +4171,7 @@ AND t2.prom_edat >=CURDATE()
             "Non_Productive_Reason" => array("data" => $data5, "action" => $request->country_id),
             "FOC_Program_ALL_Info_Table" => array("data" => $data6, "action" => $request->country_id),
         );
+
     }
 
     public
@@ -3595,8 +4239,9 @@ SELECT
     t1.dprt_name                AS Reason_Name
   FROM tm_dprt AS t1
 ");
+
         }
-        return array(
+        return Array(
             "SR_Group_Wise_Route_Table" => array("data" => $data1, "action" => $request->country_id),
             "Distribution_Info_Table" => array("data" => $data4, "action" => $request->country_id),
             "Non_Productive_Reason" => array("data" => $data5, "action" => $request->country_id),
@@ -3622,8 +4267,9 @@ SELECT
     FROM tm_wurl AS t1
     WHERE t1.wurl_stus=1
     ");
+
         }
-        return array(
+        return Array(
             "Web_URL" => array("data" => $data8, "action" => $request->country_id),
         );
     }
@@ -3715,8 +4361,9 @@ JOIN tm_aemp t4 ON t2.slgp_id=t4.slgp_id AND t2.zone_id=t4.zone_id
 WHERE t4.id=$request->emp_id AND t1.`lfcl_id`=1 AND t1.`mspm_sdat` <= CURDATE()
       AND t1.`mspm_edat` >= CURDATE()
 ");
+
         }
-        return array(
+        return Array(
             "SR_Group_Wise_Route_Table" => array("data" => $data1, "action" => $request->country_id),
             "Distribution_Info_Table" => array("data" => $data4, "action" => $request->country_id),
             "Non_Productive_Reason" => array("data" => $data5, "action" => $request->country_id),
@@ -3761,9 +4408,10 @@ FROM tl_sgsm AS t1
 WHERE t3.lfcl_id = '1' AND t1.aemp_id =  $request->emp_id AND t2.pldt_tppr>0
 GROUP BY t1.plmt_id, t3.id, t5.issc_name, t3.amim_name, t2.pldt_tppr, t2.amim_duft, t5.issc_seqn,t2.amim_dunt,t2.amim_runt,t3.amim_code ");
         }
-        return array(
+        return Array(
             "Product_Info_Table" => array("data" => $data3, "action" => $request->country_id),
         );
+
     }
 
     public
@@ -3834,10 +4482,15 @@ GROUP BY t1.plmt_id, t3.id, t5.issc_name,
 t3.amim_name, t2.pldt_tppr, t2.amim_duft, 
 t5.issc_seqn,t2.amim_dunt,t2.amim_runt,
 t3.amim_code ");
+
+
         }
-        return array(
+        return Array(
             "Product_Info_Table" => array("data" => $data3, "action" => $request->country_id),
         );
+
+
+
     }
 
     public
@@ -3877,9 +4530,10 @@ FROM tl_sgsm AS t1
 WHERE t3.lfcl_id = '1' AND t1.aemp_id =  $request->emp_id AND t2.pldt_tppr>0
 GROUP BY t1.plmt_id, t3.id, t5.issc_name, t3.amim_name, t2.pldt_tppr, t2.amim_duft, t5.issc_seqn,t2.amim_dunt,t2.amim_runt,t3.amim_code ");
         }
-        return array(
+        return Array(
             "Product_Info_Table" => array("data" => $data3, "action" => $request->country_id),
         );
+
     }
 
     public
@@ -3915,9 +4569,10 @@ GROUP BY t3.site_id, t1.rout_id, t3.rspm_serl, t4.site_code, t4.site_name, t4.si
   t4.site_mob1, t4.site_adrs, t4.geo_lat, t4.geo_lon;");
         }
 
-        return array(
+        return Array(
             "RouteWise_Outlet_Table" => array("data" => $data2, "action" => $request->country_id),
         );
+
     }
 
     public
@@ -3959,9 +4614,10 @@ GROUP BY t3.site_id, t1.rout_id, t3.rspm_serl, t4.site_code, t4.site_name, t4.si
     WHERE t4.aemp_id='$request->emp_id ' AND t4.lfcl_id='1';");
         }*/
 
-        return array(
+        return Array(
             "OutletBank_Table" => array("data" => $data2, "action" => $request->country_id),
         );
+
     }
 
     public
@@ -3990,9 +4646,10 @@ GROUP BY t3.site_id, t1.rout_id, t3.rspm_serl, t4.site_code, t4.site_name, t4.si
   LEFT JOIN tl_srth t4 ON t3.than_id=t4.than_id
   WHERE t4.aemp_id='$request->emp_id' AND t4.than_id='$request->than_id' AND t1.lfcl_id=1;");
         }
-        return array(
+        return Array(
             "OutletBank_Table" => array("data" => $data2, "action" => $request->country_id),
         );
+
     }
 
     public
@@ -4030,9 +4687,10 @@ GROUP BY t3.site_id, t1.rout_id, t3.rspm_serl, t4.site_code, t4.site_name, t4.si
   LEFT JOIN  tl_scmp t5 ON t1.id=t5.site_id
   WHERE t4.aemp_id='$request->emp_id' AND t4.than_id='$request->than_id' AND t1.lfcl_id=1;");
         }
-        return array(
+        return Array(
             "OutletBank_Table" => array("data" => $data2, "action" => $request->country_id),
         );
+
     }
 
     public
@@ -4082,10 +4740,11 @@ WHERE t1.aemp_id = $request->emp_id AND t2.lfcl_id='1'
       AND t2.prom_edat >= CURDATE()
 ");
         }
-        return array(
-            // 0= NT  1= Zn
+        return Array(
+// 0= NT  1= Zn
             "FOC_Program_ALL_Info_Table" => array("data" => $data6, "action" => $request->country_id),
         );
+
     }
 
     public
@@ -4167,13 +4826,15 @@ FROM tm_prmf AS t1
   JOIN tm_aemp t4 ON(t2.prmr_qfgp=t4.slgp_id) AND t3.site_id=t4.zone_id
 WHERE t4.id =$request->emp_id AND curdate() BETWEEN t2.prms_sdat AND t2.prms_edat AND t2.lfcl_id = 1 
 GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmr_id, t1.amim_id, t1.prmd_modr");
+
         }
-        return array(
+        return Array(
             "promotion" => array("data" => $data1, "action" => $request->country_id),
             "promotion_buy_item" => array("data" => $data2, "action" => $request->country_id),
             "promotion_slab" => array("data" => $data3, "action" => $request->country_id),
             "promotion_free_item" => array("data" => $data4, "action" => $request->country_id),
         );
+
     }
 
     public
@@ -4186,12 +4847,20 @@ GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmr_id, t1.amim
 
             if ($request->country_id == 2 || $request->country_id == 5) {
                 $data2 = DB::connection($db_conn)->select("select 0 id from dual union all SELECT distinct t4.id
-                            FROM tm_mktm t4
-                            LEFT JOIN tm_ward_lt t6 ON(t4.ward_id=t6.ward_id)
-                            WHERE  MBRContains(st_makeEnvelope (
-                            point(($request->geo_lon + 5 / 111.1), ($request->geo_lat + 5 / 111.1)),
-                            point(($request->geo_lon - 5 / 111.1), ($request->geo_lat - 5 / 111.1)) 
-                            ), POINT( geo_lon, geo_lat )) limit 15");
+FROM tm_mktm t4
+LEFT JOIN tm_ward_lt t6 ON(t4.ward_id=t6.ward_id)
+WHERE  MBRContains(st_makeEnvelope (
+point(($request->geo_lon + 1 / 111.1), ($request->geo_lat + 1 / 111.1)),
+  point(($request->geo_lon - 1 / 111.1), ($request->geo_lat - 1 / 111.1)) 
+), POINT( geo_lon, geo_lat ))
+AND ( ACOS( COS( RADIANS( $request->geo_lat  ) )
+                 * COS( RADIANS( t6.geo_lat ) )
+                 * COS( RADIANS( t6.geo_lon ) - RADIANS( $request->geo_lon ) )
+                 + SIN( RADIANS( $request->geo_lat  ) )
+                   * SIN( RADIANS( t6.geo_lat ) )
+           )
+           * 6371
+         )<.8");
                 $d = '';
                 $i = 1;
                 foreach ($data2 as $key => $value) {
@@ -4203,76 +4872,76 @@ GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmr_id, t1.amim
                     $i++;
                 }
                 $data1 = DB::connection($db_conn)->select("
-                            select
-                            Outlet_ID                                                AS Outlet_ID,
-                            Outlet_Code                                              AS Outlet_Code,
-                            Outlet_Name                                              AS Outlet_Name,
-                            Outlet_Name_Bn                                           AS Outlet_Name_Bn,
-                            distance_in_km                                           AS distance_in_km,
-                            Owner_Name                                               AS Owner_Name,
-                            Mobile_No                                                AS Mobile_No,
-                            Outlet_Address                                           AS Outlet_Address,
-                            Outlet_Address_Bn                                        AS Outlet_Address_Bn,
-                            Outlet_imge_ln                                           AS Outlet_imge_ln,
-                            refrigerator                                             AS refrigerator,
-                            shop_sign                                                AS shop_sign,
-                            geo_lat                                                  AS geo_lat,
-                            geo_lon                                                  AS geo_lon
-                    FROM ( select t1.id                  AS Outlet_ID,
-                            t1.site_code             AS Outlet_Code,
-                            t1.site_name             AS Outlet_Name,
-                            TRIM(t1.site_olnm)        AS Outlet_Name_Bn,
-                                ( ACOS( COS( RADIANS( $request->geo_lat  ) )
-                                    * COS( RADIANS( t1.geo_lat ) )
-                                    * COS( RADIANS( t1.geo_lon ) - RADIANS( $request->geo_lon ) )
-                                    + SIN( RADIANS( $request->geo_lat  ) )
-                                    * SIN( RADIANS( t1.geo_lat ) )
-                            )
-                            * 6371
-                            ) AS distance_in_km,
-                    t1.site_ownm AS Owner_Name,
-                    t1.site_mob1 AS Mobile_No,
-                    t1.site_adrs AS Outlet_Address,
-                    t1.site_olad AS Outlet_Address_Bn,
-                    t1.site_imge AS Outlet_imge_ln,
-                    t1.site_isfg AS refrigerator,
-                    t1.site_issg AS shop_sign,
-                    t1.geo_lat,
-                    t1.geo_lon
-                    from tm_site_registration as t1
-                    where t1.mktm_id in($d) and MBRContains(st_makeEnvelope (
-                    point(($request->geo_lon + 1 / 111.1), ($request->geo_lat + 1 / 111.1)),
-                    point(($request->geo_lon - 1 / 111.1), ($request->geo_lat - 1 / 111.1)) 
-                    ), POINT( geo_lon, geo_lat ))AND t1.lfcl_id=1 order by distance_in_km asc limit 50 )AS t22
-                    UNION ALL 
-                    select  t1.id                                                         AS Outlet_ID,
-                            t1.locd_code                                                 AS Outlet_Code,
-                            t1.locd_name                                                 AS Outlet_Name,
-                            TRIM(t1.locd_name)                                            AS Outlet_Name_Bn,
-                                ( ACOS( COS( RADIANS( $request->geo_lat  ) )
-                                    * COS( RADIANS( t1.geo_lat ) )
-                                    * COS( RADIANS( t1.geo_lon ) - RADIANS( $request->geo_lon ) )
-                                    + SIN( RADIANS( $request->geo_lat ) )
-                                    * SIN( RADIANS( t1.geo_lat ) )
-                            )
-                            * 6371
-                            ) AS distance_in_km,
-                    '' AS Owner_Name,
-                    '' AS Mobile_No,
-                    t1.geo_adrs AS Outlet_Address,
-                    t1.geo_adrs AS Outlet_Address_Bn,
-                    '' AS Outlet_imge_ln,
-                    '0' AS refrigerator,
-                    '0' AS shop_sign,
-                    t1.geo_lat,
-                    t1.geo_lon
-                    from tm_locd as t1
-                    where MBRContains(st_makeEnvelope (
-                    point(($request->geo_lon + 0.08 / 111.1), ($request->geo_lat + 0.08 / 111.1)),
-                    point(($request->geo_lon / 111.1), ($request->geo_lat - 0.08 / 111.1)) 
-                    ), POINT( geo_lon, geo_lat ))AND t1.lfcl_id=1 order by distance_in_km asc limit 50
+         select
+         Outlet_ID                                                AS Outlet_ID,
+         Outlet_Code                                              AS Outlet_Code,
+         Outlet_Name                                              AS Outlet_Name,
+         Outlet_Name_Bn                                           AS Outlet_Name_Bn,
+         distance_in_km                                           AS distance_in_km,
+         Owner_Name                                               AS Owner_Name,
+         Mobile_No                                                AS Mobile_No,
+         Outlet_Address                                           AS Outlet_Address,
+         Outlet_Address_Bn                                        AS Outlet_Address_Bn,
+         Outlet_imge_ln                                           AS Outlet_imge_ln,
+         refrigerator                                             AS refrigerator,
+         shop_sign                                                AS shop_sign,
+         geo_lat                                                  AS geo_lat,
+         geo_lon                                                  AS geo_lon
+  FROM ( select t1.id                  AS Outlet_ID,
+         t1.site_code             AS Outlet_Code,
+         t1.site_name             AS Outlet_Name,
+        TRIM(t1.site_olnm)        AS Outlet_Name_Bn,
+               ( ACOS( COS( RADIANS( $request->geo_lat  ) )
+                 * COS( RADIANS( t1.geo_lat ) )
+                 * COS( RADIANS( t1.geo_lon ) - RADIANS( $request->geo_lon ) )
+                 + SIN( RADIANS( $request->geo_lat  ) )
+                   * SIN( RADIANS( t1.geo_lat ) )
+           )
+           * 6371
+         ) AS distance_in_km,
+   t1.site_ownm AS Owner_Name,
+  t1.site_mob1 AS Mobile_No,
+  t1.site_adrs AS Outlet_Address,
+  t1.site_olad AS Outlet_Address_Bn,
+  t1.site_imge AS Outlet_imge_ln,
+  t1.site_isfg AS refrigerator,
+  t1.site_issg AS shop_sign,
+  t1.geo_lat,
+  t1.geo_lon
+  from tm_site_registration as t1
+ where t1.mktm_id in($d) and MBRContains(st_makeEnvelope (
+  point(($request->geo_lon + 1 / 111.1), ($request->geo_lat + 1 / 111.1)),
+  point(($request->geo_lon - 1 / 111.1), ($request->geo_lat - 1 / 111.1)) 
+), POINT( geo_lon, geo_lat ))AND t1.lfcl_id=1 order by distance_in_km asc limit 50 )AS t22
+UNION ALL 
+select  t1.id                                                         AS Outlet_ID,
+         t1.locd_code                                                 AS Outlet_Code,
+         t1.locd_name                                                 AS Outlet_Name,
+        TRIM(t1.locd_name)                                            AS Outlet_Name_Bn,
+               ( ACOS( COS( RADIANS( $request->geo_lat  ) )
+                 * COS( RADIANS( t1.geo_lat ) )
+                 * COS( RADIANS( t1.geo_lon ) - RADIANS( $request->geo_lon ) )
+                 + SIN( RADIANS( $request->geo_lat ) )
+                   * SIN( RADIANS( t1.geo_lat ) )
+           )
+           * 6371
+         ) AS distance_in_km,
+   '' AS Owner_Name,
+  '' AS Mobile_No,
+  t1.geo_adrs AS Outlet_Address,
+  t1.geo_adrs AS Outlet_Address_Bn,
+  '' AS Outlet_imge_ln,
+  '0' AS refrigerator,
+  '0' AS shop_sign,
+  t1.geo_lat,
+  t1.geo_lon
+  from tm_locd as t1
+ where MBRContains(st_makeEnvelope (
+  point(($request->geo_lon + 0.08 / 111.1), ($request->geo_lat + 0.08 / 111.1)),
+  point(($request->geo_lon / 111.1), ($request->geo_lat - 0.08 / 111.1)) 
+), POINT( geo_lon, geo_lat ))AND t1.lfcl_id=1 order by distance_in_km asc limit 50
 
-                    ");
+ ");
             } else {
                 $data1 = DB::connection($db_conn)->select("
      SELECT   t1.id                                                   AS Outlet_ID,
@@ -4300,12 +4969,14 @@ FROM tm_site AS t1 where lfcl_id=1   HAVING distance_in_km < 1
 ORDER BY distance_in_km
 LIMIT 20
 ");
+
             }
         }
 
-        return array(
+        return Array(
             "OutletBank_Table" => array("data" => $data1, "action" => $request->country_id),
         );
+
     }
 
     public
@@ -4337,7 +5008,7 @@ point(($request->geo_lon + 15 / 111.1), ($request->geo_lat + 15 / 111.1)),
                     $i++;
                 }
 
-                //AND t1.`site_name`LIKE'%$Search_key%'
+//AND t1.`site_name`LIKE'%$Search_key%'
                 $data1 = DB::connection($db_conn)->select("
         select
          Outlet_ID                                                AS Outlet_ID,
@@ -4379,7 +5050,7 @@ point(($request->geo_lon + 15 / 111.1), ($request->geo_lat + 15 / 111.1)),
  where t1.mktm_id in($d) and MBRContains(st_makeEnvelope (
   point(($request->geo_lon + 1 / 111.1), ($request->geo_lat + 1 / 111.1)),
   point(($request->geo_lon - 1 / 111.1), ($request->geo_lat - 1 / 111.1)) 
-), POINT( geo_lon, geo_lat ))AND t1.lfcl_id=1 AND t1.`site_name`LIKE'%$Search_key%'HAVING distance_in_km < .5
+), POINT( geo_lon, geo_lat ))AND t1.lfcl_id=1 AND (t1.`site_name`LIKE'%$Search_key%' OR t1.site_code LIKE'%$Search_key%')HAVING distance_in_km < .5
 order by distance_in_km asc limit 20 )AS t22
 UNION ALL 
 select  t1.id                                                         AS Outlet_ID,
@@ -4407,6 +5078,7 @@ select  t1.id                                                         AS Outlet_
  where t1.locd_code LIKE'%$Search_key%' AND t1.lfcl_id=1 HAVING distance_in_km < .5 order by distance_in_km asc limit 200;
 ");
             }
+
         } else {
 
             $data1 = DB::connection($db_conn)->select("
@@ -4425,12 +5097,14 @@ select  t1.id                                                         AS Outlet_
   t1.geo_lat,
   t1.geo_lon
   from tm_site as t1
- where t1.site_name LIKE'%$Search_key%'OR t1.site_code LIKE'%$Search_key%' AND t1.lfcl_id=1  order by t1.site_name ;
+ where (t1.site_name LIKE'%$Search_key%'OR t1.site_code LIKE'%$Search_key%') AND t1.lfcl_id=1  order by t1.site_name ;
 ");
+
         }
-        return array(
+        return Array(
             "OutletBank_Table" => array("data" => $data1, "action" => $request->country_id),
         );
+
     }
 
 
@@ -4459,8 +5133,10 @@ select  t1.id                                                         AS Outlet_
  t1.`srmd_day` = '$user_day_name'AND t1.aemp_id='$request->EmpId'
  GROUP BY t2.`id` ,t2.mktm_name
 ");
+
         }
         return $data1;
+
     }
 
     public
@@ -4487,8 +5163,10 @@ INNER JOIN tm_mktm t3 ON (t2.id=t3.ward_id)
  WHERE t1.id='$send_thana_code'
  GROUP BY t3.id ,t3.mktm_name
 ");
+
         }
         return $data1;
+
     }
 
     public
@@ -4525,8 +5203,10 @@ t1.geo_lat,
 t1.geo_lon,
 t1.site_ownm ORDER BY t1.site_name
      ");
+
         }
         return $data1;
+
     }
 
     public
@@ -4564,8 +5244,10 @@ t1.geo_lat,
 t1.geo_lon,
 t1.site_ownm
      ");
+
         }
         return $data1;
+
     }
 
     public
@@ -4578,9 +5260,11 @@ t1.site_ownm
             $data1 = DB::connection($db_conn)->select("
      SELECT t1.`id`AS Sr_id,t1.`aemp_usnm`AS Sr_Code,t1.`aemp_name`AS Sr_Name,t1.aemp_mob1 AS Sr_Mobile
      FROM `tm_aemp` t1 WHERE t1.`role_id`='1' AND t1.`aemp_mngr`=$request->MG_EmpId");
+
         }
 
         return $data1;
+
     }
 
     public
@@ -4594,8 +5278,10 @@ t1.site_ownm
      SELECT t1.id,t1.than_name 
      from tm_than t1 JOIN tl_srth t2 ON (t1.id=t2.than_id)
      WHERE t2.aemp_id=$request->emp_id");
+
         }
         return $data1;
+
     }
 
     public
@@ -4610,8 +5296,9 @@ t1.site_ownm
      t1.`pmgl_imgl` AS image 
      FROM `tl_pmgl`t1 JOIN tl_sgsm t2 ON(t1.`slgp_id`=t2.slgp_id) AND t1.`zone_id`=t2.zone_id
      WHERE t2.aemp_id=$request->emp_id");
+
         }
-        return array(
+        return Array(
             "tbld_promotion_gallery" => array("data" => $data1, "action" => $request->country_id),
         );
     }
@@ -4642,6 +5329,7 @@ t1.site_ownm
                         ");
 
                 $tutorial_master[$index]->questionLists = $data2;
+
             }
 
             return $tutorial_master;
@@ -4664,6 +5352,7 @@ t1.site_ownm
      WHERE t1.`slgp_id`=$request->slgp_id AND t1.`zone_id`=$request->zone_id AND t1.`kpim_sdat` <= CURDATE()
      AND t1.`kpim_edat` >= CURDATE() AND t1.`lfcl_id`=1
      ");
+
         }
         return $data1;
     }
@@ -4682,6 +5371,7 @@ t1.site_ownm
      AND t1.`zone_id`=$request->zone_id 
      AND t1.`lfcl_id`=1
      ");
+
         }
         return $data1;
     }
@@ -4703,6 +5393,7 @@ left JOIN tm_kfit t3 ON(t1.kfit_id=t3.id)
 WHERE t1.`aemp_id`=$request->emp_id AND 
 date(t1.created_at)>= SUBDATE(DATE(NOW()), 7)
      ");
+
         }
         return $data1;
     }
@@ -4730,6 +5421,7 @@ FROM tm_site AS t1
 WHERE t2.rout_id=$request->route_id");
         }
         return $data1;
+
     }
 
     public
@@ -4742,10 +5434,11 @@ WHERE t2.rout_id=$request->route_id");
             $data1 = DB::connection($db_conn)->select(
                 "select t1.id as Category_Code,
 t1.otcg_name as Category_Name 
-from tm_otcg as t1"
-            );
+from tm_otcg as t1");
+
         }
         return $data1;
+
     }
 
     public
@@ -4759,10 +5452,11 @@ from tm_otcg as t1"
                 "select t1.id as Category_Code,
               t1.otcg_name as Category_Name 
               from tm_rtcg as t1 WHERE t1.lfcl_id=1
-              ORDER BY t1.otcg_name"
-            );
+              ORDER BY t1.otcg_name");
+
         }
         return $data1;
+
     }
 
     public
@@ -4775,10 +5469,11 @@ from tm_otcg as t1"
             $data1 = DB::connection($db_conn)->select(
                 "select t1.id as Category_Code,
 t1.otcg_name as Category_Name 
-from tm_mtcg as t1"
-            );
+from tm_mtcg as t1");
+
         }
         return $data1;
+
     }
 
     public
@@ -4794,8 +5489,10 @@ from tm_mtcg as t1"
 FROM tm_dsct
 WHERE `lfcl_id` = 1
 ORDER BY dsct_name");
+
         }
         return $data1;
+
     }
 
     public
@@ -4815,10 +5512,12 @@ ORDER BY dsct_name");
      SELECT t1.id as Thana_Code,t1.than_name AS Thana_Name
      from tm_than t1 JOIN tl_srth t2 ON (t1.id=t2.than_id)
      WHERE t2.aemp_id=$request->emp_id");
+
         }
-        return array(
+        return Array(
             "receive_data" => array("ward_data" => $data2, "thana_data" => $data1),
         );
+
     }
 
     public
@@ -4836,8 +5535,10 @@ SELECT t2.id as Thana_Code,t2.than_name AS Thana_Name
 FROM tm_dsct t1 JOIN tm_than t2 ON (t1.id=t2.dsct_id)
 WHERE t1.dsct_name='$district_Name' OR t1.dsct_name='$district_Name1'
 ");
+
         }
         return $data1;
+
     }
 
     public
@@ -4853,8 +5554,10 @@ SELECT `id` as ward_code,`ward_name` as ward_name
 FROM `tm_ward`
 WHERE `LFCL_ID`='1' AND
       `THAN_ID`='$than_id' Order by ward_name");
+
         }
         return $data1;
+
     }
 
     public
@@ -4872,8 +5575,10 @@ FROM `tm_mktm`
 WHERE `lfcl_id` = '1' AND
       `ward_id` = '$ward_id'
 ORDER BY mktm_name");
+
         }
         return $data1;
+
     }
 
     public
@@ -4894,8 +5599,10 @@ ORDER BY mktm_name");
         AND t2.lfcl_id=1
         GROUP BY t1.site_name,t2.site_id
         ");
+
         }
         return $data1;
+
     }
 
     public
@@ -4964,8 +5671,10 @@ GROUP BY t2.ordm_date,t2.ordm_ornm");
         AND t2.lfcl_id=1
         GROUP BY t2.id,t2.ordm_ornm
         ");
+
         }
         return $data1;
+
     }
 
     public
@@ -5020,8 +5729,10 @@ t1.`ordd_oamt`,
 t2.geo_lat,
 t2.geo_lon,t1.prom_id
         ");
+
         }
         return $data1;
+
     }
 
     public
@@ -5094,8 +5805,11 @@ t2.geo_lon,t1.prom_id
        AND t1.ordd_oamt=0
       AND t3.lfcl_id=1
       GROUP BY t2.ordm_date, t1.amim_id,t2.slgp_id,t2.dlrm_id,t3.amim_name,t2.lfcl_id,t1.ordd_uprc,t2.ordm_date");*/
+
         }
 
         return $data1;
+
     }
+
 }

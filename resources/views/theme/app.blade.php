@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'BS').' '.Auth::user()->country()->cont_name }}</title>
+    <title>{{ config('app.name', 'SalesWheel').' '.Auth::user()->country()->cont_name }}</title>
     <link href="{{ asset("theme/vendors/bootstrap/dist/css/bootstrap.min.css")}}" rel="stylesheet">
     <link href="{{ asset("css/style.css")}}" rel="stylesheet">
     <link href="{{ asset("css/animate.min.css")}}" rel="stylesheet">
@@ -47,9 +47,7 @@
         .left_col{
             background-color: #333333!important;
         }
-        .nav li.current-page{
-            background-color: gray!important;
-        }
+        
 	#add-promotion-div{
             display: flex;
             align-items:center;
@@ -242,11 +240,77 @@
     height: 100px;
     animation: spin 2s linear infinite;
 }
+/* Overwrite Style */
+
+.tbl_header{
+    background-color:#6491EA!important;
+    color: white !important;
+}
+.btn-success {
+    background: #6491EA!important;
+    border: 1px solid #169F85;
+    color:#fff!important;
+}
+.left_col {
+    background-color: #142862!important;
+}
+.scroll-view{
+    width:100% !important;
+}
+.main_container{
+    background-color:#163172!important;
+}
+.nav.side-menu>li.active>a{
+    background:none;
+}
+#exTab1 .nav-pills > li.active>a{
+    background-color:#6491EA!important;
+}
+.nav.side-menu>li.active, .nav.side-menu>li.current-page{
+            border-right:5px solid yellow;
+}
+.breadcrumb{
+    padding:8px 33px !important;
+
+}
+.page-title .title_right {
+    width:53%!important;
+}
+.page-title .title_right .pull-right{
+    margin:0;
+}
+.btn-primary{
+    background-color:#4c9173 !important;
+}
+.btn-info{
+    background-color:orange !important;
+}
+.btn-danger{
+    background-color:#9f1e49 !important;
+}
+
+/* OverWrite Style End */
+.menu_div{
+    width: 100%;
+    min-height:100px;
+    padding:10px 0px 15px 10px;
+    -webkit-box-shadow: 1px 1px 5px 2px rgba(0,0,0,0.21); 
+    box-shadow: 1px 1px 5px 2px rgba(0,0,0,0.21);
+    margin-bottom:15px;
+}
+
+.row {
+    margin-right: 9px;
+    margin-left: 9px;
+}
 
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+    footer{
+        margin-left:0 !important;
+    }
     </style>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-82H28TLBFS"></script>
     <script>
@@ -258,51 +322,15 @@
     </script>
 </head>
 
-<body class="nav-md">
+<body>
 <div id="ajax_load" style="display:none;">
     <img src="{{ asset("theme/production/images/gif-load.gif")}}" class="ajax-loader"/>
 </div>
 <div class="container body">
-    <div class="main_container">
-        <div class="col-md-3 left_col">
-            <div class="left_col scroll-view">
-                <div class="" style="border: 0;">
-                    <a href="{{ URL::to('/')}}" class="site_title"><i class="fa fa-globe"></i>
-                        <span>{{ config('app.name', 'FMS').' '.Auth::user()->country()->cont_name }}</span></a>
-
-                </div>
-
-                <div class="clearfix"></div>
-
-                <!-- menu profile quick info -->
-            @include('theme.profile')
-            <!-- /menu profile quick info -->
-
-                <br/>
-
-                <!-- sidebar menu -->
-            @include('theme.menu')
-            <!-- /sidebar menu -->
-
-                <!-- /menu footer buttons -->
-            @include('theme.menu_footer')
-            <!-- /menu footer buttons -->
-            </div>
-        </div>
-
-        <!-- top navigation -->
-    @include('theme.top_nav')
-    <!-- /top navigation -->
-
-        <!-- page content -->
+    @include('theme.top_nav_menu')
     @yield('content')
-
-    <!-- /page content -->
-
-        <!-- footer content -->
     @include('theme.footer')
-    <!-- /footer content -->
-    </div>
+
 </div>
 <script src="{{ asset("theme/vendors/fastclick/lib/fastclick.js")}}"></script>
 <script src="{{ asset("theme/vendors/nprogress/nprogress.js")}}"></script>

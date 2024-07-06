@@ -13,7 +13,8 @@
                             <strong>All Target</strong>
                         </li>
                         <li class="label-success">
-                            <a href="{{ URL::to('/target/upload')}}"> Target Upload</a>
+                            <!-- <a href="{{ URL::to('/target/upload')}}"> Target Upload</a> -->
+                            <a href="{{ URL::to('/new_target')}}"> Target Upload</a>
                         </li>
                     </ol>
                 </div>

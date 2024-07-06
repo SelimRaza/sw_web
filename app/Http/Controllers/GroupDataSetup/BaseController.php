@@ -47,7 +47,7 @@ class BaseController extends Controller
             $country_id = $this->currentUser->employee()->cont_id;
             $emp_id = $this->currentUser->employee()->id;
             $bases = DB::connection($this->db)->select("SELECT t1.id, t1.`base_name`, t1.`base_code`, t2.zone_name, t2.zone_code, t1.lfcl_id 
-FROM `tm_base` t1 INNER JOIN tm_zone t2 ON t1.`zone_id`=t2.id WHERE t1.cont_id ='$country_id' ");
+                        FROM `tm_base` t1 INNER JOIN tm_zone t2 ON t1.`zone_id`=t2.id WHERE t1.cont_id ='$country_id' ");
             // $bases = Base::where('country_id', '=', $this->currentUser->employee()->cont_id)->get();
             return view('master_data.base.index')->with("bases", $bases)->with('permission', $this->userMenu);
         } else {

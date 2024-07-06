@@ -115,7 +115,7 @@ class SKUController extends Controller
 
     public function store(Request $request)
     {
-        //return $request->all();
+        $folder=  $this->currentUser->country()->cont_imgf;
         DB::connection($this->db)->beginTransaction();
         try {
             $imageName = "";
@@ -124,27 +124,27 @@ class SKUController extends Controller
             $s3 = AWS::createClient('s3');
             if ($request->amim_imgl != "") {
                 $file = $request->file('amim_imgl');
-                $imageName = 'bdp/Master/item/' . $unique . '1.' . $request->amim_imgl->getClientOriginalExtension();
+                $imageName = $folder.'/Master/item/' . $unique . '1.' . $request->amim_imgl->getClientOriginalExtension();
 
                 $s3->putObject(array(
-                    'Bucket' => 'prgfms',
+                    'Bucket' => 'sw-bucket',
                     'Key' => $imageName,
                     'SourceFile' => $file,
-                    'ACL' => 'public-read',
+                    'ACL' => 'public-read-write',
                     'ContentType' => $file->getMimeType(),
                 ));
 
             }
 
             if ($request->amim_icon != "") {
-                $imageIcon = 'bdp/Master/item/' . $unique . '.' . $request->amim_icon->getClientOriginalExtension();
+                $imageIcon = $folder. '/Master/item/' . $unique . '.' . $request->amim_icon->getClientOriginalExtension();
                 $file_icon = $request->file('amim_icon');
                 $s3 = AWS::createClient('s3');
                 $s3->putObject(array(
-                    'Bucket' => 'prgfms',
+                    'Bucket' => 'sw-bucket',
                     'Key' => $imageIcon,
                     'SourceFile' => $file_icon,
-                    'ACL' => 'public-read',
+                    'ACL' => 'public-read-write',
                     'ContentType' => $file->getMimeType(),
                 ));
             }
@@ -208,7 +208,7 @@ class SKUController extends Controller
             $itemClass = ItemClass::on($this->db)->where('cont_id', '=', $this->currentUser->country()->id)->get();
             $itemUnit = Unit::on($this->db)->where('cont_id', '=', $this->currentUser->country()->id)->get();
             $company = Company::on($this->db)->where('cont_id', '=', $this->currentUser->country()->id)->get();
-            $icmp=DB::connection($this->db)->select("SELECT t2.cont_name FROM tl_icmp t1 INNER JOIN myprg_comm.tl_cont t2 ON t1.cont_id=t2.id WHERE t1.amim_id=$id");
+            $icmp=DB::connection($this->db)->select("SELECT t2.cont_name FROM tl_icmp t1 INNER JOIN common.tl_cont t2 ON t1.cont_id=t2.id WHERE t1.amim_id=$id");
             return view('master_data.sku.show')->with('sku', $sku)->with('itemClass', $itemClass)->with('subCategorys', $subCategorys)
             ->with('itemUnit', $itemUnit)->with('company', $company)->with('icmp',$icmp);
         } else {
@@ -238,8 +238,7 @@ class SKUController extends Controller
     public function update(Request $request, $id)
     {
 
-        // dd($request);
-        //return $request->file('amim_imgl').'-----'.$request->file('amim_icon');
+        $folder=  $this->currentUser->country()->cont_imgf;
         $sku = SKU::on($this->db)->findorfail($id);
         $imageName = "";
         $imageIcon = "";
@@ -247,27 +246,27 @@ class SKUController extends Controller
         $s3 = AWS::createClient('s3');
         if ($request->amim_imgl != "") {
             $file = $request->file('amim_imgl');
-            $imageName = 'bdp/Master/item/' . $unique . '1.' . $request->amim_imgl->getClientOriginalExtension();
+            $imageName = $folder.'/Master/item/' . $unique . '1.' . $request->amim_imgl->getClientOriginalExtension();
 
             $s3->putObject(array(
-                'Bucket' => 'prgfms',
+                'Bucket' => 'sw-bucket',
                 'Key' => $imageName,
                 'SourceFile' => $file,
-                'ACL' => 'public-read',
+                'ACL' => 'public-read-write',
                 'ContentType' => $file->getMimeType(),
             ));
 
         }
 
         if ($request->amim_icon != "") {
-            $imageIcon = 'bdp/Master/item/' . $unique . '.' . $request->amim_icon->getClientOriginalExtension();
+            $imageIcon =$folder. '/Master/item/' . $unique . '.' . $request->amim_icon->getClientOriginalExtension();
             $file_icon = $request->file('amim_icon');
             $s3 = AWS::createClient('s3');
             $s3->putObject(array(
-                'Bucket' => 'prgfms',
+                'Bucket' => 'sw-bucket',
                 'Key' => $imageIcon,
                 'SourceFile' => $file_icon,
-                'ACL' => 'public-read',
+                'ACL' => 'public-read-write',
                 'ContentType' => $file_icon->getMimeType(),
             ));
         }

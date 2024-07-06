@@ -228,13 +228,13 @@ function convert_number_to_words($number)
                                                 <tr>
                                                     <td>
                                                         <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                                            <tr>
+                                                             <tr style="text-align: center">
                                                                 <td>
-                                                                    <span class="style4"> SUPPLIERS DETAILS:</span>
+                                                                    <span class="style4" style="text-align: center"> Company Info</span>
                                                                 </td>
 
                                                             </tr>
-                                                            <tr>
+                                                            <tr style="text-align: center">
                                                                 <td>
                                                                     <span class="style4"><?php echo $salesOrder->ou_name; ?></span>
                                                                     <span class="style4"><?php echo $salesOrder->note; ?></span>
@@ -242,7 +242,7 @@ function convert_number_to_words($number)
                                                             </tr>
 
                                                             <tr>
-                                                                <td>Warehouse : {{$salesOrder->address}}
+                                                                <td style="text-align: center">Address : {{$salesOrder->address}}
                                                                 </td>
                                                             </tr>
                                                             <tr>
@@ -255,7 +255,7 @@ function convert_number_to_words($number)
                                                                 </td>
 
                                                             </tr>
-                                                            <tr>
+                                                            <tr style="text-align: center">
                                                                 <td>
                                                                     <span class="style8"> <?php
                                                                         if ($salesOrder->vat_status == 1) {
@@ -271,7 +271,7 @@ function convert_number_to_words($number)
                                                         </table>
                                                     </td>
                                                     <td align="center">
-                                                        <img src="{{ asset("theme/image/logo.png")}}" alt="" width="156" height="100"/>
+                                                        <!-- <img src="{{ asset("theme/image/logo.png")}}" alt="" width="156" height="100"/>-->
                                                     </td>
                                                 </tr>
 
@@ -314,7 +314,7 @@ function convert_number_to_words($number)
 
                                     <tr>
                                         <td width="30%" align="left">
-                                            <span style="font-size:12px;" class="style8">Customer Details</span>
+                                            <span style="font-size:12px;" class="style8">Outlet Info</span>
                                         </td>
                                         <td width="40%" class="style4" align="center">
 
@@ -323,7 +323,7 @@ function convert_number_to_words($number)
                                         <td width="">
                                             <span class="style8"></span>
                                         </td>
-                                        <td>
+                                        <td style="text-align: center">
                                              <span class="style8"><?php
 
                                                  if ($salesOrder->vat_status == 1) {
@@ -340,7 +340,7 @@ function convert_number_to_words($number)
                                        bordercolor="#d3d3d3">
                                     <tr>
                                         <td width="100" valign="top">
-                                            <span class="style4">&nbsp;SHIP TO</span><br/>
+                                            <span class="style4">&nbsp;Delivery Address</span><br/>
 
                                             <span class="style4 invoiceArabic">&nbsp;توريد لــــ</span>
                                         </td>
@@ -350,7 +350,7 @@ function convert_number_to_words($number)
 
                                         </td>
                                         <td width="100" valign="top">
-                                            <span class="style4">&nbsp;BILL TO</span><br/>
+                                            <span class="style4">&nbsp;Billing Address</span><br/>
 
                                             <span class="style4 invoiceArabic">&nbsp;فاتورة لــــ</span>
                                         </td>
@@ -379,7 +379,7 @@ function convert_number_to_words($number)
                                                 } ?></span>
                                         </td>
                                         <td>
-                                            <span class="style8">Supplier Ref. No:{{$salesOrder->Order_ID}} </span>
+                                            <span class="style8">Order. No:{{$salesOrder->Order_ID}} </span>
                                         </td>
                                     </tr>
 

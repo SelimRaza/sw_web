@@ -441,6 +441,11 @@ class TripController extends Controller
         
     }
 
+    //Menu
+    public function getMenu(){
+        return view('Trip.Menu.index');
+    }
+
     
 
 }

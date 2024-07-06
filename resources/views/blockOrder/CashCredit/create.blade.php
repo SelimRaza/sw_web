@@ -73,7 +73,7 @@
                                                     <input type="text" class="form-control in_tg" name="aemp_usnm" id="aemp_usnm">
                                                 </div>
                                             </div>
-                                            <div class="form-group col-md-6  col-sm-6 col-xs-12">
+                                            <div class="form-group col-md-6  col-sm-6 col-xs-12" style="display:none;">
                                                 <label class="control-label col-md-4 col-sm-4 col-xs-12" for="scbm_date">Month *
                                                         
                                                 </label>

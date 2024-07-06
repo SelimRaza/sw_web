@@ -72,7 +72,7 @@ function getHReport() {
                             '<th>Rout Name</th><th>Rout Outlet</th>' +
                             '<th>Visit</th><th>RO-Visit</th><th>WR-Visit</th><th>Order</th>' +
                             '<th>Strike Rate</th><th>LPC</th>' +
-                            '<th>Exp.</th><th>Action</th><tr>';
+                            '<th>Exp.</th><th>Action</th><th>Test</th><tr>';
                         var t_visit = 0;
                         var t_memo = 0;
                         var t_amnt = 0.00;
@@ -103,9 +103,10 @@ function getHReport() {
                                 '<td>' + data[i]['strikeRate'] + '</td>' +
                                 '<td>' + data[i]['lpc'] + '</td>' +
                                 '<td>' + data[i]['t_amnt'] + '</td>' +
-                                '<td><button class="btn btn-success in_tg" onclick="showWardWiseVisitDetails(this)" sr_id="' + data[i]["id"] + '" date="' + data[i]["dhbd_date"] + '">Visit</button>' +
-                                '<button class="btn btn-danger in_tg" onclick="showVisitMap(' + data[i]["id"] + ',this,0)" date="' + data[i]['dhbd_date'] + '" sr_id="' + data[i]["id"] + '">Map</button>' +
-                                '<button class="btn btn-primary in_tg" onclick="showAllVisitedOutletList(this)" date="' + data[i]['dhbd_date'] + '" sr_id="' + data[i]["id"] + '">Outlet</button></td>' +
+                                '<td><button class="btn btn-success in_tg" onclick="showWardWiseVisitDetails(this)" sr_id="' + data[i]["aemp_id"] + '" date="' + data[i]["dhbd_date"] + '">Visit</button>' +
+                                '<button class="btn btn-danger in_tg" onclick="showVisitMap(' + data[i]['aemp_id'] + ',this,0)" date="' + data[i]['dhbd_date'] + '" sr_id="' + data[i]["aemp_id"] + '">Map</button>' +
+                                '<button class="btn btn-primary in_tg" onclick="showAllVisitedOutletList(this)" date="' + data[i]['dhbd_date'] + '" sr_id="' + data[i]["aemp_id"] + '">Outlet</button></td>' +
+                                '<td>'+data[i]['aemp_id']+'</td>'+
                                 '</tr>';
                         }
                         footer += '<tr><th>GT</th><th></th><th></th><th></th><th></th>' +
@@ -117,94 +118,7 @@ function getHReport() {
                             '<th>' + (s_rate / data.length).toFixed(2) + '</th>' +
                             '<th>' + (t_lpc / data.length).toFixed(2) + '</th>' +
                             '<th>' + (t_amnt).toFixed(2) + '</th><th></th></tr>';
-                    //  else {
-                    //     console.log("else-block");
-                    //     var date = '<?php echo date("Y_m_d"); ?>';
-
-                    //     $('#activity_section').removeAttr('onclick');
-                    //     $('#activity_section').attr('onclick', 'exportTableToCSV("activity_map_supervisor.csv","tableDiv_sr_history")');
-                    //     heading += '<tr>' +
-                    //         '<th>Date</th>' +
-                    //         '<th>Name</th><th>Thana</th><th>District</th><th>Total Note</th></tr>';
-                    //     var html='';
-                    //     let total_note=0;
-                    //     for(var i=0;i<data.length;i++){
-                    //         total_note+=parseInt(data[i].Total_note);
-                    //         html+='<tr><td>'+data[i].hloc_date+'</td>'+
-                    //                 '<td>'+data[i].aemp_name+'</td>'+
-                    //                 '<td>'+data[i].than_name+'</td>'+
-                    //                 '<td>'+data[i].dsct_name+'</td>'+
-                    //                 '<td>'+data[i].Total_note+'</td></tr>';
-
-                    //     }
-                        
-
-                        // let visit_location =[];
-                        // let test_data = [];
-                        // var last_test = [];
-                        // let pt = 0;
-                        //     for (var i = 0; i < data.length; i++) {
-                        //         var lat = data[i].geo_lat;
-                        //         var long = data[i].geo_lon;
-                        //         var date = data[i].hloc_date;
-                        //         var name = data[i].aemp_name;
-
-                        //         var url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + long + "&key=AIzaSyAUz9b1JjhtFMPkg4scrdW2uAbLfGyc3d4&lang=en-US";
-                        //         $.get(url, function (data2) {
-                                    
-                        //         }).then(function (data2) {
-                        //             var results = data2.results;
-                        //             var city = "";
-                        //             var thana = "";
-                        //             var zilla = "";
-                        //             var state = "";
-                        //             var country = "";
-                        //             var zipcode = "";
-                        //             let own_city='';
-                        //             if (data2.status === 'OK') {
-                        //                 if (results[0]) {    
-                                                                                   
-                        //                     var address_components = results[0].address_components;
-                        //                     console.log(address_components)
-                        //                     for (var i = 0; i < address_components.length; i++) {
-                        //                         if (address_components[i].types[0] === "administrative_area_level_1" && address_components[i].types[1] === "political") {
-                        //                             state = address_components[i].long_name;
-                        //                         }
-                        //                         if (address_components[i].types[0] === "administrative_area_level_2" && address_components[i].types[1] === "political") {
-                        //                             zilla = address_components[i].long_name;
-                        //                         }
-                        //                         if (address_components[i].types[0] === "locality" && address_components[i].types[1] === "political") {
-                        //                             city = address_components[i].long_name;
-                        //                         }
-                        //                         if (address_components[i].types[1] === "sublocality" && address_components[i].types[0] === "political") {
-                        //                             thana = address_components[i].long_name;
-                        //                         }
-
-                        //                         if (address_components[i].types[0] === "postal_code") {
-                        //                             zipcode = address_components[i].long_name;
-
-                        //                         }
-
-                        //                         if (address_components[i].types[0] === "country") {
-                        //                             country = address_components[i].long_name;
-
-                        //                         }
-                        //                         own_city=address_components[3].short_name;
-                        //                     }
-                        //                     visit_location[i]={ 'date': date, 'name': name, 'city': city, 'thana': thana, 'zilla': zilla, 'state': state, 'country': country };
-                        //                     test_data.push({ date: date, name: name, city: city, thana: thana, zilla: zilla, state: state, country: country });
-                        //                     last_test.push({ date, name, city,zipcode, thana, zilla, state, country,own_city });
-                                            
-
-                        //                 }
-                                        
-                        //             }
-                                    
-                        //             console.log("promise SJB: " + last_test.length);
-                        //         });
-                        //     }
-                            
-                    //}
+            
                     break;
                 case "sr_activity_gvt_hierarchy":
                     $('#activity_section').removeAttr('onclick');
@@ -305,12 +219,6 @@ function appendData(head,content){
     $('#head_history').append(head);
     $('#cont_history').append(content);
     $('#tableDiv_sr_history').show();
-    $('#tableDiv_sr_history').excelTableFilter();
-    $('.dropdown-filter-item').css('color', 'black');
-    $('.dropdown-filter-dropdown').css({'margin-top': '3px', 'height': '23px', 'padding': '0px', 'gap': '1px' });
-    $('.arrow-down').css('display', 'none');
-    $('.dropdown-filter-icon').css('border', '1px solid white');
-    $('th').css({'vertical-align': 'top', 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'width': '100% !important', 'padding': '2px 10px'});
 }
 
 function getCategoryWiseNoteDetails(obj){

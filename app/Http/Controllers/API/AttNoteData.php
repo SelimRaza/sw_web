@@ -268,81 +268,110 @@ class AttNoteData extends Controller
     public function employeeAttendance(Request $request)
 
     {
+		
+		
         $country = (new Country())->country($request->country_id);
 
         if ($country != false) {
             $db_conn = $country->cont_conn;
-            $dataRow = DB::connection($db_conn)->select("SELECT
-  t1.date,
-  t2.aemp_id as emp_id,
-  min(t2.attn_time) AS start_time,
-  max(t2.attn_time) AS end_time,
-  t9.atyp_name AS type,
-  ''                AS off_day,
-  0                 AS prosess_status_id,
-  ''                AS processStatus,
-  ''                AS leave_reason,
-  ''                AS iom_reason,
-  ''                AS holiday_reason
-FROM
-  (SELECT adddate('2020-01-01', t4.i * 10000 + t3.i * 1000 + t2.i * 100 + t1.i * 10 + t0.i) AS date
-   FROM
-     (SELECT 0 i
-      UNION SELECT 1
-      UNION SELECT 2
-      UNION SELECT 3
-      UNION SELECT 4
-      UNION SELECT 5
-      UNION SELECT 6
-      UNION SELECT 7
-      UNION SELECT 8
-      UNION SELECT 9) t0,
-     (SELECT 0 i
-      UNION SELECT 1
-      UNION SELECT 2
-      UNION SELECT 3
-      UNION SELECT 4
-      UNION SELECT 5
-      UNION SELECT 6
-      UNION SELECT 7
-      UNION SELECT 8
-      UNION SELECT 9) t1,
-     (SELECT 0 i
-      UNION SELECT 1
-      UNION SELECT 2
-      UNION SELECT 3
-      UNION SELECT 4
-      UNION SELECT 5
-      UNION SELECT 6
-      UNION SELECT 7
-      UNION SELECT 8
-      UNION SELECT 9) t2,
-     (SELECT 0 i
-      UNION SELECT 1
-      UNION SELECT 2
-      UNION SELECT 3
-      UNION SELECT 4
-      UNION SELECT 5
-      UNION SELECT 6
-      UNION SELECT 7
-      UNION SELECT 8
-      UNION SELECT 9) t3,
-     (SELECT 0 i
-      UNION SELECT 1
-      UNION SELECT 2
-      UNION SELECT 3
-      UNION SELECT 4
-      UNION SELECT 5
-      UNION SELECT 6
-      UNION SELECT 7
-      UNION SELECT 8
-      UNION SELECT 9) t4) AS t1
-  LEFT JOIN tt_attn AS t2 ON t1.date = t2.attn_date AND t2.aemp_id = $request->emp_id
-  LEFT JOIN tm_atyp as t9 ON t2.atten_atyp=t9.id
-WHERE t1.date BETWEEN '$request->start_date'and '$request->end_date'
+            $dataRow=DB::connection($db_conn)->select("SELECT
+                            t1.c_date date,
+                            t2.aemp_id as emp_id,
+                            t3.aemp_usnm,
+                            t3.aemp_name,
+                            min(t2.attn_time) AS start_time,
+                            max(t2.attn_time) AS end_time,
+                            t9.atyp_name AS type,
+                            ''                AS off_day,
+                            0                 AS prosess_status_id,
+                            ''                AS processStatus,
+                            ''                AS leave_reason,
+                            ''                AS iom_reason,
+                            ''                AS holiday_reason,
+                            t2.geo_lat,t2.geo_lon
+                        FROM tm_clndr AS t1
+                            INNER JOIN tt_attn AS t2 ON t1.c_date = t2.attn_date 
+                            INNER JOIN tm_aemp t3 ON t2.aemp_id=t3.id 
+                            INNER JOIN tm_atyp as t9 ON t2.atten_atyp=t9.id
+                        WHERE t1.c_date BETWEEN '$request->start_date'and '$request->end_date'  and(t3.id = $request->emp_id OR t3.aemp_mngr=$request->emp_id)
+                        GROUP BY t1.c_date, t2.aemp_id,t9.atyp_name,t2.geo_lat,t2.geo_lon 
+                        ORDER BY t2.aemp_id ASC 
+                    ");
+            // $dataRow = DB::connection($db_conn)->select("SELECT
+            //         t1.date,
+            //         t2.aemp_id as emp_id,
+            //         concat(t8.aemp_usnm,'-',t8.aemp_name)as aemp_name,
+            //         min(t2.attn_time) AS start_time,
+            //         max(t2.attn_time) AS end_time,
+            //         t9.atyp_name AS type,
+            //         ''                AS off_day,
+            //         0                 AS prosess_status_id,
+            //         ''                AS processStatus,
+            //         ''                AS leave_reason,
+            //         ''                AS iom_reason,
+            //         ''                AS holiday_reason,
+            //         t2.`geo_lat`,t2.`geo_lon`
+            //         FROM
+            //         (SELECT adddate('2020-01-01', t4.i * 10000 + t3.i * 1000 + t2.i * 100 + t1.i * 10 + t0.i) AS date
+            //         FROM
+            //             (SELECT 0 i
+            //             UNION SELECT 1
+            //             UNION SELECT 2
+            //             UNION SELECT 3
+            //             UNION SELECT 4
+            //             UNION SELECT 5
+            //             UNION SELECT 6
+            //             UNION SELECT 7
+            //             UNION SELECT 8
+            //             UNION SELECT 9) t0,
+            //             (SELECT 0 i
+            //             UNION SELECT 1
+            //             UNION SELECT 2
+            //             UNION SELECT 3
+            //             UNION SELECT 4
+            //             UNION SELECT 5
+            //             UNION SELECT 6
+            //             UNION SELECT 7
+            //             UNION SELECT 8
+            //             UNION SELECT 9) t1,
+            //             (SELECT 0 i
+            //             UNION SELECT 1
+            //             UNION SELECT 2
+            //             UNION SELECT 3
+            //             UNION SELECT 4
+            //             UNION SELECT 5
+            //             UNION SELECT 6
+            //             UNION SELECT 7
+            //             UNION SELECT 8
+            //             UNION SELECT 9) t2,
+            //             (SELECT 0 i
+            //             UNION SELECT 1
+            //             UNION SELECT 2
+            //             UNION SELECT 3
+            //             UNION SELECT 4
+            //             UNION SELECT 5
+            //             UNION SELECT 6
+            //             UNION SELECT 7
+            //             UNION SELECT 8
+            //             UNION SELECT 9) t3,
+            //             (SELECT 0 i
+            //             UNION SELECT 1
+            //             UNION SELECT 2
+            //             UNION SELECT 3
+            //             UNION SELECT 4
+            //             UNION SELECT 5
+            //             UNION SELECT 6
+            //             UNION SELECT 7
+            //             UNION SELECT 8
+            //             UNION SELECT 9) t4) AS t1
+            //         LEFT JOIN tt_attn AS t2 ON t1.date = t2.attn_date 
+            //         LEFT JOIN tm_aemp t3 ON t2.aemp_id=t3.aemp_mngr and(t2.aemp_id = $request->emp_id OR t3.aemp_mngr=$request->emp_id)
+            //         LEFT JOIN tm_atyp as t9 ON t2.atten_atyp=t9.id
+            //         LEFT JOIN tm_aemp t8 ON t8.id=t2.aemp_id
+            //         WHERE t1.date BETWEEN '$request->start_date'and '$request->end_date' and t2.aemp_id IS NOT NULL
 
-GROUP BY t1.date, t2.aemp_id,t9.atyp_name
-ORDER BY t1.date DESC");
+            //         GROUP BY t1.date, t2.aemp_id,t9.atyp_name,t2.`geo_lat`,t2.`geo_lon`
+            //         ORDER BY t1.date DESC");
             return Array("receive_data" => array("data" => $dataRow, "action" => $request->emp_id));
         }
 

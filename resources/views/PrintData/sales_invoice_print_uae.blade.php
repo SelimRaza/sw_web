@@ -207,6 +207,20 @@ function roundPayableForUae($amount) {
             visibility: hidden;
             display: none;
         }
+        @media print {
+            @page {
+                size: auto;
+                margin: 0;
+            }
+
+            @page :first {
+                margin: 0;
+            }
+
+            @page :last {
+                margin: 0;
+            }
+        }
 
     </style>
     <script>
@@ -237,19 +251,13 @@ function roundPayableForUae($amount) {
                                                 <tr>
                                                     <td>
                                                         <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                                            <tr>
-                                                                <td>
-                                                                    <span class="style4"> SUPPLIERS DETAILS:</span>
-                                                                </td>
-
-                                                            </tr>
-                                                            <tr>
+                                                            <tr style="text-align: center">
                                                                 <td>
                                                                     <span class="style4"><?php echo $salesOrder->ou_name; ?></span>
                                                                     <span class="style4"><?php echo $salesOrder->note; ?></span>
                                                                 </td>
                                                             </tr>
-                                                            <tr>
+                                                            <tr style="text-align: center">
                                                                 <td>{{$salesOrder->address}}
                                                                 </td>
                                                             </tr>
@@ -280,9 +288,10 @@ function roundPayableForUae($amount) {
                                                         </table>
                                                     </td>
                                                     <td align="center">
-                                                        <img src="{{ asset("theme/image/logo.png")}}" alt="" width="100" height="60" style="margin-top:2px!important;"/>
-                                                    
-													
+                                                     <!--   <img src="{{ asset("theme/image/logo.png")}}" alt="" width="100" height="60" style="margin-top:2px!important;"/>
+                                                    -->
+													<img src="{{ asset("http://128.199.240.50/theme/image/logo.JPG")}}" alt="" width="80" height="60" style="margin-top:2px!important;"/>                                                                                                                                                                              
+                                                       
 													
 													</td>
                                                 </tr>
@@ -299,19 +308,19 @@ function roundPayableForUae($amount) {
 
                                     <tr>
                                         <td height="30" style="width: 33.33%;" align="left">
-                                            <span class="style8">Order Date(تاريخ الطلب):</span>
+                                            <span class="style8">Order(تاريخ الطلب):</span>
                                             {{$salesOrder->order_date}}
                                         </td>
                                         <!--</tr>
                                         <tr>-->
                                         <td height="30" style="width: 33.33%;" align="center">
-                                            <span class="style8">Invoice Date (تاريخ الفاتورة):&nbsp;</span>
+                                            <span class="style8">Invoice (تاريخ الفاتورة):&nbsp;</span>
                                             {{$salesOrder->delivery_date}}
                                         </td>
                                         <!--</tr>
                                         <tr>-->
                                         <td height="30" style="width: 33.33%;" align="right">
-                                            <span class="style8"> Delivery Date (تاريخ التوصيل):&nbsp;</span>
+                                            <span class="style8"> Delivery (تاريخ التوصيل):&nbsp;</span>
                                             {{$salesOrder->delivery_date}}
                                         </td>
                                     </tr>
@@ -349,22 +358,20 @@ function roundPayableForUae($amount) {
                         <tr style="border: none;">
                             <td width="100%">
                                 <table width="100%" border="1" cellpadding="0" cellspacing="0"
-                                       bordercolor="#d3d3d3">
+                                       >
                                     <tr>
-                                        <td width="100" valign="top">
-                                            <span class="style4">&nbsp;SHIP TO</span><br/>
-
-                                            <span class="style4 invoiceArabic">&nbsp;توريد لــــ</span>
+                                        <td width="100" valign="top"  style="text-align:center;">
+                                            <span class="style4">&nbsp;Delivery Address </span><br/>
+                                            <span class="style4 invoiceArabic">&nbsp;وجهة الشحن</span>
                                         </td>
                                         <td width="350">
                                             {{$salesOrder->Site_Name}}
                                             <br/>{{$salesOrder->site_address}}
 
                                         </td>
-                                        <td width="100" valign="top">
-                                            <span class="style4">&nbsp;BILL TO</span><br/>
-
-                                            <span class="style4 invoiceArabic">&nbsp;فاتورة لــــ</span>
+                                        <td width="100" valign="top"  style="text-align:center;">
+                                            <span class="style4">&nbsp;Billing Address</span><br/>
+                                            <span class="style4 invoiceArabic">&nbsp;وجهة الفوترة</span>
                                         </td>
                                         <td width="350">
                                             {{$salesOrder->Outlet_Name}}
@@ -378,7 +385,7 @@ function roundPayableForUae($amount) {
                         <tr>
                             <td width="100%">
                                 <table width="100%" height="24" border="1" cellpadding="0" cellspacing="0"
-                                       bordercolor="#d3d3d3"
+                                       
                                        style="border-top: none;">
                                     <tr>
                                         <td width="200">
@@ -391,7 +398,7 @@ function roundPayableForUae($amount) {
                                                 } ?></span>
                                         </td>
                                         <td>
-                                            <span class="style8">Supplier Ref. No:{{$salesOrder->Order_ID}} </span>
+                                            <span class="style8">Reference No:{{$salesOrder->Order_ID}} </span>
                                         </td>
                                     </tr>
 
@@ -414,7 +421,7 @@ function roundPayableForUae($amount) {
 											<span class="style8">DM ID: {{$salesOrder->DM_CODE}} </span>
                                         </td>                                        
                                         <td>
-                                            <span class="style8">Vehicle No: {{$salesOrder->V_NAME}} </span>
+                                            <span class="style8">Vehicle: {{$salesOrder->V_NAME}} </span>
                                         </td>
                                     </tr>
 
@@ -424,7 +431,7 @@ function roundPayableForUae($amount) {
                         <tr>
                             <td>
                                 <table width="100%" border="1" cellpadding="0" cellspacing="0" bordercolor="#d3d3d3">
-                                    <tr bgcolor="#b0c4de">
+                                    <tr>
                                         <td width="100">
                                             <span style="font-size:12px;" class="style12">PRESELLER MAN</span><br/>
                                             <span style="font-size:12px;" class="style12">مندوب المبيعات</span>
@@ -481,24 +488,24 @@ function roundPayableForUae($amount) {
                             <td width="100%">
 
                                 <table width="100%" border="1" cellpadding="0" cellspacing="0" bordercolor="#d3d3d3">
-                                    <tr bgcolor="#b0c4de">
+                                    <tr>
                                          <td width="25" height="23" rowspan="2">
                                              <span style="font-size:12px;" class="style12">&nbsp;SL#</span><br/>
 
                                              <span style="font-size:12px;" class="style12 invoiceArabic">&nbsp;الرقم التسلسلي</span>
                                          </td>
                                         <td width="65" height="23" rowspan="2">
-                                            <span style="font-size:12px;" class="style12">&nbsp;ITEM CODE</span><br/>
+                                            <span style="font-size:12px;" class="style12">&nbsp;PRODUCT CODE</span><br/>
                                             <span style="font-size:12px;"
                                                   class="style12 invoiceArabic">&nbsp;رمز الصنف</span>
                                         </td>
 										<td width="65" height="23" rowspan="2">
-                                            <span style="font-size:12px;" class="style12">&nbsp;DESCRIPTION</span><br/>
+                                            <span style="font-size:12px;" class="style12">&nbsp;PRODUCT NAME</span><br/>
                                             <span style="font-size:12px;"
                                                   class="style12 invoiceArabic">&nbsp;التفاصيل / وصف الصنف</span>
                                         </td>
                                         <td width="50" height="23" rowspan="2" style="text-align:center;">
-                                            <span style="font-size:12px;" class="style12">UOM</span><br/>
+                                            <span style="font-size:12px;" class="style12">FACTOR</span><br/>
                                             <span style="font-size:12px;" class="style12 invoiceArabic">&nbsp;وحدة القياس</span>
                                         </td>
                                         <td colspan="2" style="text-align:center;">
@@ -542,7 +549,7 @@ function roundPayableForUae($amount) {
                                             <span style="font-size:12px;" class="style12">Total Incl Excise +VAT</span>
                                         </td>
                                     </tr>
-                                    <tr bgcolor="#b0c4de">
+                                    <tr>
                                         <td style="text-align:center;"><span style="font-size:12px;"
                                                   class="style12">CTN</span></td>
                                         <td style="text-align:center;"><span style="font-size:12px;"
@@ -691,7 +698,7 @@ function roundPayableForUae($amount) {
 									<td width="99%" height="26" align="right">                                                                                                          
                                           <span class="style8">(المجموع بدون الضريبة المضافة
 )Total Excluding Excise Duty: &nbsp;<?php echo $totalGrossAmt-$totalGrossDiscountAmt; ?>&nbsp;</span>                                                
-                                    </td>
+                                        </td>
 									</tr>
 									 <tr>
 									<td width="99%" height="26" align="right">                                                                                                          
@@ -757,11 +764,11 @@ function roundPayableForUae($amount) {
 
                         <tr>
                             <td width="100%">
-                                <table width="100%" border="1" cellspacing="0" cellpadding="0"
+                                <table width="100%" cellspacing="0" cellpadding="0"
                                        style="text-align: left;">
                                     <tr>
                                         <td>
-                                                    <span style="font-size:12px;" class="style8" style="float: left;">&nbsp;<u>Terms and Conditions</u>&nbsp;(<u>الشروط
+                                                    <span style="font-size:12px;" class="style8" style="float: left;">&nbsp;<u>Terms of Service and Usage Agreement</u>&nbsp;(<u>الشروط
                                                             والأحكام</u>)</span>
 
                                         </td>
@@ -769,10 +776,9 @@ function roundPayableForUae($amount) {
                                     <tr>
                                         <td>
                                             <ul style="margin: 6px 0px;">
-                                                <li>Received complete invoiced quantity in good condition</li>
-                                                <li>Official receipt is mandatory for payments</li>
-                                                <li>Please issue cheque on behalf
-                                                    of <?php echo $salesOrder->ou_name; ?></li>
+                                                <li>Check the order for completeness and good condition upon receipt.</li>
+                                                <li>Official receipt required for payments.</li>
+                                                <li>Make checks payable to {{$salesOrder->ou_name;}}</li>
                                             </ul>
 
                                         </td>
@@ -786,10 +792,10 @@ function roundPayableForUae($amount) {
                         </tr>
                         <tr>
                             <td>
-                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                     <tr>
                                         <td width="360" align="left">
-                                            <table width="360" height="40" border="2" cellpadding="0" cellspacing="0"
+                                            <table width="360" height="40" border="0" cellpadding="0" cellspacing="0"
                                                    style="margin: 0px 0px;">
                                                 <tr>
                                                     <td valign="top">
@@ -799,7 +805,7 @@ function roundPayableForUae($amount) {
                                             </table>
                                         </td>
                                         <td width="360" align="right">
-                                            <table width="355" height="40" border="2" cellpadding="0" cellspacing="0"
+                                            <table width="250" height="40" border="0" cellpadding="0" cellspacing="0"
                                                    style="margin: 0px 0px;">
                                                 <tr>
                                                     <td valign="top">
@@ -819,8 +825,7 @@ function roundPayableForUae($amount) {
                         <tr>
                             <td align="center">
                                         <span style="font-size:12px;" class="style5"
-                                              style="font-size: 20px; font-weight: bold;">Thank you for your
-                                            business</span>
+                                              style="font-size: 20px; font-weight: bold;">Thanks for cooperating</span>
                             </td>
                         </tr>
                     </table>

@@ -111,7 +111,7 @@
                                         <td>{{$site->site_olnm}}</td>
                                         <td>{{$site->site_olad}}</td>
                                         <td>{{$site->site_olon}}</td>
-                                        <td><img src="{{'https://images.sihirbox.com/'.$site->site_imge}}" height="90" width="150"  alt="N/A"></td>
+                                        <td><img src="{{'https://sw-bucket.sgp1.cdn.digitaloceanspaces.com/'.$site->site_imge}}" height="90" width="150"  alt="N/A"></td>
                                         <td>{{$site->scnl_name}}</td>
                                         <td>{{$site->otcg_name}}</td>
                                         <td>{{$site->mktm_name}}</td>

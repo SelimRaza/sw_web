@@ -198,6 +198,7 @@ Route::resource('dashboard1Permission', 'Setting\Dashboard1PermissionController'
 Route::get('setting/process', 'Setting\ProcessRunController@index');
 Route::post('setting/process', 'Setting\ProcessRunController@store');
 Route::get('/home', 'TestController@home')->name('home');
+Route::get('/dashboard', 'TestController@dashboard')->name('dashboard');
 Route::post('load/top10/data','TestController@getTopData');
 Route::post('load/bottom10/data','TestController@getBottomData');
 //=====================Master data role controller start =========//
@@ -584,6 +585,19 @@ Route::post('ThanSR/depotEmployeeMappingUpload', 'GovtHeirarchy\SRThanaMappingCo
 Route::get('ThanSR/depotEmployeeMappingUploadFormat', 'GovtHeirarchy\SRThanaMappingController@depotEmployeeMappingUploadFormatGen');
 Route::post('ThanSR/dataExportThanSRMappingInfotData', 'GovtHeirarchy\SRThanaMappingController@dataExportSRThanaMappingData');
 
+// District Thana Mapping
+Route::get('district/emp/mapping', 'GovtHeirarchy\SRDistrictMappingController@empThanAdd');
+Route::post('district/sr/mapping', 'GovtHeirarchy\SRDistrictMappingController@empDistrictMapping');
+Route::get('district/sr/mapping/format', 'GovtHeirarchy\SRDistrictMappingController@districtSRMappingFormat');
+Route::post('district/sr/mapping/store', 'GovtHeirarchy\SRDistrictMappingController@districtSRMappingInsert');
+Route::post('district/sr/mapping/data/export', 'GovtHeirarchy\SRDistrictMappingController@srDistrictMappingDataExport');
+Route::get('district/sr/mapping/data/view/{id}', 'GovtHeirarchy\SRDistrictMappingController@srWiseDistrictList');
+Route::get('district/sr/mapping/data/delete/{id}', 'GovtHeirarchy\SRDistrictMappingController@deleteSrWiseDistrictList');
+
+Route::get('/json/get/sr_wise/thana/list/{id}','MarketOpen\MarketOpenController@srWiseThanaList');
+Route::get('/json/delete/sr_wise/thana/list/{id}','MarketOpen\MarketOpenController@deleteSrWiseThanaList');
+
+
 
 Route::get('depot/depotFormat', 'Depot\DepotController@depotFormatGen');
 Route::post('depot/depotUpload', 'Depot\DepotController@depotInsert');
@@ -837,6 +851,10 @@ Route::post('data_upload/routeSiteUpload', 'GroupDataUpload\RouteSiteUploadContr
 Route::get('data_upload/groupEmployeeMappingUpload', 'GroupDataUpload\GroupEmployeeMappingUploadController@groupEmployeeMappingUpload');
 Route::post('data_upload/groupEmployeeMappingUpload', 'GroupDataUpload\GroupEmployeeMappingUploadController@groupEmployeeMappingUploadInsert');
 Route::get('data_upload/groupEmployeeMappingUploadFormat', 'GroupDataUpload\GroupEmployeeMappingUploadController@groupEmployeeMappingUploadFormatGen');
+
+Route::get('NewReport', 'DataExport\NewReportController@start_index');
+Route::post('NewReport/filter', 'DataExport\NewReportController@usersOrderReportFilter');
+Route::post('NewReport/filter3', 'DataExport\NewReportController@showData');
 
 Route::get('data_export/dataExport', 'DataExport\DataExportController@dataExport');
 Route::post('data_export/dataExportGroupData', 'DataExport\DataExportController@dataExportGroupData');
@@ -1422,7 +1440,7 @@ Route::get('remove/outofstock/item/{id}', 'MasterData\OutOfStockController@remov
 Route::get('site-mapping', 'Mapping\SiteMappingController@index');
 Route::post('site-mapping', 'Mapping\SiteMappingController@getFilterSite');
 Route::post('remove/site/rsmp', 'Mapping\SiteMappingController@removeSiteFromRoute');
-Route::get('add/site/rsmp/{rout_id}/{site_code}/{route_code}', 'Mapping\SiteMappingController@addSiteToRoute');
+Route::get('add/site/rsmp/{rout_id}/{site_code}', 'Mapping\SiteMappingController@addSiteToRoute');
 Route::get('bulk/route/site', 'Mapping\SiteMappingController@bulkRouteSiteMapping');
 Route::get('download/rsmp/format', 'Mapping\SiteMappingController@getRouteSiteUploadFormat');
 Route::get('cash/credit', 'Report\HelperController@getCashCreditLimit');
@@ -1841,3 +1859,14 @@ Route::get('/getDelarList/{acmp_id}','Trip\TripController@getDelarList');
 Route::get('/getDmList/{acmp_id}/{dlrm_id}','Trip\TripController@getDmList');
 Route::post('/getSRList','Trip\TripController@getSRList');
 Route::post('/getInvoiceList','Trip\TripController@getInvoiceList');
+
+
+Route::get('/menup','Trip\TripController@getMenu');
+
+
+
+/// Newly Added
+Route::get('sr-balance', 'Collection\CollectionController@srBalance');
+Route::post('sr-balance', 'Collection\CollectionController@srBalanceFilter');
+Route::post('sr-collection-ref-data', 'Collection\CollectionController@collectionReference');
+

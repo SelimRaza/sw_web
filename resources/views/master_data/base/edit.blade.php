@@ -68,9 +68,13 @@
                                     </label>
                                     <div class="col-md-6 col-sm-6 col-xs-12">
                                         <select class="form-control" name="zone_id" id="zone_id" required>
-                                            <option value="{{$base->zone()->id}}">{{$base->zone()->zone_name}} </option>
+                                            
                                             @foreach ($zones as $zone)
+                                                @if($zone->id==$base->zone_id)
+                                                <option value="{{ $zone->id }}" selected>{{ ucfirst($zone->zone_name) }}</option>
+                                                @else
                                                 <option value="{{ $zone->id }}">{{ ucfirst($zone->zone_name) }}</option>
+                                                @endif
                                             @endforeach
                                         </select>
                                     </div>

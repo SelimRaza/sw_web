@@ -56,11 +56,11 @@ class OrderModuleDataUAE extends Controller
                 $msg = "";
                 if ($request->Order_Type == 'Productive') {
 
-                     $otyp_id = $request->otyp_id ?? 1 ;
+                    $otyp_id = $request->otyp_id ?? 1;
 
-                    $orderSyncLog = OrderSyncLog::on($db_conn)->where(['oslg_moid' => $request->Order_Unique_ID])->first();//tl_oslg
+                    $orderSyncLog = OrderSyncLog::on($db_conn)->where(['oslg_moid' => $request->Order_Unique_ID])->first(); //tl_oslg
                     if ($orderSyncLog == null) {
-                        $orderSequence = OrderSequence::on($db_conn)->where(['aemp_id' => $request->SR_ID, 'srsc_year' => date('y')])->first();//tm_srsc
+                        $orderSequence = OrderSequence::on($db_conn)->where(['aemp_id' => $request->SR_ID, 'srsc_year' => date('y')])->first(); //tm_srsc
                         if ($orderSequence == null) {
                             $orderSequence = new OrderSequence();
                             $orderSequence->setConnection($db_conn);
@@ -79,8 +79,8 @@ class OrderModuleDataUAE extends Controller
                         $orderMaster = new OrderMaster();
                         $orderMaster->setConnection($db_conn);
                         $orderLines = json_decode($request->line_data);
-                        $order_id = "O" . str_pad($employee->aemp_usnm, 10, '0', STR_PAD_LEFT) . '-' . $orderSequence->srsc_year . '-' . str_pad($orderSequence->srsc_ocnt + 1, 5, '0', STR_PAD_LEFT);
-                        //  $order_amount = array_sum(array_column($orderLines, 'P_T_Price'));
+                        $order_id = "I" . str_pad($employee->aemp_usnm, 10, '0', STR_PAD_LEFT) . '_' . $orderSequence->srsc_year . '_' . str_pad($orderSequence->srsc_ocnt + 1, 5, '0', STR_PAD_LEFT);
+                        //$order_id = $employee->aemp_usnm . str_pad("I", 10, '0', STR_PAD_LEFT) . '-' . $orderSequence->srsc_year . '-' . str_pad($orderSequence->srsc_ocnt + 1, 5, '0', STR_PAD_LEFT);                   
                         $order_amount = array_sum(array_column($orderLines, 'total_price'));
                         $orderMaster->ordm_ornm = $order_id;
                         $orderMaster->aemp_id = $request->SR_ID;
@@ -259,8 +259,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function saveReturnOrder_dev(Request $request)
-    {
+        function saveReturnOrder_dev(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         if ($country) {
             DB::connection($country->cont_conn)->beginTransaction();
@@ -288,7 +289,7 @@ class OrderModuleDataUAE extends Controller
                     $returnMaster = new ReturnMaster();
                     $returnMaster->setConnection($country->cont_conn);
                     $orderLines = json_decode($request->line_data);
-                    $order_id = strtoupper("R" . str_pad($employee->aemp_usnm, 10, '0', STR_PAD_LEFT) . '-' . $orderSequence->srsc_year . '-' . str_pad($orderSequence->srsc_rcnt + 1, 5, '0', STR_PAD_LEFT));
+                    $order_id = strtoupper("G" . str_pad($employee->aemp_usnm, 10, '0', STR_PAD_LEFT) . '_' . $orderSequence->srsc_year . '_' . str_pad($orderSequence->srsc_rcnt + 1, 5, '0', STR_PAD_LEFT));
                     $order_amount = array_sum(array_column($orderLines, 'total_amount'));
                     $returnMaster->rtan_rtnm = $order_id;
                     $returnMaster->aemp_id = $request->emp_id;
@@ -403,8 +404,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function saveReturnOrder(Request $request)
-    {
+        function saveReturnOrder(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         if ($country) {
             DB::connection($country->cont_conn)->beginTransaction();
@@ -432,7 +434,8 @@ class OrderModuleDataUAE extends Controller
                     $returnMaster = new ReturnMaster();
                     $returnMaster->setConnection($country->cont_conn);
                     $orderLines = json_decode($request->line_data);
-                    $order_id = strtoupper("R" . str_pad($employee->aemp_usnm, 10, '0', STR_PAD_LEFT) . '-' . $orderSequence->srsc_year . '-' . str_pad($orderSequence->srsc_rcnt + 1, 5, '0', STR_PAD_LEFT));
+                    $order_id = strtoupper("G" . str_pad($employee->aemp_usnm, 10, '0', STR_PAD_LEFT) . '_' . $orderSequence->srsc_year . '_' . str_pad($orderSequence->srsc_rcnt + 1, 5, '0', STR_PAD_LEFT));
+                    //$order_id = strtoupper($employee->aemp_usnm . str_pad("G", 10, '0', STR_PAD_LEFT) . '-' . $orderSequence->srsc_year . '-' . str_pad($orderSequence->srsc_rcnt + 1, 5, '0', STR_PAD_LEFT));
                     $order_amount = array_sum(array_column($orderLines, 'total_amount'));
                     $returnMaster->rtan_rtnm = $order_id;
                     $returnMaster->aemp_id = $request->emp_id;
@@ -539,8 +542,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function saveReturnOrderWithReturnType(Request $request)
-    {
+        function saveReturnOrderWithReturnType(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         if ($country) {
             DB::connection($country->cont_conn)->beginTransaction();
@@ -568,7 +572,8 @@ class OrderModuleDataUAE extends Controller
                     $returnMaster = new ReturnMaster();
                     $returnMaster->setConnection($country->cont_conn);
                     $orderLines = json_decode($request->line_data);
-                    $order_id = strtoupper("R" . str_pad($employee->aemp_usnm, 10, '0', STR_PAD_LEFT) . '-' . $orderSequence->srsc_year . '-' . str_pad($orderSequence->srsc_rcnt + 1, 5, '0', STR_PAD_LEFT));
+                    $order_id = strtoupper("G" . str_pad($employee->aemp_usnm, 10, '0', STR_PAD_LEFT) . '_' . $orderSequence->srsc_year . '_' . str_pad($orderSequence->srsc_rcnt + 1, 5, '0', STR_PAD_LEFT));
+                    //$order_id = strtoupper($employee->aemp_usnm . str_pad("G", 10, '0', STR_PAD_LEFT) . '-' . $orderSequence->srsc_year . '-' . str_pad($orderSequence->srsc_rcnt + 1, 5, '0', STR_PAD_LEFT));
                     $order_amount = array_sum(array_column($orderLines, 'total_amount'));
                     $returnMaster->rtan_rtnm = $order_id;
                     $returnMaster->aemp_id = $request->emp_id;
@@ -630,10 +635,10 @@ class OrderModuleDataUAE extends Controller
                         $returnLine->rtdd_ptyp = $orderLineData->retrun_type == "retrun_type" ? 1 : $orderLineData->retrun_type;
                         $returnLine->lfcl_id = 1;
                         $returnLine->cont_id = $request->country_id;
-						$returnLine->rtdd_batc = $orderLineData->rtdd_batc??'-';
-                        $returnLine->rtdd_mfdt = $orderLineData->rtdd_mfdt??null;
-                        $returnLine->rtdd_exdt = $orderLineData->rtdd_exdt??null;
-                        $returnLine->rtdd_imag = $orderLineData->rtdd_imag??'-';
+                        $returnLine->rtdd_batc = $orderLineData->rtdd_batc ?? '-';
+                        $returnLine->rtdd_mfdt = $orderLineData->rtdd_mfdt ?? null;
+                        $returnLine->rtdd_exdt = $orderLineData->rtdd_exdt ?? null;
+                        $returnLine->rtdd_imag = $orderLineData->rtdd_imag ?? '-';
                         $returnLine->aemp_iusr = $request->up_emp_id;
                         $returnLine->aemp_eusr = $request->up_emp_id;
                         $returnLine->save();
@@ -696,8 +701,8 @@ class OrderModuleDataUAE extends Controller
 
         return $trip_m;
     }
-	
-	 public function get_com_wh_invoice($invoice_code, $db_conn)
+
+    public function get_com_wh_invoice($invoice_code, $db_conn)
     {
         $invoice_m = DB::connection($db_conn)->select("
         SELECT `WH_ID`AS WH_ID,`ACMP_CODE`AS company_code
@@ -757,7 +762,7 @@ class OrderModuleDataUAE extends Controller
         }
 
     }
-	
+
     public function Re_Generated_Invoice_OrderWise(Request $request)
     {
 
@@ -773,16 +778,16 @@ class OrderModuleDataUAE extends Controller
                 $wh = $com_wh ? $com_wh[0]->WH_ID : '';
 
                 if ($IBS_INVOICE1 = $this->get_IBS_INVOICE_new($comp, $wh, $invoice_code, $request->country_id)) {
-                   
-                   $array = json_decode($IBS_INVOICE1, true);
-				   $data = json_decode($array, true);
 
-                 // Access "Status" value
-                  $status = $data[0]['Status'];
-                  $vatNumber = $data[0]['VatNumber'];
-				   		
+                    $array = json_decode($IBS_INVOICE1, true);
+                    $data = json_decode($array, true);
+
+                    // Access "Status" value
+                    $status = $data[0]['Status'];
+                    $vatNumber = $data[0]['VatNumber'];
+
                 }
-               
+
                 if ($status == 'success') {
                     $ret = DB::connection($db_conn)->table('dm_trip_master')->where(['ORDM_ORNM' => $invoice_code])
                         ->update(['IBS_INVOICE' => $vatNumber]);
@@ -790,9 +795,9 @@ class OrderModuleDataUAE extends Controller
                         ->update(['IBS_INVOICE' => $vatNumber]);
 
                     DB::connection($db_conn)->commit();
-                  return array(
-                        'success' => 1,   
-                        'vatNumber' => $vatNumber,						
+                    return array(
+                        'success' => 1,
+                        'vatNumber' => $vatNumber,
                         'message' => 'Vat Generated Successfully !!!',
                     );
                 } else {
@@ -800,9 +805,9 @@ class OrderModuleDataUAE extends Controller
                         'success' => 0,
                         'vatNumber' => 'N',
                         'message' => 'Vat Server Problem !!!',
-                    ); 
+                    );
                 }
-                
+
             } catch (\Exception $e) {
                 DB::connection($db_conn)->rollback();
                 return $e;
@@ -813,11 +818,11 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function SubmitSiteWiseInvoiceGrvDelivery(Request $request)
-    {
-        //  $sql .= "INSERT INTO MyGuests (firstname, lastname, email)
-        //  VALUES ('Julie', 'Dooley', 'julie@example.com')";
-       //return $request->all();
+        function SubmitSiteWiseInvoiceGrvDelivery(
+        Request $request
+    ) {
+
+
         $request->tpm_id;
         $request->tpm_code;
         $request->site_code;
@@ -830,17 +835,18 @@ class OrderModuleDataUAE extends Controller
         $request->emp_id;
         $request->emp_code;
 
-       $country = new Country();
-       $country1 = $country->country($request->country_id);
+        $country = new Country();
+        $country1 = $country->country($request->country_id);
         $round_digit = $country1->cont_dgit;
-		return $round_digit;
+        $module_type = $country1->module_type;
+        //return $round_digit;
         $outletData = json_decode($request->invoice_wise_delivery)[0];
         $outletData_child = json_decode($request->invoice_wise_delivery);
         if ($outletData) {
             $country = (new Country())->country($request->country_id);
-           return $country;
-		   $db_conn = $country->cont_conn;
-			 
+            // return $country;
+            $db_conn = $country->cont_conn;
+            //$slq_array=[]; 
             if ($db_conn != '') {
                 DB::connection($db_conn)->beginTransaction();
                 try {
@@ -851,11 +857,13 @@ class OrderModuleDataUAE extends Controller
                     $sql5 = "";
                     $sql6 = "";
                     $sql7 = "";
+                    $sql9 = "";
                     $sql = "SET autocommit=0;";
                     $DRDT = date('Y-m-d');
                     $Year = date('Y');
                     $DRTM = date('Y-m-d H:i:s');
                     $dt = date('Ymd-Hi');
+
                     if ($request->type_id == 1) {
 
                         $com_wh = $this->get_com_wh($request->tpm_code, $db_conn);
@@ -863,7 +871,7 @@ class OrderModuleDataUAE extends Controller
                         $wh = $com_wh ? $com_wh[0]->WH_ID : '';
                         $IBS_INVOICE = 'N';
                         $site_type = $request->site_type == "" ? 2 : $request->site_type;
-                        if ($site_type == 1) {
+                        if ($site_type == 1 || $module_type == 1) {
 
                             $IBS_INVOICE = 'N';
 
@@ -882,20 +890,24 @@ class OrderModuleDataUAE extends Controller
                                 );
                             }
                         }
-                        $sql1 = " Update tt_ordm set lfcl_id=11,ordm_drdt='$DRDT',ordm_dltm='$DRTM' WHERE ordm_ornm='$request->ORDM_ORNM'; ";
+                        $sql1 = " Update tt_ordm set lfcl_id=11,ordm_drdt='$DRDT',ordm_dltm='$DRTM' WHERE ordm_ornm='$request->ORDM_ORNM' ;";
+                        // array_push($slq_array,$sql1);
+
+                        //return $slq_array;
 
                         foreach ($outletData_child as $orderLineData) {
                             $amount = $orderLineData->Dev_QNTY * $orderLineData->Rate;
 
-                            $sql2 .= " Update tt_ordd set ordd_dqty=$orderLineData->Dev_QNTY,ordd_odat=$amount  WHERE id=$orderLineData->trp_line; ";
-                            $sql3 .= " Update dm_trip_detail set DELV_QNTY=$orderLineData->Dev_QNTY,DISCOUNT=$orderLineData->DISCOUNT,TRIP_STATUS='D',ORDM_DRDT='$DRDT' WHERE OID=$orderLineData->trp_line;";
+                            $sql2 .= "update tt_ordd set ordd_dqty=$orderLineData->Dev_QNTY,ordd_odat=$amount  WHERE id=$orderLineData->trp_line ;";
+                            //array_push($slq_array,$sql2);
+                            $sql3 .= " Update dm_trip_detail set DELV_QNTY=$orderLineData->Dev_QNTY,TRIP_STATUS='D',IBS_INVOICE='$IBS_INVOICE',DISCOUNT=$orderLineData->DISCOUNT,ORDM_DRDT='$DRDT' WHERE OID=$orderLineData->trp_line;";
+                            // array_push($slq_array,$sql3);
                         }
 
                         // $sql4 = " Update dm_trip_master set ORDM_DRDT='$DRDT',DELV_AMNT=round($request->DELV_AMNT,4),DELIVERY_STATUS=11 WHERE ORDM_ORNM='$request->ORDM_ORNM';";
                         $sql4 = " Update dm_trip_master set ORDM_DRDT='$DRDT',IBS_INVOICE='$IBS_INVOICE',DELV_AMNT=round($request->DELV_AMNT,$round_digit),DELIVERY_STATUS=11 WHERE ORDM_ORNM='$request->ORDM_ORNM';";
-                        //       // $sql8 = " Update dm_trip_detail set TRIP_STATUS='D',IBS_INVOICE='$IBS_INVOICE' WHERE TRIP_NO='$request->tpm_code'AND ORDM_ORNM='$request->ORDM_ORNM' AND TRIP_STATUS='N'; ";
-                        $sql8 = " Update dm_trip_detail set TRIP_STATUS='D',IBS_INVOICE='$IBS_INVOICE' WHERE ORDM_ORNM='$request->ORDM_ORNM' ; ";
-                        // $sql8 = " Update dm_trip_detail set TRIP_STATUS='D' WHERE ORDM_ORNM='$request->ORDM_ORNM' ; ";
+                        //array_push($slq_array,$sql4);
+                        // $sql8 = " Update dm_trip_detail set TRIP_STATUS='D',IBS_INVOICE='$IBS_INVOICE' WHERE ORDM_ORNM='$request->ORDM_ORNM';";
                     } else {
                         $now = now();
                         //  "SELECT `ACMP_CODE`,`WH_ID`,`DM_CODE` FROM `dm_trip_master` WHERE TRIP_NO='TRIP-0500-01-2111000005' GROUP BY TRIP_NO";
@@ -917,39 +929,44 @@ class OrderModuleDataUAE extends Controller
                                   '$request->emp_code', '$dm_ACMP_WH_ID_DM_CODE->DM_CODE', '$dm_ACMP_WH_ID_DM_CODE->WH_ID',
                                   '$request->site_id', '$request->site_code',  round($request->DELV_AMNT,$round_digit),0, 'GRV', 11, 'N', 5,$request->slgp_id); ";
 
-                        // foreach ($outletData_child as $orderLineData) {
-                        //     $amountd = $orderLineData->Dev_QNTY * $orderLineData->Rate;
-                        //     $sql7 .= " Update tt_rtdd set rtdd_dqty='$orderLineData->Dev_QNTY',rtdd_damt='$amountd' WHERE id=$orderLineData->trp_line; ";
-                        // }
-                        $sql7 = "UPDATE tt_rtdd SET ";
                         foreach ($outletData_child as $orderLineData) {
                             $amountd = $orderLineData->Dev_QNTY * $orderLineData->Rate;
-                            $sql7 .= "CASE WHEN id = $orderLineData->trp_line THEN rtdd_dqty = '$orderLineData->Dev_QNTY', rtdd_damt = '$amountd' ELSE ";
-                        }
-                        $sql7 .= "rtdd_dqty END, rtdd_damt END WHERE id IN (";
-                        foreach ($outletData_child as $orderLineData) {
-                            $sql7 .= $orderLineData->trp_line . ",";
-                        }
-                        $grv_single_statement = rtrim($sql7, ",") . ");";
-                        return $grv_single_statement;
 
+                            if(isset($orderLineData->delv_gqty)){									 
+								 
+                                $sql9 .= "INSERT IGNORE INTO `tt_rtdd_new`(`rtdd_rtan`, `amim_id`, `rtdd_qnty`,
+                                       `rtdd_dqty`, `rtdd_ptyp`, `lfcl_id`)
+                                        VALUES ('$orderLineData->ORDM_ORNM',$orderLineData->AMIM_ID,$orderLineData->ORDD_QNTY,
+                                        $orderLineData->delv_gqty,2, 11);";
+                                $sql9 .= "INSERT IGNORE INTO `tt_rtdd_new`(`rtdd_rtan`, `amim_id`, `rtdd_qnty`,
+                                       `rtdd_dqty`, `rtdd_ptyp`, `lfcl_id`)
+                                        VALUES ('$orderLineData->ORDM_ORNM',$orderLineData->AMIM_ID,$orderLineData->ORDD_QNTY,
+                                        $orderLineData->delv_bqty,1, 11);";	
+                                  }
+
+                            $sql7 .= " Update tt_rtdd set rtdd_dqty='$orderLineData->Dev_QNTY',rtdd_damt='$amountd' WHERE id=$orderLineData->trp_line; ";
+                        }
                     }
                     DB::connection($db_conn)->unprepared($sql);
 
                     if ($request->type_id == 1) {
                         DB::connection($db_conn)->insert($sql1);
-                        DB::connection($db_conn)->unprepared($sql2);//multiple row
-                        DB::connection($db_conn)->unprepared($sql3);//multiple row
+                        DB::connection($db_conn)->unprepared($sql2); //multiple row
+                        DB::connection($db_conn)->unprepared($sql3); //multiple row
                         DB::connection($db_conn)->insert($sql4);
-                        DB::connection($db_conn)->insert($sql8);
+                        // DB::connection($db_conn)->insert($sql8);
+
+
                     } else {
                         DB::connection($db_conn)->insert($sql5);
                         DB::connection($db_conn)->insert($sql6);
-                        DB::connection($db_conn)->unprepared($sql7);//multiple row
+                        DB::connection($db_conn)->unprepared($sql7); //multiple row
+                         if($sql9){
+                        DB::connection($db_conn)->unprepared($sql9);//multiple row
+                         }
                     }
                     DB::connection($db_conn)->commit();
-                    // echo $retn;
-                    // die();
+
                     return array(
                         'success' => 1,
                         'message' => "Delivery Successfully",
@@ -957,6 +974,8 @@ class OrderModuleDataUAE extends Controller
                 } catch
                 (\Exception $e) {
                     DB::connection($db_conn)->rollback();
+                    // $sq33 = "SET autocommit=1;";
+                    // DB::connection($db_conn)->unprepared($sq33);
                     return $e;
                     //throw $e;
                 }
@@ -965,8 +984,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function ReverseDelivery_postman(Request $request)
-    {
+        function ReverseDelivery_postman(
+        Request $request
+    ) {
 
         $request->country_id;
         $request->ORDM_ORNM;
@@ -1033,8 +1053,8 @@ class OrderModuleDataUAE extends Controller
                         DB::connection($db_conn)->unprepared($sql);
 
                         DB::connection($db_conn)->insert($sql1);
-                        DB::connection($db_conn)->unprepared($sql2);//multiple row
-                        DB::connection($db_conn)->unprepared($sql3);//multiple row
+                        DB::connection($db_conn)->unprepared($sql2); //multiple row
+                        DB::connection($db_conn)->unprepared($sql3); //multiple row
                         DB::connection($db_conn)->insert($sql4);
                         DB::connection($db_conn)->unprepared($sql_cancel);
                         DB::connection($db_conn)->commit();
@@ -1073,8 +1093,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function ReverseDelivery(Request $request)
-    {
+        function ReverseDelivery(
+        Request $request
+    ) {
 
         $request->country_id;
         $request->ORDM_ORNM;
@@ -1137,8 +1158,8 @@ class OrderModuleDataUAE extends Controller
                         DB::connection($db_conn)->unprepared($sql);
 
                         DB::connection($db_conn)->insert($sql1);
-                        DB::connection($db_conn)->unprepared($sql2);//multiple row
-                        DB::connection($db_conn)->unprepared($sql3);//multiple row
+                        DB::connection($db_conn)->unprepared($sql2); //multiple row
+                        DB::connection($db_conn)->unprepared($sql3); //multiple row
                         DB::connection($db_conn)->insert($sql4);
                         DB::connection($db_conn)->unprepared($sql_cancel);
                         DB::connection($db_conn)->commit();
@@ -1171,8 +1192,9 @@ class OrderModuleDataUAE extends Controller
 
 
     public
-    function CancelDelivery(Request $request)
-    {
+        function CancelDelivery(
+        Request $request
+    ) {
 
         $request->country_id;
         $request->ORDM_ORNM;
@@ -1196,13 +1218,13 @@ class OrderModuleDataUAE extends Controller
                 $zero = 0;
 
                 $is_challan_completed = DB::connection($db_conn)->table('tt_ordm')->where(['ordm_ornm' => $request->ORDM_ORNM])->first();
-               
-			   if ($is_challan_completed->lfcl_id == 39) {
+
+                if ($is_challan_completed->lfcl_id == 39) {
                     return array(
                         'success' => 0,
                         'message' => "Already Challan Completed !!\nUn-do Delivery Failed",
                     );
-                }elseif ($is_challan_completed->lfcl_id == 38) {
+                } elseif ($is_challan_completed->lfcl_id == 38) {
                     return array(
                         'success' => 0,
                         'message' => "Already Delivery Canceled !!",
@@ -1258,8 +1280,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function SubmitSiteWiseInvoiceCollection(Request $request)
-    {
+        function SubmitSiteWiseInvoiceCollection(
+        Request $request
+    ) {
 
         $request->site_code;
         $request->site_id;
@@ -1282,7 +1305,7 @@ class OrderModuleDataUAE extends Controller
 
         if ($request->ex_st_type == 42 && $request->ex_st_amt > 0) {
             $last_order_number = $outletData_child[count($outletData_child) - 1]->ORDM_ORNM;
-           // $last_order_coll_amt = $outletData_child[count($outletData_child) - 1]->Coll_Amt + $request->ex_st_amt;
+            // $last_order_coll_amt = $outletData_child[count($outletData_child) - 1]->Coll_Amt + $request->ex_st_amt;
             $last_order_coll_amt = $outletData_child[count($outletData_child) - 1]->Coll_Amt;
         } else {
             $last_order_number = '';
@@ -1296,12 +1319,12 @@ class OrderModuleDataUAE extends Controller
         //ex_st_amt
         // ex_st_type
         //
-		if (($request->ex_st_type == 43 OR $request->ex_st_type == 40)&& $request->ex_st_amt > 300) {
-			return array(
-                            'success' => 0,
-                            'message' => 'Collection Failed! Excess amt more than 50 !',
-                        ); 
-		 }
+        if (($request->ex_st_type == 43 or $request->ex_st_type == 40) && $request->ex_st_amt > 300) {
+            return array(
+                'success' => 0,
+                'message' => 'Collection Failed! Excess amt more than 50 !',
+            );
+        }
         if ($outletData) {
             $country = (new Country())->country($request->country_id);
             $db_conn = $country->cont_conn;
@@ -1377,12 +1400,12 @@ class OrderModuleDataUAE extends Controller
                     if ($request->ex_st_type != 42 && $request->ex_st_amt > 0) { // cash or credit excess
                         $total_Debit_amt = round($request->COLL_AMNT - $request->ex_st_amt, 5);
                     } else {
-                       // $total_Debit_amt = round($request->COLL_AMNT, 5);
-						$total_Debit_amt = round($request->COLL_AMNT + $request->ex_st_amt, 5);
+                        // $total_Debit_amt = round($request->COLL_AMNT, 5);
+                        $total_Debit_amt = round($request->COLL_AMNT + $request->ex_st_amt, 5);
                     }
 
                     // credit party Excess
-                    if ($request->ex_st_type == 40 && $request->ex_st_amt > 0) {
+                    if ($request->ex_st_type == 40 && $request->ex_st_amt > 1) {
 
                         $sql_CLMP_Credit_EX_CN = "INSERT INTO `dm_invoice_collection_mapp`(`ID`, `ACMP_CODE`, `TRN_DATE`, `MAP_ID`,
                         `TRANSACTION_ID`, `SITE_ID`, `SITE_CODE`, `DEBIT_AMNT`, `CRECIT_AMNT`, `DELV_AMNT`)
@@ -1409,7 +1432,7 @@ class OrderModuleDataUAE extends Controller
                     //  return '$sql1='.$sql1.'/n/'.$sql2.'/n/'.$sql_CLMP_Credit_EX_CN.'/n/'.$sql_DMCL_Credit_EX_CN.'/n/'.$sql_DMCL_Credit_EX_DN;
 
                     // Cash Party Excess
-                    if ($request->ex_st_type == 43 && $request->ex_st_amt > 0) {
+                    if ($request->ex_st_type == 43 && $request->ex_st_amt > 1) {
 
                         /*$sql_DMCL_Cash_EX_DN = "INSERT INTO `dm_collection` (`ID`, `ACMP_CODE`, `COLL_DATE`, `COLL_NUMBER`,
                                  `IBS_INVOICE`, `AEMP_ID`, `AEMP_USNM`, `DM_CODE`, `WH_ID`, `SITE_ID`, `SITE_CODE`, `COLLECTION_AMNT`,
@@ -1447,7 +1470,7 @@ class OrderModuleDataUAE extends Controller
 
                     }
                     // Cash Party Sort
-                    if ($request->ex_st_type == 42 && $request->ex_st_amt > 0) {
+                    if ($request->ex_st_type == 42 && $request->ex_st_amt > 1) {
 
                         $sql_DMCL_Cash_ST_DN = "INSERT INTO `dm_collection` (`ID`, `ACMP_CODE`, `COLL_DATE`, `COLL_NUMBER`, 
                                  `IBS_INVOICE`, `AEMP_ID`, `AEMP_USNM`, `DM_CODE`, `WH_ID`, `SITE_ID`, `SITE_CODE`, `COLLECTION_AMNT`,
@@ -1556,9 +1579,9 @@ class OrderModuleDataUAE extends Controller
                         DB::connection($db_conn)->insert($sql1);
                         DB::connection($db_conn)->insert($sql2);
                         if (!empty($sql3)) {
-                            DB::connection($db_conn)->unprepared($sql3);//multiple row
-                            DB::connection($db_conn)->unprepared($sql4);//multiple row
-                            DB::connection($db_conn)->unprepared($sql8);//multiple row
+                            DB::connection($db_conn)->unprepared($sql3); //multiple row
+                            DB::connection($db_conn)->unprepared($sql4); //multiple row
+                            DB::connection($db_conn)->unprepared($sql8); //multiple row
 
                             /*if (!empty($sql_tl_cpcr)) {
                                 DB::connection($db_conn)->unprepared($sql_tl_cpcr);//multiple row
@@ -1570,19 +1593,19 @@ class OrderModuleDataUAE extends Controller
                             DB::connection($db_conn)->unprepared($sql5);
                             DB::connection($db_conn)->unprepared($sql6);
                         }
-                        if ($request->ex_st_type == 40 && $request->ex_st_amt > 0) {
+                        if ($request->ex_st_type == 40 && $request->ex_st_amt > 1) {
                             DB::connection($db_conn)->unprepared($sql_CLMP_Credit_EX_CN);
                             DB::connection($db_conn)->unprepared($sql_DMCL_Credit_EX_CN);
                             DB::connection($db_conn)->unprepared($sql_DMCL_Credit_EX_DN);
                         }
-                        if ($request->ex_st_type == 43 && $request->ex_st_amt > 0) {
+                        if ($request->ex_st_type == 43 && $request->ex_st_amt > 1) {
                             // DB::connection($db_conn)->unprepared($sql_DMCL_Cash_EX_DN);
                             // DB::connection($db_conn)->unprepared($sql_CLMP_Cash_EX_DN);
                             DB::connection($db_conn)->unprepared($sql_CLMP_Credit_EX_CN);
                             DB::connection($db_conn)->unprepared($sql_DMCL_Credit_EX_CN);
                             DB::connection($db_conn)->unprepared($sql_DMCL_Credit_EX_DN);
                         }
-                        if ($request->ex_st_type == 42 && $request->ex_st_amt > 0) {
+                        if ($request->ex_st_type == 42 && $request->ex_st_amt > 1) {
                             DB::connection($db_conn)->unprepared($sql_DMCL_Cash_ST_DN);
                             DB::connection($db_conn)->unprepared($sql_CLMP_Cash_ST_DN);
                         }
@@ -1638,7 +1661,7 @@ class OrderModuleDataUAE extends Controller
         if ($request->ex_st_type == 42 && $request->ex_st_amt > 0) {
             $last_order_number = $outletData_child[count($outletData_child) - 1]->ORDM_ORNM;
             //$last_order_coll_amt = $outletData_child[count($outletData_child) - 1]->Coll_Amt + $request->ex_st_amt;
-            $last_order_coll_amt = $outletData_child[count($outletData_child) - 1]->Coll_Amt ;
+            $last_order_coll_amt = $outletData_child[count($outletData_child) - 1]->Coll_Amt;
         } else {
             $last_order_number = '';
             $last_order_coll_amt = 0;
@@ -1651,15 +1674,16 @@ class OrderModuleDataUAE extends Controller
         //ex_st_amt
         // ex_st_type
         //
-		if (($request->ex_st_type == 43 OR $request->ex_st_type == 40)&& $request->ex_st_amt > 300) {
-			return array(
-                            'success' => 0,
-                            'message' => 'Collection Failed! Excess amt more than 50 !',
-                        ); 
-		 }
+        if (($request->ex_st_type == 43 or $request->ex_st_type == 40) && $request->ex_st_amt > 300) {
+            return array(
+                'success' => 0,
+                'message' => 'Collection Failed! Excess amt more than 50 !',
+            );
+        }
         if ($outletData) {
             $country = (new Country())->country($request->country_id);
             $db_conn = $country->cont_conn;
+            $module_type = $country->module_type;
             if ($db_conn != '') {
                 DB::connection($db_conn)->beginTransaction();
                 try {
@@ -1708,17 +1732,20 @@ class OrderModuleDataUAE extends Controller
                         $coll_type = $request->Coll_no;
                     }
 
-
-                    $sql_get_mother = "SELECT `mother_site_code`AS m_site_code FROM `tl_site_party_mapping` WHERE `site_code`=$request->site_code";
-                    $pending_collection = DB::connection($db_conn)->select($sql_get_mother);
-                    if ($pending_collection) {
-                        $m_site_code = $pending_collection[0]->m_site_code;
-                        $m_site_id = $pending_collection[0]->m_site_code;
+                    if ($module_type == 2) {
+                        $sql_get_mother = "SELECT `mother_site_code`AS m_site_code FROM `tl_site_party_mapping` WHERE `site_code`=$request->site_code";
+                        $pending_collection = DB::connection($db_conn)->select($sql_get_mother);
+                        if ($pending_collection) {
+                            $m_site_code = $pending_collection[0]->m_site_code;
+                            $m_site_id = $pending_collection[0]->m_site_code;
+                        } else {
+                            $m_site_id = $request->site_id;
+                            $m_site_code = $request->site_code;
+                        }
                     } else {
                         $m_site_id = $request->site_id;
                         $m_site_code = $request->site_code;
                     }
-
 
                     $now = now();
                     $last_3 = substr($now->timestamp . $now->milli, 10);
@@ -1742,12 +1769,12 @@ class OrderModuleDataUAE extends Controller
                     if ($request->ex_st_type != 42 && $request->ex_st_amt > 0) { // cash or credit excess
                         $total_Debit_amt = round($request->COLL_AMNT - $request->ex_st_amt, 5);
                     } else {
-                        // $total_Debit_amt = round($request->COLL_AMNT, 5);
-						$total_Debit_amt = round($request->COLL_AMNT + $request->ex_st_amt, 5);
+                         $total_Debit_amt = round($request->COLL_AMNT, 5);
+                       // $total_Debit_amt = round($request->COLL_AMNT + $request->ex_st_amt, 5);
                     }
 
                     // credit party Excess
-                    if ($request->ex_st_type == 40 && $request->ex_st_amt > 0) {
+                    if ($request->ex_st_type == 40 && $request->ex_st_amt > 1) {
 
                         $sql_CLMP_Credit_EX_CN = "INSERT INTO `dm_invoice_collection_mapp`(`ID`, `ACMP_CODE`, `TRN_DATE`, `MAP_ID`,
                         `TRANSACTION_ID`, `SITE_ID`, `SITE_CODE`, `DEBIT_AMNT`, `CRECIT_AMNT`, `DELV_AMNT`)
@@ -1774,7 +1801,7 @@ class OrderModuleDataUAE extends Controller
                     //  return '$sql1='.$sql1.'/n/'.$sql2.'/n/'.$sql_CLMP_Credit_EX_CN.'/n/'.$sql_DMCL_Credit_EX_CN.'/n/'.$sql_DMCL_Credit_EX_DN;
 
                     // Cash Party Excess
-                    if ($request->ex_st_type == 43 && $request->ex_st_amt > 0) {
+                    if ($request->ex_st_type == 43 && $request->ex_st_amt > 1) {
 
                         /*$sql_DMCL_Cash_EX_DN = "INSERT INTO `dm_collection` (`ID`, `ACMP_CODE`, `COLL_DATE`, `COLL_NUMBER`,
                                  `IBS_INVOICE`, `AEMP_ID`, `AEMP_USNM`, `DM_CODE`, `WH_ID`, `SITE_ID`, `SITE_CODE`, `COLLECTION_AMNT`,
@@ -1812,7 +1839,7 @@ class OrderModuleDataUAE extends Controller
 
                     }
                     // Cash Party Sort
-                    if ($request->ex_st_type == 42 && $request->ex_st_amt > 0) {
+                    if ($request->ex_st_type == 42 && $request->ex_st_amt > 1) {
 
                         $sql_DMCL_Cash_ST_DN = "INSERT INTO `dm_collection` (`ID`, `ACMP_CODE`, `COLL_DATE`, `COLL_NUMBER`, 
                                  `IBS_INVOICE`, `AEMP_ID`, `AEMP_USNM`, `DM_CODE`, `WH_ID`, `SITE_ID`, `SITE_CODE`, `COLLECTION_AMNT`,
@@ -1934,8 +1961,8 @@ class OrderModuleDataUAE extends Controller
                         DB::connection($db_conn)->insert($sql1);
                         DB::connection($db_conn)->insert($sql2);
                         if (!empty($sql3)) {
-                            DB::connection($db_conn)->unprepared($sql3);//multiple row
-                            DB::connection($db_conn)->unprepared($sql4);//multiple row
+                            DB::connection($db_conn)->unprepared($sql3); //multiple row
+                            DB::connection($db_conn)->unprepared($sql4); //multiple row
 
                             /*if (!empty($sql_tl_cpcr)) {
                                 DB::connection($db_conn)->unprepared($sql_tl_cpcr);//multiple row
@@ -1947,19 +1974,19 @@ class OrderModuleDataUAE extends Controller
                             DB::connection($db_conn)->unprepared($sql5);
                             DB::connection($db_conn)->unprepared($sql6);
                         }
-                        if ($request->ex_st_type == 40 && $request->ex_st_amt > 0) {
+                        if ($request->ex_st_type == 40 && $request->ex_st_amt > 1) {
                             DB::connection($db_conn)->unprepared($sql_CLMP_Credit_EX_CN);
                             DB::connection($db_conn)->unprepared($sql_DMCL_Credit_EX_CN);
                             DB::connection($db_conn)->unprepared($sql_DMCL_Credit_EX_DN);
                         }
-                        if ($request->ex_st_type == 43 && $request->ex_st_amt > 0) {
+                        if ($request->ex_st_type == 43 && $request->ex_st_amt > 1) {
                             // DB::connection($db_conn)->unprepared($sql_DMCL_Cash_EX_DN);
                             // DB::connection($db_conn)->unprepared($sql_CLMP_Cash_EX_DN);
                             DB::connection($db_conn)->unprepared($sql_CLMP_Credit_EX_CN);
                             DB::connection($db_conn)->unprepared($sql_DMCL_Credit_EX_CN);
                             DB::connection($db_conn)->unprepared($sql_DMCL_Credit_EX_DN);
                         }
-                        if ($request->ex_st_type == 42 && $request->ex_st_amt > 0) {
+                        if ($request->ex_st_type == 42 && $request->ex_st_amt > 1) {
                             DB::connection($db_conn)->unprepared($sql_DMCL_Cash_ST_DN);
                             DB::connection($db_conn)->unprepared($sql_CLMP_Cash_ST_DN);
                         }
@@ -1991,8 +2018,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function SubmitInvoiceSMS(Request $request)
-    {
+        function SubmitInvoiceSMS(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
@@ -2021,8 +2049,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function getIsCashPartyCreditRequestExist(Request $request)
-    {
+        function getIsCashPartyCreditRequestExist(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
@@ -2071,8 +2100,12 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function give_notification($usnm, $title, $body, $cond_id)
-    {
+        function give_notification(
+        $usnm,
+        $title,
+        $body,
+        $cond_id
+    ) {
         $country = (new Country())->country($cond_id);
         $db_conn = $country->cont_conn;
         $result = DB::connection($db_conn)->select("SELECT
@@ -2106,7 +2139,8 @@ class OrderModuleDataUAE extends Controller
                     'Content-Type:  application/json ',
                     'Authorization:  key=AAAAzsoU3ew:APA91bH8T-JQP9unlLTWFsoHHIRaMpXyGnTQ52bUkKB_kBuaLI75WGo4BPIfyawFrzn0Tsj_o9Deg4Qu-cW4ZBIJjC3wcCRqKroGV-BS576LbvE9x1rI1vNuM-8wRNpE9IVv-rx6lLH7'
                 ),
-            ));
+            )
+            );
             $response = curl_exec($curl);
             curl_close($curl);
 
@@ -2115,8 +2149,8 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function ggg()
-    {
+        function ggg(
+    ) {
         $curl = curl_init();
 
         $top = "eXmv9lLjScieqYKNa6OG23:APA91bFn14NRPbH0dtRogHmvY2Jl_C7le_g2tp_t4mnxhWMdLpX_R-Qrvmb14uTxDNnBFPAfstEsI9aNFX4hUk-yWvGXBL13HIxKmLsDUJCInjJ9Zaee3e-J4NyQQl4sF6HdIpIIzxZT";
@@ -2142,7 +2176,8 @@ class OrderModuleDataUAE extends Controller
                 'Content-Type:  application/json ',
                 'Authorization:  key=AAAAzsoU3ew:APA91bH8T-JQP9unlLTWFsoHHIRaMpXyGnTQ52bUkKB_kBuaLI75WGo4BPIfyawFrzn0Tsj_o9Deg4Qu-cW4ZBIJjC3wcCRqKroGV-BS576LbvE9x1rI1vNuM-8wRNpE9IVv-rx6lLH7'
             ),
-        ));
+        )
+        );
 
         $response = curl_exec($curl);
 
@@ -2151,8 +2186,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function SubmitCashPartyCreditRequest(Request $request)
-    {
+        function SubmitCashPartyCreditRequest(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
@@ -2167,12 +2203,12 @@ class OrderModuleDataUAE extends Controller
              t1.`aemp_id`AS mngr_id,t3.aemp_usnm AS manager_usname,t2.aemp_usnm
              FROM `tm_scbm`t1 JOIN tm_aemp t2 ON(t1.`aemp_id`=t2.aemp_mngr) AND t2.id=$request->emp_id
              JOIN tm_aemp t3 ON(t2.aemp_mngr=t3.id);
-             ");/* $sql_mngr = DB::connection($db_conn)->select("SELECT  t1.spbm_amnt AS Balance, t1.`id` AS spbm_id ,
-             t1.`aemp_id`AS mngr_id,t3.aemp_usnm AS manager_usname,t2.aemp_usnm
-             FROM `tm_scbm`t1 JOIN tm_aemp t2 ON(t1.`aemp_id`=t2.aemp_mngr) AND t2.id=$request->emp_id
-             JOIN tm_aemp t3 ON(t2.aemp_mngr=t3.id)
-             WHERE t1.spbm_mnth = $month AND t1.spbm_year = $year;
-             ");*/
+             "); /* $sql_mngr = DB::connection($db_conn)->select("SELECT  t1.spbm_amnt AS Balance, t1.`id` AS spbm_id ,
+           t1.`aemp_id`AS mngr_id,t3.aemp_usnm AS manager_usname,t2.aemp_usnm
+           FROM `tm_scbm`t1 JOIN tm_aemp t2 ON(t1.`aemp_id`=t2.aemp_mngr) AND t2.id=$request->emp_id
+           JOIN tm_aemp t3 ON(t2.aemp_mngr=t3.id)
+           WHERE t1.spbm_mnth = $month AND t1.spbm_year = $year;
+           ");*/
 
                 if ($sql_mngr) {
                     $Balance = $sql_mngr[0]->Balance;
@@ -2243,8 +2279,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function GetCashPartyCreditRequestList(Request $request)
-    {
+        function GetCashPartyCreditRequestList(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
@@ -2284,8 +2321,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function GetCashPartyCreditApprovedList(Request $request)
-    {
+        function GetCashPartyCreditApprovedList(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
@@ -2297,12 +2335,12 @@ class OrderModuleDataUAE extends Controller
                           round(t2.spbm_amnt,4)  AS mngr_balance               
                           FROM tm_scbm t2 
                           WHERE t2.aemp_id=$request->emp_id 
-                        ");/* $manager_balance = DB::connection($db_conn)->select("
-                          SELECT
-                          round(t2.spbm_amnt,4)  AS mngr_balance
-                          FROM tm_scbm t2
-                          WHERE t2.aemp_id=$request->emp_id AND t2.spbm_mnth = $month AND t2.spbm_year = $year
-                        ");*/
+                        "); /* $manager_balance = DB::connection($db_conn)->select("
+                        SELECT
+                        round(t2.spbm_amnt,4)  AS mngr_balance
+                        FROM tm_scbm t2
+                        WHERE t2.aemp_id=$request->emp_id AND t2.spbm_mnth = $month AND t2.spbm_year = $year
+                      ");*/
 
             $req_list_item = DB::connection($db_conn)->select("
                           SELECT t1.`id`AS cpcr_id,t1.`site_id`,t2.site_name,t2.site_mob1 AS site_mob,t1.`ordm_ornm`,
@@ -2314,17 +2352,17 @@ class OrderModuleDataUAE extends Controller
                           JOIN tm_scbm t4 ON t1.`spbm_id`=t4.id
                           WHERE t3.aemp_id=$request->emp_id AND t1.`sapr_amnt`>0 AND t1.trnt_id=4;
                          
-                        ");/*$req_list_item = DB::connection($db_conn)->select("
-                          SELECT t1.`id`AS cpcr_id,t1.`site_id`,t2.site_name,t2.site_mob1 AS site_mob,t1.`ordm_ornm`,
-                          t1.ordm_amnt, t1.`sreq_amnt`,
-                          t1.`sapr_amnt`AS aprv_amt,t1.`scol_amnt`,t1.`cpcr_cdat`
-                          FROM `tl_cpcr`t1
-                          JOIN tm_site t2 ON(t1.`site_id`=t2.id)
-                          JOIN tm_scbm t3 ON(t1.spbm_id=t3.id)
-                          JOIN tm_scbm t4 ON t1.`spbm_id`=t4.id
-                          WHERE t3.aemp_id=$request->emp_id AND t1.`sapr_amnt`>0 AND t1.trnt_id=4
-                          AND t4.spbm_mnth=$month AND t4.spbm_year=$year;
-                        ");*/
+                        "); /*$req_list_item = DB::connection($db_conn)->select("
+                        SELECT t1.`id`AS cpcr_id,t1.`site_id`,t2.site_name,t2.site_mob1 AS site_mob,t1.`ordm_ornm`,
+                        t1.ordm_amnt, t1.`sreq_amnt`,
+                        t1.`sapr_amnt`AS aprv_amt,t1.`scol_amnt`,t1.`cpcr_cdat`
+                        FROM `tl_cpcr`t1
+                        JOIN tm_site t2 ON(t1.`site_id`=t2.id)
+                        JOIN tm_scbm t3 ON(t1.spbm_id=t3.id)
+                        JOIN tm_scbm t4 ON t1.`spbm_id`=t4.id
+                        WHERE t3.aemp_id=$request->emp_id AND t1.`sapr_amnt`>0 AND t1.trnt_id=4
+                        AND t4.spbm_mnth=$month AND t4.spbm_year=$year;
+                      ");*/
 
             return array(
                 'balance' => $manager_balance[0]->mngr_balance,
@@ -2334,8 +2372,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function SpecialBudgetDetailsUserWise(Request $request)
-    {
+        function SpecialBudgetDetailsUserWise(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
@@ -2373,8 +2412,12 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function calculateBudget($auto_id, $role_id, $request_time, $db_conn)
-    {
+        function calculateBudget(
+        $auto_id,
+        $role_id,
+        $request_time,
+        $db_conn
+    ) {
         $t_bdgt = 0;
         $t_available = 0;
         $own_bdgt = 0;
@@ -2463,8 +2506,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function SubmitCashPartyCreditApproved(Request $request)
-    {
+        function SubmitCashPartyCreditApproved(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
@@ -2522,8 +2566,8 @@ class OrderModuleDataUAE extends Controller
                 } else {
                     // update query $sql_cancle = "SET trnt_id='5',spbd_type='Credit Rej', aemp_eusr=$_msg_id"
                     /*
-                    * it`s requirement for iqram bhai.
-                    */
+                     * it`s requirement for iqram bhai.
+                     */
 
                     $sql_cancel = "DELETE FROM `tl_cpcr`  WHERE `id`=$request->cpcr_id";
 
@@ -2548,8 +2592,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function GetCashPartyCreditCollectionPendingList(Request $request)
-    {
+        function GetCashPartyCreditCollectionPendingList(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
@@ -2568,8 +2613,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function GetTrip_Summery_Details_Data(Request $request)
-    {
+        function GetTrip_Summery_Details_Data(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
@@ -2589,8 +2635,9 @@ class OrderModuleDataUAE extends Controller
     }
 
     public
-    function GetTrip_Report_Details_Data(Request $request)
-    {
+        function GetTrip_Report_Details_Data(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
@@ -2663,8 +2710,9 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
     }
 
     public
-    function SubmitCashPartyCollection(Request $request)
-    {
+        function SubmitCashPartyCollection(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
@@ -2685,7 +2733,7 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
                     $sql_cpcd = "INSERT INTO `tl_cpcd` (cpcr_id,`spbm_id`, `site_id`, `ordm_ornm`, `scol_amnt`, 
                         `cont_id`, `lfcl_id`, `aemp_iusr`, `aemp_eusr`) 
                         VALUES ($cpcr_id,'$request->spbm_id', '$request->site_id', '$request->ordm_ornm',
-                        '$request->coll_amnt', '3', '27', '1', '1')";//27=lfcl_id cash collection
+                        '$request->coll_amnt', '3', '27', '1', '1')"; //27=lfcl_id cash collection
                 }
                 DB::connection($db_conn)->insert($sql);
                 DB::connection($db_conn)->unprepared($sql1);
@@ -2704,8 +2752,9 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
     }
 
     public
-    function SubmitTripEOT(Request $request)
-    {
+        function SubmitTripEOT(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
@@ -2725,8 +2774,10 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
                     $cod = 0;
                     $mgs = $pp . ' Invoice Collection Pending Please collection then Try to EOT';
                 } else {
-                    $ret = DB::connection($db_conn)->table('dm_trip')->where(['TRIP_NO' => $request->TRIP_NO,
-                        'STATUS' => 'N'])->update(['STATUS' => 'R', 'DM_ACTIVITY' => '5']);
+                    $ret = DB::connection($db_conn)->table('dm_trip')->where([
+                        'TRIP_NO' => $request->TRIP_NO,
+                        'STATUS' => 'N'
+                    ])->update(['STATUS' => 'R', 'DM_ACTIVITY' => '5']);
 
                     if ($ret == 1) {
                         $cod = 1;
@@ -2751,8 +2802,9 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
     }
 
     public
-    function Test(Request $request)
-    {
+        function Test(
+        Request $request
+    ) {
         // $country = (new Country())->country($request->country_id);
         // $db_conn = $country->cont_conn;
         $DRTM = date('YmdHi');
@@ -2786,9 +2838,7 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
 
     }
 
-    public
-    function outletSave(Request $request)
-    {
+    public function outletSave(Request $request) {
 
 
         $outletData = json_decode($request->data_Open_New_Outlet)[0];
@@ -2798,7 +2848,15 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
 
             $country = Country::on($db_conn)->findorfail($outletData->country_id);
 
-            $site_code = '5' . str_pad($country->attr4 + 1, 9, '0', STR_PAD_LEFT);
+           // $site_code = '5' . str_pad($country->attr4 + 1, 9, '0', STR_PAD_LEFT);
+           $shop_credit_code = [
+                    8 => 30,
+                    9 => 70,
+                    10 => 20,
+                    11 => 50,
+            ];
+		    // $site_code = $outletData->p_type . $outletData->dsct_code . str_pad($country->attr4 + 1, 6, '0', STR_PAD_LEFT);
+		    $site_code = $shop_credit_code[$outletData->Shop_Category_id] . $outletData->dsct_code . str_pad($country->attr4 + 1, 6, '0', STR_PAD_LEFT);
 
             DB::connection($db_conn)->beginTransaction();
             try {
@@ -2842,20 +2900,12 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
                 $site->otcg_id = $outletData->Shop_Category_id;
                 $site->site_imge = $outletData->Outlet_Image;
                 $site->site_omge = '';
-                $site->geo_lat = isset($outletData->Location) ? explode(',', $outletData->Location)[0] : 0;;
+                $site->geo_lat = isset($outletData->Location) ? explode(',', $outletData->Location)[0] : 0;
+                ;
                 $site->geo_lon = isset($outletData->Location) ? explode(',', $outletData->Location)[1] : 0;
                 $site->site_reg = '';
-                $site->site_hsno = '';
-				//$site->site_vtrn = '';
-				$vat=$outletData->site_vtrn??0;
-              // if(is_null($outletData->site_vtrn)){
-				//if ($outletData->has('site_vtrn')){   
-				$site->site_vtrn = $vat;
-				//$site->site_vtrn = $outletData->site_vtrn;	
-				//}else{
-				//	$site->site_vtrn = '';
-				//$site->site_vtrn = $outletData->site_vtrn;	
-				//}
+                $site->site_hsno = '';   
+                $site->site_vtrn =  $outletData->vat_trn ?? 0;
                 $site->site_vsts = 1;
                 $site->site_vrfy = 0;
                 $site->cont_id = $outletData->country_id;
@@ -2870,7 +2920,7 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
                 $site->save();
 
                 if ($outletData->national_id != "") {
-                    $site_wdov=$outletData->site_wdov??0;
+                    $site_wdov = $outletData->site_wdov ?? 0;
                     $insert[] = [
                         'site_id' => $site->id,
                         'cont_id' => $outletData->national_id,
@@ -2902,7 +2952,8 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
                 $tempSite->otcg_id = $outletData->Shop_Category_id;
                 $tempSite->nsit_imge = $outletData->Outlet_Image;
                 $tempSite->nsit_omge = '';
-                $tempSite->geo_lat = isset($outletData->Location) ? explode(',', $outletData->Location)[0] : 0;;
+                $tempSite->geo_lat = isset($outletData->Location) ? explode(',', $outletData->Location)[0] : 0;
+                ;
                 $tempSite->geo_lon = isset($outletData->Location) ? explode(',', $outletData->Location)[1] : 0;
                 $tempSite->nsit_reg = '';
                 $tempSite->nsit_vrfy = 0;
@@ -2961,8 +3012,9 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
     }
 
     public
-    function SavePoCopyMapping(Request $request)
-    {
+        function SavePoCopyMapping(
+        Request $request
+    ) {
 
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
@@ -3021,8 +3073,9 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
     }
 
     public
-    function updateOutletSerial(Request $request)
-    {
+        function updateOutletSerial(
+        Request $request
+    ) {
         $outletData = json_decode($request->Outlet_Serialize_Data)[0];
         $outletData_child = json_decode($request->Outlet_Serialize_Data);
         if ($outletData) {
@@ -3033,8 +3086,10 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
                 try {
 
                     foreach ($outletData_child as $outletData_1) {
-                        DB::connection($db_conn)->table('tl_rsmp')->where(['rout_id' => $outletData_1->Route_ID,
-                            'site_id' => $outletData_1->Outlet_ID])->update(['rspm_serl' => $outletData_1->Outlet_Serial]);
+                        DB::connection($db_conn)->table('tl_rsmp')->where([
+                            'rout_id' => $outletData_1->Route_ID,
+                            'site_id' => $outletData_1->Outlet_ID
+                        ])->update(['rspm_serl' => $outletData_1->Outlet_Serial]);
 
                     }
 
@@ -3055,8 +3110,9 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
     }
 
     public
-    function SubmitChallanWiseDelivery(Request $request)
-    {
+        function SubmitChallanWiseDelivery(
+        Request $request
+    ) {
         $outletData = json_decode($request->delivery_data_challan_wise)[0];
         $outletData_child = json_decode($request->delivery_data_challan_wise);
         if ($outletData) {
@@ -3090,8 +3146,10 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
                         $orderLine->save();
 
 
-                        DB::connection($db_conn)->table('tt_ordm')->where(['aemp_id' => $orderLineData->SR_ID,
-                            'ordm_date' => $orderLineData->Order_Date])->update(['lfcl_id' => 3]);
+                        DB::connection($db_conn)->table('tt_ordm')->where([
+                            'aemp_id' => $orderLineData->SR_ID,
+                            'ordm_date' => $orderLineData->Order_Date
+                        ])->update(['lfcl_id' => 3]);
 
 
                     }
@@ -3111,8 +3169,9 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
     }
 
     public
-    function updateOutletSave(Request $request)
-    {
+        function updateOutletSave(
+        Request $request
+    ) {
         $outletData = json_decode($request->Outlet_Update_Data)[0];
         if ($outletData) {
             $country = (new Country())->country($outletData->country_id);
@@ -3131,7 +3190,8 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
                     /* $site->site_imge = '';
                      $site->site_omge = '';*/
                     $site->site_imge = $outletData->Outlet_Image;
-                    $site->geo_lat = isset($outletData->Location) ? explode(',', $outletData->Location)[0] : 0;;
+                    $site->geo_lat = isset($outletData->Location) ? explode(',', $outletData->Location)[0] : 0;
+                    ;
                     $site->geo_lon = isset($outletData->Location) ? explode(',', $outletData->Location)[1] : 0;
                     $site->aemp_eusr = $outletData->up_emp_id;
                     $site->save();
@@ -3162,8 +3222,9 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
     }
 
     public
-    function censusOutletImport(Request $request)
-    {
+        function censusOutletImport(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         $result_data = array(
             'success' => 0,
@@ -3222,8 +3283,9 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
 
 
     public
-    function attendanceSave_new(Request $request)
-    {
+        function attendanceSave_new(
+        Request $request
+    ) {
 
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
@@ -3244,8 +3306,9 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
                  }*/
                 $attendance = new Attendance();
                 $attendance->setConnection($db_conn);
-                $attendance->slgp_id = $request->Group_Id;;//$request->Group_Id;
-                $attendance->aemp_id = $request->SR_ID;// $request->SR_ID;
+                $attendance->slgp_id = $request->Group_Id;
+                ; //$request->Group_Id;
+                $attendance->aemp_id = $request->SR_ID; // $request->SR_ID;
                 $attendance->site_id = 2;
                 $attendance->site_name = '';
                 $attendance->attn_imge = $request->OutLet_Picture;
@@ -3282,8 +3345,9 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
     }
 
     public
-    function attendanceSave(Request $request)
-    {
+        function attendanceSave(
+        Request $request
+    ) {
 
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
@@ -3293,19 +3357,22 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
             try {
                 $path_name = $country->cont_imgf . '/' . date('Y-m-d') . '/attendance/' . uniqid() . '.jpg';
                 if (isset($request['OutLet_Picture'])) {
-                    $s3->putObject(array(
-                        'Bucket' => 'prgfms',
-                        'Key' => $path_name,
-                        'Body' => base64_decode($request->OutLet_Picture),
-                        'ContentType' => 'base64',
-                        'ContentEncoding' => 'image/jpeg',
-                        'ACL' => 'public-read',
-                    ));
+                    $s3->putObject(
+                        array(
+                            'Bucket' => 'prgfms',
+                            'Key' => $path_name,
+                            'Body' => base64_decode($request->OutLet_Picture),
+                            'ContentType' => 'base64',
+                            'ContentEncoding' => 'image/jpeg',
+                            'ACL' => 'public-read',
+                        )
+                    );
                 }
                 $attendance = new Attendance();
                 $attendance->setConnection($db_conn);
-                $attendance->slgp_id = $request->Group_Id;;//$request->Group_Id;
-                $attendance->aemp_id = $request->SR_ID;// $request->SR_ID;
+                $attendance->slgp_id = $request->Group_Id;
+                ; //$request->Group_Id;
+                $attendance->aemp_id = $request->SR_ID; // $request->SR_ID;
                 $attendance->site_id = 2;
                 $attendance->site_name = '';
                 $attendance->attn_imge = $path_name;
@@ -3342,8 +3409,9 @@ AND t6.ordm_date BETWEEN '$start_date' AND '$end_date';
     }
 
     public
-    function MasterData(Request $request)
-    {
+        function MasterData(
+        Request $request
+    ) {
         $data1 = array();
         $data2 = array();
         $data3 = array();
@@ -3501,8 +3569,9 @@ AND t2.prom_edat >=CURDATE()
     }
 
     public
-    function MasterDataNew(Request $request)
-    {
+        function MasterDataNew(
+        Request $request
+    ) {
         $data1 = array();
         $data2 = array();
         $data3 = array();
@@ -3650,8 +3719,9 @@ AND t2.prom_edat >=CURDATE()
     }
 
     public
-    function MasterDataNew_Three(Request $request)
-    {
+        function MasterDataNew_Three(
+        Request $request
+    ) {
         $data1 = array();
         $data4 = array();
         $data5 = array();
@@ -3725,8 +3795,9 @@ FROM tm_nopr AS t1");
     }
 
     public
-    function GetPromoSlabDetails(Request $request)
-    {
+        function GetPromoSlabDetails(
+        Request $request
+    ) {
         $data1 = array();
         $data2 = array();
 
@@ -3769,8 +3840,9 @@ GROUP BY t2.amim_id,t3.amim_code,t3.amim_name
     }
 
     public
-    function GetPromoSingleFOCSlabDetails(Request $request)
-    {
+        function GetPromoSingleFOCSlabDetails(
+        Request $request
+    ) {
         $data1 = array();
 
         $promo_id = $request->Promotion_ID;
@@ -3798,8 +3870,9 @@ GROUP BY t3.amim_id,t2.amim_id,t1.`prsb_fqty`,t1.`prsb_tqty`,t1.`prsb_qnty`,t1.`
     }
 
     public
-    function GetItemOrderHistory(Request $request)
-    {
+        function GetItemOrderHistory(
+        Request $request
+    ) {
         $data1 = array();
 
         $site_id = $request->site_id;
@@ -3832,8 +3905,9 @@ ORDER BY t1.`id` DESC
     }
 
     public
-    function GetPromoFOCSlabDetails(Request $request)
-    {
+        function GetPromoFOCSlabDetails(
+        Request $request
+    ) {
         $data1 = array();
         $data2 = array();
         $data3 = array();
@@ -3884,8 +3958,9 @@ GROUP BY t2.amim_id,t3.amim_code,t3.amim_name
     }
 
     public
-    function CheckINSyncAllData(Request $request)
-    {
+        function CheckINSyncAllData(
+        Request $request
+    ) {
         $data1 = array();
         $data2 = array();
         $data3 = array();
@@ -4029,8 +4104,9 @@ FROM tm_nopr AS t1");
     }
 
     public
-    function CheckINSyncAllData_Image(Request $request)
-    {
+        function CheckINSyncAllData_Image(
+        Request $request
+    ) {
         $data1 = array();
         $data2 = array();
         $data3 = array();
@@ -4247,8 +4323,9 @@ FROM tm_nopr AS t1");
     }
 
     public
-    function fetchMarketOutProduct(Request $request)
-    {
+        function fetchMarketOutProduct(
+        Request $request
+    ) {
 
         $sql = array();
 
@@ -4316,9 +4393,7 @@ FROM tm_nopr AS t1");
         }
     }
 
-    public
-    function CheckINSyncAllData_Merge(Request $request)
-    {
+    public function CheckINSyncAllData_Merge(Request $request) {
 
         $data2 = array();
         $data3 = array();
@@ -4333,267 +4408,267 @@ FROM tm_nopr AS t1");
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
-
-
             if ($request->country_id == 15) {
                 $data2 = DB::connection($db_conn)->select("
-SELECT
-  concat(t1.amim_code, $request->site_id)              AS column_id,
-  t5.plmt_id                                           AS Item_Price_List,
-  t5.plmt_id                                           AS Grv_Item_Price_List,
-  t1.id                                                AS Item_Id,
-  t1.amim_code                                         AS Item_Code,
-  t1.amim_imgl                                         AS amim_imgl,
-  t1.amim_imic                                         AS amim_imic,
-  t4.issc_name                                         AS Category_Name,
-  t1.amim_name                                         AS Item_Name,
-  t6.pldt_tppr                                         AS Item_Rate,
-  t6.pldt_tpgp                                         AS Grv_Item_Price,
-  (t1.amim_pexc * 100) / (t6.pldt_tppr * t6.amim_duft) AS Item_gst,
-  t1.amim_pvat                                         AS Item_vat,
-  t6.amim_duft                                         AS Item_Factor,
-  t4.issc_seqn                                         AS category_Showing_seqn,
-  t6.amim_dunt                                         AS D_Unit,
-  t6.amim_runt                                         AS R_Unit,
-  t2.attr4                                             AS min_oqty,
-  if(t9.amim_id IS NULL,true,false)                    AS is_special_dis
+                            SELECT
+                            concat(t1.amim_code, $request->site_id)              AS column_id,
+                            t5.plmt_id                                           AS Item_Price_List,
+                            t5.plmt_id                                           AS Grv_Item_Price_List,
+                            t1.id                                                AS Item_Id,
+                            t1.amim_code                                         AS Item_Code,
+                            t1.amim_imgl                                         AS amim_imgl,
+                            t1.amim_imic                                         AS amim_imic,
+                            t4.issc_name                                         AS Category_Name,
+                            t1.amim_name                                         AS Item_Name,
+                            t6.pldt_tppr                                         AS Item_Rate,
+                            t6.pldt_tpgp                                         AS Grv_Item_Price,
+                            (t1.amim_pexc * 100) / (t6.pldt_tppr * t6.amim_duft) AS Item_gst,
+                            t1.amim_pvat                                         AS Item_vat,
+                            t6.amim_duft                                         AS Item_Factor,
+                            t4.issc_seqn                                         AS category_Showing_seqn,
+                            t6.amim_dunt                                         AS D_Unit,
+                            t6.amim_runt                                         AS R_Unit,
+                            t2.attr4                                             AS min_oqty,
+                            if(t9.amim_id IS NULL,true,false)                    AS is_special_dis
 
-FROM `tm_amim`t1 
-INNER JOIN tl_sgit t2 ON t1.id=t2.amim_id
-INNER JOIN tl_sgsm t3 ON t2.slgp_id = t3.slgp_id AND t3.slgp_id=$request->slgp_id
-INNER JOIN tm_issc t4 ON t2.issc_id = t4.id
-INNER JOIN tl_stcm t5 ON t3.slgp_id = t5.slgp_id AND t5.slgp_id=$request->slgp_id
-INNER JOIN tm_pldt AS t6 ON t5.plmt_id = t6.plmt_id  AND t6.amim_id = t2.amim_id
-LEFT JOIN tt_outs t8 ON(t6.amim_id=t8.amim_id) AND t8.dpot_id=$request->dpot_id
-LEFT JOIN tl_npit t9 ON(t2.amim_id=t9.amim_id) AND t2.slgp_id=t9.slgp_id
+                            FROM `tm_amim`t1 
+                            INNER JOIN tl_sgit t2 ON t1.id=t2.amim_id
+                            INNER JOIN tl_sgsm t3 ON t2.slgp_id = t3.slgp_id AND t3.slgp_id=$request->slgp_id
+                            INNER JOIN tm_issc t4 ON t2.issc_id = t4.id
+                            INNER JOIN tl_stcm t5 ON t3.slgp_id = t5.slgp_id AND t5.slgp_id=$request->slgp_id
+                            INNER JOIN tm_pldt AS t6 ON t5.plmt_id = t6.plmt_id  AND t6.amim_id = t2.amim_id
+                            LEFT JOIN tt_outs t8 ON(t6.amim_id=t8.amim_id) AND t8.dpot_id=$request->dpot_id
+                            LEFT JOIN tl_npit t9 ON(t2.amim_id=t9.amim_id) AND t2.slgp_id=t9.slgp_id
 
-JOIN tl_srdi t77 ON(t3.aemp_id=t77.aemp_id) AND t77.dlrm_id=$request->dpot_id
-JOIN tm_dlrm t99 ON t77.dlrm_id=t99.id
+                            JOIN tl_srdi t77 ON(t3.aemp_id=t77.aemp_id) AND t77.dlrm_id=$request->dpot_id
+                            JOIN tm_dlrm t99 ON t77.dlrm_id=t99.id
 
 
-WHERE  t1.lfcl_id=1 AND t3.aemp_id = $request->emp_id  AND t5.site_id = $request->site_id 
-AND t5.acmp_id = $request->ou_id AND t8.id IS NULL
-");
-            } else {
+                            WHERE  t1.lfcl_id=1 AND t3.aemp_id = $request->emp_id  AND t5.site_id = $request->site_id 
+                            AND t5.acmp_id = $request->ou_id AND t8.id IS NULL
+                            ");
+            } 
+            else {
                 $data2 = DB::connection($db_conn)->select("
-SELECT
-  concat(t1.amim_code, $request->site_id)              AS column_id,
-  t5.plmt_id                                           AS Item_Price_List,
-  t5.plmt_id                                           AS Grv_Item_Price_List,
-  t1.id                                                AS Item_Id,
-  t1.amim_code                                         AS Item_Code,
-  t1.amim_imgl                                         AS amim_imgl,
-  t1.amim_imic                                         AS amim_imic,
-  t4.issc_name                                         AS Category_Name,
-  t1.amim_name                                         AS Item_Name,
-  t6.pldt_tppr                                         AS Item_Rate,
-  t6.pldt_tpgp                                         AS Grv_Item_Price,
-  (t1.amim_pexc * 100) / (t6.pldt_tppr * t6.amim_duft) AS Item_gst,
-  t1.amim_pvat                                         AS Item_vat,
-  t6.amim_duft                                         AS Item_Factor,
-  t4.issc_seqn                                         AS category_Showing_seqn,
-  t6.amim_dunt                                         AS D_Unit,
-  t6.amim_runt                                         AS R_Unit,
-  t2.attr4                                             AS min_oqty,
-  if(t9.amim_id IS NULL,true,false)                    AS is_special_dis
+                            SELECT
+                            concat(t1.amim_code, $request->site_id)              AS column_id,
+                            t5.plmt_id                                           AS Item_Price_List,
+                            t5.plmt_id                                           AS Grv_Item_Price_List,
+                            t1.id                                                AS Item_Id,
+                            t1.amim_code                                         AS Item_Code,
+                            t1.amim_imgl                                         AS amim_imgl,
+                            t1.amim_imic                                         AS amim_imic,
+                            t4.issc_name                                         AS Category_Name,
+                            t1.amim_name                                         AS Item_Name,
+                            t6.pldt_tppr                                         AS Item_Rate,
+                            t6.pldt_tpgp                                         AS Grv_Item_Price,
+                            (t1.amim_pexc * 100) / (t6.pldt_tppr * t6.amim_duft) AS Item_gst,
+                            t1.amim_pvat                                         AS Item_vat,
+                            t6.amim_duft                                         AS Item_Factor,
+                            t4.issc_seqn                                         AS category_Showing_seqn,
+                            t6.amim_dunt                                         AS D_Unit,
+                            t6.amim_runt                                         AS R_Unit,
+                            t2.attr4                                             AS min_oqty,
+                            if(t9.amim_id IS NULL,true,false)                    AS is_special_dis
 
-FROM `tm_amim`t1 
-INNER JOIN tl_sgit t2 ON t1.id=t2.amim_id
-INNER JOIN tl_sgsm t3 ON t2.slgp_id = t3.slgp_id AND t3.slgp_id=$request->slgp_id
-INNER JOIN tm_issc t4 ON t2.issc_id = t4.id
-INNER JOIN tl_stcm t5 ON t3.slgp_id = t5.slgp_id AND t5.slgp_id=$request->slgp_id
-INNER JOIN tm_pldt AS t6 ON t5.plmt_id = t6.plmt_id  AND t6.amim_id = t2.amim_id
-LEFT JOIN tt_outs t8 ON(t6.amim_id=t8.amim_id) AND t8.dpot_id=$request->dpot_id
-LEFT JOIN tl_npit t9 ON(t2.amim_id=t9.amim_id) AND t2.slgp_id=t9.slgp_id
+                            FROM `tm_amim`t1 
+                            INNER JOIN tl_sgit t2 ON t1.id=t2.amim_id
+                            INNER JOIN tl_sgsm t3 ON t2.slgp_id = t3.slgp_id AND t3.slgp_id=$request->slgp_id
+                            INNER JOIN tm_issc t4 ON t2.issc_id = t4.id
+                            INNER JOIN tl_stcm t5 ON t3.slgp_id = t5.slgp_id AND t5.slgp_id=$request->slgp_id
+                            INNER JOIN tm_pldt AS t6 ON t5.plmt_id = t6.plmt_id  AND t6.amim_id = t2.amim_id
+                            LEFT JOIN tt_outs t8 ON(t6.amim_id=t8.amim_id) AND t8.dpot_id=$request->dpot_id
+                            LEFT JOIN tl_npit t9 ON(t2.amim_id=t9.amim_id) AND t2.slgp_id=t9.slgp_id
 
-JOIN tl_srdi t77 ON(t3.aemp_id=t77.aemp_id) AND t77.dlrm_id=$request->dpot_id
-JOIN tm_dlrm t99 ON t77.dlrm_id=t99.id
-JOIN DEPOT_STOCK t10 ON t99.dlrm_code=t10.DEPOT_ID AND t6.amim_code = t10.DEPOT_ITEM
+                            JOIN tl_srdi t77 ON(t3.aemp_id=t77.aemp_id) AND t77.dlrm_id=$request->dpot_id
+                            JOIN tm_dlrm t99 ON t77.dlrm_id=t99.id
+                            JOIN DEPOT_STOCK t10 ON t99.dlrm_code=t10.DEPOT_ID AND t6.amim_code = t10.DEPOT_ITEM
 
-WHERE  t1.lfcl_id=1 AND t3.aemp_id = $request->emp_id AND t10.DEPOT_B>0 AND t5.site_id = $request->site_id 
-AND t5.acmp_id = $request->ou_id AND t8.id IS NULL
-");
+                            WHERE  t1.lfcl_id=1 AND t3.aemp_id = $request->emp_id AND t10.DEPOT_B>0 AND t5.site_id = $request->site_id 
+                            AND t5.acmp_id = $request->ou_id AND t8.id IS NULL
+                            ");
             }
 
             if ($request->country_id == 14) {
                 $data4 = DB::connection($db_conn)->select("
-SELECT
-  concat(t1.id, t1.prms_edat, t1.prms_sdat,t1.lfcl_id,$request->site_id,t1.`prmr_ctgp`,t1.`prmr_qfct`,t1.`prmr_ditp`) AS column_id,
-  t1.id                                                AS promo_id,
-  t1.prms_name                                         AS promo_name,
-  t1.prms_sdat                                         AS start_date,
-  t1.prms_edat                                         AS end_date,
-  t1.prmr_qfct                                         AS qualifier_category,
-  t1.prmr_ditp                                         AS discount_type,
-  t1.prmr_ctgp                                         AS category_group,
-  t1.prmr_qfon                                         AS qualifier_on,
-  t1.prmr_qfln                                         AS qualifier_line
-FROM tm_prmr AS t1 INNER JOIN tl_prsm AS t2 ON t1.id = t2.prmr_id
-WHERE t2.site_id = $request->site_id  AND curdate() BETWEEN t1.prms_sdat AND t1.prms_edat AND t1.lfcl_id = 1
-GROUP BY t1.id, t1.prms_edat, t1.prms_name, t1.prms_sdat, t1.prmr_qfct, t1.prmr_ditp, t1.prmr_ctgp, t1.prmr_qfon,t1.prmr_qfln
-");
+                            SELECT
+                            concat(t1.id, t1.prms_edat, t1.prms_sdat,t1.lfcl_id,$request->site_id,t1.`prmr_ctgp`,t1.`prmr_qfct`,t1.`prmr_ditp`) AS column_id,
+                            t1.id                                                AS promo_id,
+                            t1.prms_name                                         AS promo_name,
+                            t1.prms_sdat                                         AS start_date,
+                            t1.prms_edat                                         AS end_date,
+                            t1.prmr_qfct                                         AS qualifier_category,
+                            t1.prmr_ditp                                         AS discount_type,
+                            t1.prmr_ctgp                                         AS category_group,
+                            t1.prmr_qfon                                         AS qualifier_on,
+                            t1.prmr_qfln                                         AS qualifier_line
+                            FROM tm_prmr AS t1 INNER JOIN tl_prsm AS t2 ON t1.id = t2.prmr_id
+                            WHERE t2.site_id = $request->site_id  AND curdate() BETWEEN t1.prms_sdat AND t1.prms_edat AND t1.lfcl_id = 1
+                            GROUP BY t1.id, t1.prms_edat, t1.prms_name, t1.prms_sdat, t1.prmr_qfct, t1.prmr_ditp, t1.prmr_ctgp, t1.prmr_qfon,t1.prmr_qfln
+                            ");
 
                 $data8 = DB::connection($db_conn)->select("
-  SELECT
-  concat(t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat,t2.lfcl_id,$request->site_id) AS column_id,
-  t1.prmr_id                                                            AS promo_id,
-  t1.amim_id                                                            AS product_id,
-  t1.prmd_modr                                                          AS pro_modifier_id
-  FROM tm_prmd AS t1
-  INNER JOIN tm_prmr AS t2 ON t1.prmr_id = t2.id
-  INNER JOIN tl_prsm AS t3 ON t2.id = t3.prmr_id
-WHERE t3.site_id =$request->site_id  AND curdate() BETWEEN t2.prms_sdat AND t2.prms_edat AND t2.lfcl_id = 1
-and t1.amim_id IN(SELECT t11.amim_id FROM `tl_sgit` t11 WHERE `slgp_id` = $request->slgp_id)
-GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmd_modr
-  ");
-            }else{
+                            SELECT
+                            concat(t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat,t2.lfcl_id,$request->site_id) AS column_id,
+                            t1.prmr_id                                                            AS promo_id,
+                            t1.amim_id                                                            AS product_id,
+                            t1.prmd_modr                                                          AS pro_modifier_id
+                            FROM tm_prmd AS t1
+                            INNER JOIN tm_prmr AS t2 ON t1.prmr_id = t2.id
+                            INNER JOIN tl_prsm AS t3 ON t2.id = t3.prmr_id
+                            WHERE t3.site_id =$request->site_id  AND curdate() BETWEEN t2.prms_sdat AND t2.prms_edat AND t2.lfcl_id = 1
+                            and t1.amim_id IN(SELECT t11.amim_id FROM `tl_sgit` t11 WHERE `slgp_id` = $request->slgp_id)
+                            GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmd_modr
+                            ");
+            } 
+            else {
                 $data4 = DB::connection($db_conn)->select("
-SELECT
-  concat(t1.id, t1.prms_edat, t1.prms_sdat,t1.lfcl_id,$request->site_id,t1.`prmr_ctgp`,t1.`prmr_qfct`,t1.`prmr_ditp`) AS column_id,
-  t1.id                                                AS promo_id,
-  t1.prms_name                                         AS promo_name,
-  t1.prms_sdat                                         AS start_date,
-  t1.prms_edat                                         AS end_date,
-  t1.prmr_qfct                                         AS qualifier_category,
-  t1.prmr_ditp                                         AS discount_type,
-  t1.prmr_ctgp                                         AS category_group,
-  t1.prmr_qfon                                         AS qualifier_on,
-  t1.prmr_qfln                                         AS qualifier_line
-FROM tm_prmr AS t1 INNER JOIN tl_prsm AS t2 ON t1.id = t2.prmr_id
-WHERE t2.site_id = $request->site_id AND t1.prmr_qfgp=$request->slgp_id AND curdate() BETWEEN t1.prms_sdat AND t1.prms_edat AND t1.lfcl_id = 1
-GROUP BY t1.id, t1.prms_edat, t1.prms_name, t1.prms_sdat, t1.prmr_qfct, t1.prmr_ditp, t1.prmr_ctgp, t1.prmr_qfon,t1.prmr_qfln
-");
+                            SELECT
+                            concat(t1.id, t1.prms_edat, t1.prms_sdat,t1.lfcl_id,$request->site_id,t1.`prmr_ctgp`,t1.`prmr_qfct`,t1.`prmr_ditp`) AS column_id,
+                            t1.id                                                AS promo_id,
+                            t1.prms_name                                         AS promo_name,
+                            t1.prms_sdat                                         AS start_date,
+                            t1.prms_edat                                         AS end_date,
+                            t1.prmr_qfct                                         AS qualifier_category,
+                            t1.prmr_ditp                                         AS discount_type,
+                            t1.prmr_ctgp                                         AS category_group,
+                            t1.prmr_qfon                                         AS qualifier_on,
+                            t1.prmr_qfln                                         AS qualifier_line
+                            FROM tm_prmr AS t1 INNER JOIN tl_prsm AS t2 ON t1.id = t2.prmr_id
+                            WHERE t2.site_id = $request->site_id AND t1.prmr_qfgp=$request->slgp_id AND curdate() BETWEEN t1.prms_sdat AND t1.prms_edat AND t1.lfcl_id = 1
+                            GROUP BY t1.id, t1.prms_edat, t1.prms_name, t1.prms_sdat, t1.prmr_qfct, t1.prmr_ditp, t1.prmr_ctgp, t1.prmr_qfon,t1.prmr_qfln
+                            ");
 
                 $data8 = DB::connection($db_conn)->select("
-  SELECT
-  concat(t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat,t2.lfcl_id,$request->site_id) AS column_id,
-  t1.prmr_id                                                            AS promo_id,
-  t1.amim_id                                                            AS product_id,
-  t1.prmd_modr                                                          AS pro_modifier_id
-  FROM tm_prmd AS t1
-  INNER JOIN tm_prmr AS t2 ON t1.prmr_id = t2.id
-  INNER JOIN tl_prsm AS t3 ON t2.id = t3.prmr_id
-WHERE t3.site_id =$request->site_id AND t2.prmr_qfgp=$request->slgp_id AND curdate() BETWEEN t2.prms_sdat AND t2.prms_edat AND t2.lfcl_id = 1
-and t1.amim_id IN(SELECT t11.amim_id FROM `tl_sgit` t11 WHERE `slgp_id` = $request->slgp_id)
-GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmd_modr
-  ");
+                            SELECT
+                            concat(t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat,t2.lfcl_id,$request->site_id) AS column_id,
+                            t1.prmr_id                                                            AS promo_id,
+                            t1.amim_id                                                            AS product_id,
+                            t1.prmd_modr                                                          AS pro_modifier_id
+                            FROM tm_prmd AS t1
+                            INNER JOIN tm_prmr AS t2 ON t1.prmr_id = t2.id
+                            INNER JOIN tl_prsm AS t3 ON t2.id = t3.prmr_id
+                            WHERE t3.site_id =$request->site_id AND t2.prmr_qfgp=$request->slgp_id AND curdate() BETWEEN t2.prms_sdat AND t2.prms_edat AND t2.lfcl_id = 1
+                            and t1.amim_id IN(SELECT t11.amim_id FROM `tl_sgit` t11 WHERE `slgp_id` = $request->slgp_id)
+                            GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmd_modr
+                            ");
             }
 
 
             $data3 = DB::connection($db_conn)->select("
-SELECT
-  concat(t1.amim_code, $request->site_id )              AS column_id,
-  t1.id                                                 AS Item_Id,
-  t1.amim_code                                          AS Item_Code,
-  if(t2.dfim_disc > 0, t2.dfim_disc, 0)                 AS Item_Default_Dis
-FROM tm_amim t1 JOIN tm_dfim AS t2 ON (t1.id = t2.amim_id) 
-  JOIN tl_dfsm AS t3 ON t3.dfdm_id = t2.dfdm_id 
-  JOIN tm_dfdm AS t4 ON t4.id = t3.dfdm_id 
-WHERE t1.lfcl_id = 1 AND t3.slgp_id=$request->slgp_id
-      AND t3.site_id = $request->site_id 
-      AND (curdate() BETWEEN t4.start_date AND t4.end_date) AND t4.lfcl_id = 1
-GROUP BY t1.id, t1.amim_code, t2.dfim_disc;
-");
+                        SELECT
+                        concat(t1.amim_code, $request->site_id )              AS column_id,
+                        t1.id                                                 AS Item_Id,
+                        t1.amim_code                                          AS Item_Code,
+                        if(t2.dfim_disc > 0, t2.dfim_disc, 0)                 AS Item_Default_Dis
+                        FROM tm_amim t1 JOIN tm_dfim AS t2 ON (t1.id = t2.amim_id) 
+                        JOIN tl_dfsm AS t3 ON t3.dfdm_id = t2.dfdm_id 
+                        JOIN tm_dfdm AS t4 ON t4.id = t3.dfdm_id 
+                        WHERE t1.lfcl_id = 1 AND t3.slgp_id=$request->slgp_id
+                            AND t3.site_id = $request->site_id 
+                            AND (curdate() BETWEEN t4.start_date AND t4.end_date) AND t4.lfcl_id = 1
+                        GROUP BY t1.id, t1.amim_code, t2.dfim_disc;
+                        ");
 
 
             // $data4 = DB::connection($db_conn)->select("
-// SELECT
-            // concat(t1.id, t1.prms_edat, t1.prms_sdat,t1.lfcl_id,$request->site_id,t1.`prmr_ctgp`,t1.`prmr_qfct`,t1.`prmr_ditp`) AS column_id,
-            // t1.id                                                AS promo_id,
-            // t1.prms_name                                         AS promo_name,
-            // t1.prms_sdat                                         AS start_date,
-            // t1.prms_edat                                         AS end_date,
-            // t1.prmr_qfct                                         AS qualifier_category,
-            // t1.prmr_ditp                                         AS discount_type,
-            // t1.prmr_ctgp                                         AS category_group,
-            // t1.prmr_qfon                                         AS qualifier_on,
-            // t1.prmr_qfln                                         AS qualifier_line
-// FROM tm_prmr AS t1 INNER JOIN tl_prsm AS t2 ON t1.id = t2.prmr_id
-// WHERE t2.site_id = $request->site_id AND curdate() BETWEEN t1.prms_sdat AND t1.prms_edat AND t1.lfcl_id = 1
-// GROUP BY t1.id, t1.prms_edat, t1.prms_name, t1.prms_sdat, t1.prmr_qfct, t1.prmr_ditp, t1.prmr_ctgp, t1.prmr_qfon,t1.prmr_qfln
-// ");
+                        // SELECT
+                                    // concat(t1.id, t1.prms_edat, t1.prms_sdat,t1.lfcl_id,$request->site_id,t1.`prmr_ctgp`,t1.`prmr_qfct`,t1.`prmr_ditp`) AS column_id,
+                                    // t1.id                                                AS promo_id,
+                                    // t1.prms_name                                         AS promo_name,
+                                    // t1.prms_sdat                                         AS start_date,
+                                    // t1.prms_edat                                         AS end_date,
+                                    // t1.prmr_qfct                                         AS qualifier_category,
+                                    // t1.prmr_ditp                                         AS discount_type,
+                                    // t1.prmr_ctgp                                         AS category_group,
+                                    // t1.prmr_qfon                                         AS qualifier_on,
+                                    // t1.prmr_qfln                                         AS qualifier_line
+                        // FROM tm_prmr AS t1 INNER JOIN tl_prsm AS t2 ON t1.id = t2.prmr_id
+                        // WHERE t2.site_id = $request->site_id AND curdate() BETWEEN t1.prms_sdat AND t1.prms_edat AND t1.lfcl_id = 1
+                        // GROUP BY t1.id, t1.prms_edat, t1.prms_name, t1.prms_sdat, t1.prmr_qfct, t1.prmr_ditp, t1.prmr_ctgp, t1.prmr_qfon,t1.prmr_qfln
+                        // ");
             $data5 = DB::connection($db_conn)->select("
- SELECT 
- concat(t1.`mspm_id` , $request->site_id,t2.mspm_sdat,t2.mspm_edat,t4.amim_code,t1.`mspd_qnty`)AS column_id,
- t1.`mspm_id`AS MSP_ID,
- t1.amim_id AS MSP_Item_ID,
- t1.`mspd_qnty`AS MSP_Item_Qty,
- '2' AS Status_ID
-FROM `tm_mspd` t1 JOIN tm_mspm t2 ON(t1.`mspm_id`=t2.id)
-LEFT JOIN tl_msps t3 ON(t3.mspm_id=t2.id) 
-LEFT JOIN tm_amim t4 ON(t1.`amim_id`=t4.id)
-WHERE t3.site_id='$request->site_id' AND t3.slgp_id=$request->slgp_id
-AND (curdate() BETWEEN t2.mspm_sdat AND t2.mspm_edat)
-GROUP BY t1.`mspm_id`,t4.amim_code,t1.`mspd_qnty`,t1.amim_id
- ");
+                        SELECT 
+                        concat(t1.`mspm_id` , $request->site_id,t2.mspm_sdat,t2.mspm_edat,t4.amim_code,t1.`mspd_qnty`)AS column_id,
+                        t1.`mspm_id`AS MSP_ID,
+                        t1.amim_id AS MSP_Item_ID,
+                        t1.`mspd_qnty`AS MSP_Item_Qty,
+                        '2' AS Status_ID
+                        FROM `tm_mspd` t1 JOIN tm_mspm t2 ON(t1.`mspm_id`=t2.id)
+                        LEFT JOIN tl_msps t3 ON(t3.mspm_id=t2.id) 
+                        LEFT JOIN tm_amim t4 ON(t1.`amim_id`=t4.id)
+                        WHERE t3.site_id='$request->site_id' AND t3.slgp_id=$request->slgp_id
+                        AND (curdate() BETWEEN t2.mspm_sdat AND t2.mspm_edat)
+                        GROUP BY t1.`mspm_id`,t4.amim_code,t1.`mspd_qnty`,t1.amim_id
+                        ");
             $data6 = DB::connection($db_conn)->select("
-SELECT
-  concat(t1.id, t1.nopr_name) AS column_id,
-  concat(t1.id, t1.nopr_name) AS token,
-  t1.id                       AS Reason_id,
-  t1.nopr_name                AS Reason_Name
-FROM tm_nopr AS t1");
+                        SELECT
+                        concat(t1.id, t1.nopr_name) AS column_id,
+                        concat(t1.id, t1.nopr_name) AS token,
+                        t1.id                       AS Reason_id,
+                        t1.nopr_name                AS Reason_Name
+                        FROM tm_nopr AS t1");
 
-            $data7 = DB::connection($db_conn)->select("
-  SELECT
-    concat(t1.id, t1.dprt_name) AS column_id,
-    concat(t1.id, t1.dprt_name) AS token,
-    t1.id                       AS Reason_id,
-    t1.dprt_name                AS Reason_Name
-  FROM tm_dprt AS t1
-  ");
+                                    $data7 = DB::connection($db_conn)->select("
+                        SELECT
+                            concat(t1.id, t1.dprt_name) AS column_id,
+                            concat(t1.id, t1.dprt_name) AS token,
+                            t1.id                       AS Reason_id,
+                            t1.dprt_name                AS Reason_Name
+                        FROM tm_dprt AS t1
+                        ");
             // $data8 = DB::connection($db_conn)->select("
-            // SELECT
-            // concat(t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat,t2.lfcl_id,$request->site_id) AS column_id,
-            // t1.prmr_id                                                            AS promo_id,
-            // t1.amim_id                                                            AS product_id,
-            // t1.prmd_modr                                                          AS pro_modifier_id
-            // FROM tm_prmd AS t1
-            // INNER JOIN tm_prmr AS t2 ON t1.prmr_id = t2.id
-            // INNER JOIN tl_prsm AS t3 ON t2.id = t3.prmr_id
-// WHERE t3.site_id =$request->site_id AND curdate() BETWEEN t2.prms_sdat AND t2.prms_edat AND t2.lfcl_id = 1
-// and t1.amim_id IN(SELECT t11.amim_id FROM `tl_sgit` t11 WHERE `slgp_id` = $request->slgp_id)
-// GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmd_modr
-            // ");
+                                    // SELECT
+                                    // concat(t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat,t2.lfcl_id,$request->site_id) AS column_id,
+                                    // t1.prmr_id                                                            AS promo_id,
+                                    // t1.amim_id                                                            AS product_id,
+                                    // t1.prmd_modr                                                          AS pro_modifier_id
+                                    // FROM tm_prmd AS t1
+                                    // INNER JOIN tm_prmr AS t2 ON t1.prmr_id = t2.id
+                                    // INNER JOIN tl_prsm AS t3 ON t2.id = t3.prmr_id
+                        // WHERE t3.site_id =$request->site_id AND curdate() BETWEEN t2.prms_sdat AND t2.prms_edat AND t2.lfcl_id = 1
+                        // and t1.amim_id IN(SELECT t11.amim_id FROM `tl_sgit` t11 WHERE `slgp_id` = $request->slgp_id)
+                        // GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmd_modr
+                                    // ");
 
 
             $data9 = DB::connection($db_conn)->select("
-SELECT
-  concat(t2.id, t1.prsb_fqty, t2.prms_sdat, t2.prms_edat, t1.prsb_tqty,t2.lfcl_id,$request->site_id, t1.prsb_famn,t1.prsb_disc, t1.prsb_modr, t1.prsb_mosl) AS column_id,
-  t1.prmr_id                                                                            AS promo_id,
-  t1.prsb_text                                                                          AS promo_slab_text,
-  t1.prsb_fqty                                                                          AS from_qty,
-  t1.prsb_tqty                                                                          AS to_qty,
-  0                                                                                     AS unit,
-  0                                                                                     AS unit_factor,
-  t1.prsb_famn                                                                          AS from_amnt,
-  t1.prsb_tamn                                                                          AS to_amnt,
-  t1.prsb_qnty                                                                          AS qty,
-  0                                                                                     AS given_unit,
-  0                                                                                     AS given_unit_factor,
-  t1.prsb_disc                                                                          AS discount,
-  t1.prsb_modr                                                                          AS pro_modifier_id,
-  t1.prsb_mosl                                                                          AS pro_modifier_id_sl
-FROM tm_prsb AS t1
-  INNER JOIN tm_prmr AS t2 ON t1.prmr_id = t2.id
-  INNER JOIN tl_prsm AS t3 ON t2.id = t3.prmr_id
-WHERE t3.site_id = $request->site_id AND curdate() BETWEEN t2.prms_sdat AND t2.prms_edat AND t2.lfcl_id = 1
-GROUP BY t1.prmr_id, t1.prsb_fqty, t2.prms_sdat, t2.prms_edat, t1.prsb_text, t1.prsb_tqty, t1.prsb_famn, t1.prsb_tamn,
-  t1.prsb_qnty, t1.prsb_disc, t1.prsb_modr, t1.prsb_mosl
-  ");
+                        SELECT
+                        concat(t2.id, t1.prsb_fqty, t2.prms_sdat, t2.prms_edat, t1.prsb_tqty,t2.lfcl_id,$request->site_id, t1.prsb_famn,t1.prsb_disc, t1.prsb_modr, t1.prsb_mosl) AS column_id,
+                        t1.prmr_id                                                                            AS promo_id,
+                        t1.prsb_text                                                                          AS promo_slab_text,
+                        t1.prsb_fqty                                                                          AS from_qty,
+                        t1.prsb_tqty                                                                          AS to_qty,
+                        0                                                                                     AS unit,
+                        0                                                                                     AS unit_factor,
+                        t1.prsb_famn                                                                          AS from_amnt,
+                        t1.prsb_tamn                                                                          AS to_amnt,
+                        t1.prsb_qnty                                                                          AS qty,
+                        0                                                                                     AS given_unit,
+                        0                                                                                     AS given_unit_factor,
+                        t1.prsb_disc                                                                          AS discount,
+                        t1.prsb_modr                                                                          AS pro_modifier_id,
+                        t1.prsb_mosl                                                                          AS pro_modifier_id_sl
+                        FROM tm_prsb AS t1
+                        INNER JOIN tm_prmr AS t2 ON t1.prmr_id = t2.id
+                        INNER JOIN tl_prsm AS t3 ON t2.id = t3.prmr_id
+                        WHERE t3.site_id = $request->site_id AND curdate() BETWEEN t2.prms_sdat AND t2.prms_edat AND t2.lfcl_id = 1
+                        GROUP BY t1.prmr_id, t1.prsb_fqty, t2.prms_sdat, t2.prms_edat, t1.prsb_text, t1.prsb_tqty, t1.prsb_famn, t1.prsb_tamn,
+                        t1.prsb_qnty, t1.prsb_disc, t1.prsb_modr, t1.prsb_mosl
+                        ");
 
             $data10 = DB::connection($db_conn)->select("
-SELECT
-  concat(t2.id, t1.amim_id, t2.prms_sdat, t2.prms_edat,t2.lfcl_id,$request->site_id) AS column_id,
-  t1.prmr_id                                                            AS promo_id,
-  t1.amim_id                                                            AS product_id,
-  t1.prmd_modr                                                          AS pro_modifier_id
-FROM tm_prmf AS t1
-  INNER JOIN tm_prmr AS t2 ON t1.prmr_id = t2.id
-  INNER JOIN tl_prsm AS t3 ON t2.id = t3.prmr_id
-WHERE t3.site_id =$request->site_id AND curdate() BETWEEN t2.prms_sdat AND t2.prms_edat AND t2.lfcl_id = 1
-GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmd_modr
-");
+                        SELECT
+                        concat(t2.id, t1.amim_id, t2.prms_sdat, t2.prms_edat,t2.lfcl_id,$request->site_id) AS column_id,
+                        t1.prmr_id                                                            AS promo_id,
+                        t1.amim_id                                                            AS product_id,
+                        t1.prmd_modr                                                          AS pro_modifier_id
+                        FROM tm_prmf AS t1
+                        INNER JOIN tm_prmr AS t2 ON t1.prmr_id = t2.id
+                        INNER JOIN tl_prsm AS t3 ON t2.id = t3.prmr_id
+                        WHERE t3.site_id =$request->site_id AND curdate() BETWEEN t2.prms_sdat AND t2.prms_edat AND t2.lfcl_id = 1
+                        GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmd_modr
+                        ");
 
         }
         return array(
@@ -4610,8 +4685,9 @@ GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmd_modr
     }
 
     public
-    function CheckINSyncAllDataMergeVanSales(Request $request)
-    {
+        function CheckINSyncAllDataMergeVanSales(
+        Request $request
+    ) {
 
         $data2 = array();
         $data3 = array();
@@ -4851,8 +4927,9 @@ GROUP BY t1.prmr_id, t1.amim_id, t2.prms_sdat, t2.prms_edat, t1.prmd_modr
     }
 
     public
-    function MasterDataNew_Product_Info(Request $request)
-    {
+        function MasterDataNew_Product_Info(
+        Request $request
+    ) {
         $data1 = array();
         $data2 = array();
         $data3 = array();
@@ -4891,8 +4968,9 @@ GROUP BY t1.plmt_id, t3.id, t5.issc_name, t3.amim_name, t2.pldt_tppr, t2.amim_du
     }
 
     public
-    function MasterDataNew_RouteWise_Outlet(Request $request)
-    {
+        function MasterDataNew_RouteWise_Outlet(
+        Request $request
+    ) {
 
         $data2 = array();
 
@@ -4930,8 +5008,9 @@ GROUP BY t3.site_id, t1.rout_id, t3.rspm_serl, t4.site_code, t4.site_name, t4.si
     }
 
     public
-    function getVanItemList(Request $request)
-    {
+        function getVanItemList(
+        Request $request
+    ) {
 
         $data2 = array();
         $data1 = array();
@@ -5020,14 +5099,15 @@ AND t5.slgp_id=$request->slgp_id AND t10.DEPOT_B>0 AND t8.id IS NULL");
 
     }
     public
-    function getVanpending_collection(Request $request)
-    {
-		$pending_collection = array();
+        function getVanpending_collection(
+        Request $request
+    ) {
+        $pending_collection = array();
 
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
-			$pending_collection = DB::connection($db_conn)->select("
+            $pending_collection = DB::connection($db_conn)->select("
                         SELECT TRIP_NO,SITE_CODE,SITE_ID ,slgp_id, optp_id as p_type_id  from(
                             SELECT t1.`TRIP_NO`,t3.SITE_CODE,t3.SITE_ID ,t3.slgp_id,t5.optp_id,sum(t3.DELV_AMNT) amnt, sum(t6.COLLECTION_AMNT) camnt
                             FROM 
@@ -5042,99 +5122,59 @@ AND t5.slgp_id=$request->slgp_id AND t10.DEPOT_B>0 AND t8.id IS NULL");
                             having sum(ifnull(d.amnt,0))>sum( ifnull(d.camnt,0))
                         LIMIT 1;
             ");
-		}
-		if (count($pending_collection) > 0) {
+        }
+        if (count($pending_collection) > 0) {
             $collection = $pending_collection[0];
-			
+
         } else {
-			
+
             $collection = [];
         }
-		
-		$result_data = array(
-                    
+
+        $result_data = array(
+
             'pending_collection' => $collection,
         );
         return $result_data;
-	}
+    }
     public
-    function getVanTripDetails(Request $request)
-    {
+        function getVanTripDetails(
+        Request $request
+    ) {
 
 
         $data1 = array();
         $data2 = array();
-        $data3 = array();       
+        $data3 = array();
 
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
 
-            /*$data1 = DB::connection($db_conn)->select("
-                    SELECT t1.`id` AS trip_id,t1.`TRIP_NO` AS trip_code,t1.V_ID AS vehicle,t1.`TRIP_DATE`AS trip_date,t1.DEPOT_ID AS WH_ID,t1.company_id AS ibs_com_code,
-                    ifnull(SUM(round((t5.lodl_qnty*t5.lodl_uprc),4)),0)AS load_re_amt,
-                    ifnull(SUM(round((t5.lodl_cqty*t5.lodl_uprc),4)),0)AS load_conf_amt,
-                    t1.`DM_ACTIVITY` AS trip_status_id,t2.lfcl_name AS trip_status
-                    FROM `dm_trip`t1 JOIN tm_lfcl t2 ON(t1.`DM_ACTIVITY`=t2.id)
-                    LEFT JOIN tt_trip t3 ON(t1.id=t3.trip_otid)
-                    LEFT JOIN tt_lodm t4 ON(t3.id=t4.trip_id)
-                    LEFT JOIN tt_lodl t5 ON(t4.id=t5.lodm_id)
-                    WHERE t1.`DM_ID`='$request->emp_code' AND t1.`STATUS`='N'
-                    GROUP BY t1.`id`,t1.`TRIP_NO`,t1.V_ID,t1.DEPOT_ID,t1.company_id,t1.`TRIP_DATE`,t1.`DM_ACTIVITY`,t2.lfcl_name;");*/
-
-            // $data1 = DB::connection($db_conn)->select("
-                    // SELECT 
-// t1.`id` AS trip_id,
-// t1.`TRIP_NO` AS trip_code,t1.V_ID AS vehicle,
-// t1.`TRIP_DATE`AS trip_date,t1.DEPOT_ID AS WH_ID,
-// t1.company_id AS ibs_com_code,
-// ifnull(SUM(round((t5.lodl_qnty*t5.lodl_uprc),4)),0)AS load_re_amt,
-// ifnull(SUM(round((t5.lodl_cqty*t5.lodl_uprc),4)),0)AS load_conf_amt,
-// t6.aemp_crdt AS personal_credit_limit,
-// t7.personal_credit_amount,
-// t1.`DM_ACTIVITY` AS trip_status_id,t2.lfcl_name AS trip_status 
-// FROM `dm_trip`t1 JOIN tm_lfcl t2 ON(t1.`DM_ACTIVITY`=t2.id) 
-// LEFT JOIN tt_trip t3 ON(t1.id=t3.trip_otid)
-// LEFT JOIN tt_lodm t4 ON(t3.id=t4.trip_id)
-// LEFT JOIN tt_lodl t5 ON(t4.id=t5.lodm_id)
-// JOIN tm_aemp t6 ON(t1.`DM_ID`=t6.aemp_usnm)
-// LEFT JOIN 
-// ( select
- // t7.aemp_iusr,
- // round(sum(t7.ordm_amnt)-ifnull(sum(t8.CRECIT_AMNT),0),2) personal_credit_amount
- // FROM tl_cpcr  t7
- // LEFT JOIN (Select TRANSACTION_ID,sum(CRECIT_AMNT)CRECIT_AMNT  FROM dm_invoice_collection_mapp GROUP BY TRANSACTION_ID)t8
- // ON t7.ordm_ornm=t8.TRANSACTION_ID
- // WHERE t7.aemp_iusr=$request->emp_id
- // ) t7 ON t6.id=t7.aemp_iusr
-// WHERE t1.`DM_ID`='$request->emp_code' AND t1.`STATUS`='N' 
-// GROUP BY t1.`id`,t1.`TRIP_NO`,t1.V_ID,t1.DEPOT_ID,t1.company_id,t1.`TRIP_DATE`,t1.`DM_ACTIVITY`,t2.lfcl_name,t6.aemp_crdt,
-// t7.personal_credit_amount");
-
-$data1 = DB::connection($db_conn)->select("
-                    SELECT 
+            $data1 = DB::connection($db_conn)->select("
+                   SELECT 
 t1.`id` AS trip_id,
 t1.`TRIP_NO` AS trip_code,t1.V_ID AS vehicle,
 t1.`TRIP_DATE`AS trip_date,t1.DEPOT_ID AS WH_ID,
 t1.company_id AS ibs_com_code,
-ifnull(SUM(round((t5.lodl_qnty*t5.lodl_uprc),4)),0)AS load_re_amt,
-ifnull(SUM(round((t5.lodl_cqty*t5.lodl_uprc),4)),0)AS load_conf_amt,
+ifnull(round(SUM((t5.lodl_qnty*t5.lodl_uprc)),4),0)AS load_re_amt,
+ifnull(round(SUM((t5.lodl_cqty*t5.lodl_uprc)),4),0)AS load_conf_amt,
 t6.aemp_crdt AS personal_credit_limit,
 ifnull(personal_credit_amount,0) personal_credit_amount,
 t1.`DM_ACTIVITY` AS trip_status_id,t2.lfcl_name AS trip_status 
-FROM `dm_trip`t1 JOIN tm_lfcl t2 ON(t1.`DM_ACTIVITY`=t2.id) 
+FROM `dm_trip`t1
+JOIN tm_lfcl t2 ON(t1.`DM_ACTIVITY`=t2.id) 
 LEFT JOIN tt_trip t3 ON(t1.id=t3.trip_otid)
 LEFT JOIN tt_lodm t4 ON(t3.id=t4.trip_id)
 LEFT JOIN tt_lodl t5 ON(t4.id=t5.lodm_id)
 JOIN tm_aemp t6 ON(t1.`DM_ID`=t6.aemp_usnm)
 LEFT JOIN 
-( select t2.aemp_iusr, sum(sapr_amnt)-sum(t1.CRECIT_AMNT) personal_credit_amount 
-from dm_invoice_collection_mapp t1,tl_cpcr t2 
-where t1.MAP_ID IN(SELECT COLL_NUMBER FROM dm_collection where AEMP_ID=$request->emp_id)
-and t2.ordm_ornm=t1.TRANSACTION_ID and t2.trnt_id=4 group by t2.aemp_iusr
- ) t7 ON t6.id=t7.aemp_iusr
+( SELECT `aemp_iusr`,round(sum(`sapr_amnt`-`scol_amnt`),2)AS personal_credit_amount 
+   FROM `tl_cpcr` WHERE `aemp_iusr`=$request->emp_id and (`sapr_amnt`-`scol_amnt`)>0
+) t7 ON t6.id=t7.aemp_iusr
 WHERE t1.`DM_ID`='$request->emp_code' AND t1.`STATUS`='N' 
-GROUP BY t1.`id`,t1.`TRIP_NO`,t1.V_ID,t1.DEPOT_ID,t1.company_id,t1.`TRIP_DATE`,t1.`DM_ACTIVITY`,t2.lfcl_name,t6.aemp_crdt,
+GROUP BY t1.`id`,t1.`TRIP_NO`,t1.V_ID,t1.DEPOT_ID,t1.company_id,
+t1.`TRIP_DATE`,t1.`DM_ACTIVITY`,t2.lfcl_name,t6.aemp_crdt,
 t7.personal_credit_amount");
 
             $data2 = DB::connection($db_conn)->select("
@@ -5142,7 +5182,7 @@ SELECT t1.`dlrm_id`,t2.dlrm_name AS dlrm_name,t1.`acmp_id`AS ou_id
 FROM `tl_srdi`t1 JOIN tm_dlrm t2 ON(t1.`dlrm_id`=t2.id)
 WHERE t1.`aemp_id`=$request->emp_id;");
 
-            $data10 = DB::connection($db_conn)->select("
+            /* $data10 = DB::connection($db_conn)->select("
 SELECT t1.`TRIP_NO`,
 round(sum(t1.`DELV_AMNT`),2)AS DELV_AMNT,
 round(sum(t1.`COLLECTION_AMNT`),2)AS COLLECTION_AMNT,
@@ -5152,7 +5192,34 @@ FROM `dm_trip_master`t1 JOIN dm_trip t2 ON t1.`TRIP_NO`=t2.TRIP_NO
 LEFT JOIN dm_invoice_collection_mapp t3 ON t1.`ORDM_ORNM`=t3.TRANSACTION_ID 
 LEFT JOIN dm_collection t4 ON t3.MAP_ID=t4.COLL_NUMBER
 WHERE t2.`DM_ID`='$request->emp_code'  and t2.STATUS='N'
-group by t1.`TRIP_NO`;");
+group by t1.`TRIP_NO`;");*/
+            $data10 = DB::connection($db_conn)->select("
+SELECT 
+t1.TRIP_NO,
+t1.DM_ID,
+ROUND(t1.DELV_AMNT,2)DELV_AMNT,
+ROUND(t1.COLLECTION_AMNT,2)COLLECTION_AMNT,
+ROUND(t2.CASH_IN_HAND,2)CASH_IN_HAND,
+ROUND(t2.CHEQUE_IN_HAND,2)CHEQUE_IN_HAND,
+ROUND(t2.ONLINE_IN_HAND,2)ONLINE_IN_HAND
+FROM 
+(SELECT t1.`TRIP_NO`,t2.DM_ID,
+sum(t1.`DELV_AMNT`)AS DELV_AMNT,
+sum(t1.`COLLECTION_AMNT`) AS COLLECTION_AMNT
+FROM `dm_trip_master`t1 
+JOIN dm_trip t2 ON t1.`TRIP_NO`=t2.TRIP_NO
+WHERE t2.`DM_ID`='$request->emp_code'  and t2.STATUS='N'
+GROUP BY t1.TRIP_NO,t2.DM_ID)t1
+LEFT JOIN (
+SELECT 
+AEMP_USNM,
+SUM(CASE WHEN COLLECTION_TYPE='Cash' THEN COLLECTION_AMNT-COLL_REC_HO ELSE 0 END) CASH_IN_HAND,
+SUM(CASE WHEN COLLECTION_TYPE='Cheque' THEN COLLECTION_AMNT-COLL_REC_HO ELSE 0 END) CHEQUE_IN_HAND,
+SUM(CASE WHEN COLLECTION_TYPE='Online' THEN COLLECTION_AMNT-COLL_REC_HO ELSE 0 END) ONLINE_IN_HAND
+FROM dm_collection 
+WHERE `DM_CODE`='$request->emp_code' AND AEMP_USNM='$request->emp_code' AND STATUS=26 AND COLLECTION_AMNT-COLL_REC_HO>0
+GROUP BY AEMP_USNM
+)t2 ON t1.DM_ID=t2.AEMP_USNM;");
 
             $data3 = DB::connection($db_conn)->select("
 SELECT
@@ -5177,22 +5244,22 @@ SELECT
   GROUP BY t4.id, t4.site_code, t4.site_name, 
   t4.site_mob1, t4.geo_lat, t4.geo_lon, t5.optp_id, t5.stcm_limt, t5.stcm_duea, t5.stcm_days,
   t5.stcm_ordm,t4.site_vtrn, t5.stcm_odue, t8.dfdm_id;");
-   
-         
+
+
         }
-          
+
         if ($data1 != null) {
-            $data11 = (array)$data1[0];
+            $data11 = (array) $data1[0];
         } else {
             $data11 = null;
         }
         if ($data10 != null) {
-            $data12 = (array)$data10[0];
+            $data12 = (array) $data10[0];
         } else {
             $data12 = null;
         }
         if ($data3 != null) {
-            $data33 = (array)$data3[0];
+            $data33 = (array) $data3[0];
         } else {
             $data33 = null;
         }
@@ -5203,7 +5270,7 @@ SELECT
             'van_dpo_ou' => $data2,
             'van_HO_collection' => $data12,
             'van_site_details' => $data33,
-            
+
         );
         return $result_data;
 
@@ -5211,8 +5278,9 @@ SELECT
 
 
     public
-    function vanLoadDataSave(Request $request)
-    {
+        function vanLoadDataSave(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         if ($country) {
 
@@ -5234,7 +5302,7 @@ SELECT
                 $VanLoadTrip->aemp_cusr = 0;
                 $VanLoadTrip->dpot_id = $request->depo_id;
                 $VanLoadTrip->dlrm_id = $request->depo_id;
-                $VanLoadTrip->vhcl_id = 1;//table vhcl
+                $VanLoadTrip->vhcl_id = 1; //table vhcl
                 $VanLoadTrip->ttyp_id = 2; //table ttyp
                 $VanLoadTrip->cont_id = $request->country_id;
                 $VanLoadTrip->lfcl_id = 20;
@@ -5291,11 +5359,15 @@ SELECT
     }
 
     public
-    function get_IBS_INVOICE($com_id, $wh_id, $order_id, $cont_id)
-    {
+        function get_IBS_INVOICE(
+        $com_id,
+        $wh_id,
+        $order_id,
+        $cont_id
+    ) {
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://coreapi.sihirfms.com/api/InvoicesaveVan',
+            CURLOPT_URL => '159.223.60.117/api/InvoicesaveVan',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -5303,20 +5375,34 @@ SELECT
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => array('ApiKey_van' => 'API2345fsdvh3675gsvbxdgeg425435hdgfsfg33',
-                'company_id' => $com_id, 'wh_id' => $wh_id, 'MobileOrder_nummber' => $order_id, 'trn' => 'OC', 'cont_code_van' => $cont_id),
-        ));
+            CURLOPT_POSTFIELDS => array(
+                'ApiKey_van' => 'API2345fsdvh3675gsvbxdgeg425435hdgfsfg33',
+                'company_id' => $com_id,
+                'wh_id' => $wh_id,
+                'MobileOrder_nummber' => $order_id,
+                'trn' => 'OC',
+                'cont_code_van' => $cont_id
+            ),
+        )
+        );
         $response = curl_exec($curl);
         curl_close($curl);
         return $response;
 
     }
+
     public
-    function get_IBS_INVOICE_new($com_id, $wh_id, $order_id, $cont_id)
-    {
+        function get_IBS_INVOICE111(
+        Request $request
+    ) {
+        $com_id = $request->com_id;
+        $wh_id = $request->wh_id;
+        $order_id = $request->order_id;
+        $cont_id = $request->cont_id;
+
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://coreapi.sihirfms.com/api/Invoicesavevann',
+            CURLOPT_URL => '159.223.60.117/api/Invoicesavevann',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -5324,15 +5410,70 @@ SELECT
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => array('ApiKey_van' => 'API2345fsdvh3675gsvbxdgeg425435hdgfsfg33',
-                'company_id' => $com_id, 'wh_id' => $wh_id, 'MobileOrder_nummber' => $order_id, 'trn' => 'OC', 'cont_code_van' => $cont_id),
-        ));
+            CURLOPT_POSTFIELDS => array(
+                'ApiKey_van' => 'API2345fsdvh3675gsvbxdgeg425435hdgfsfg33',
+                'company_id' => $com_id,
+                'wh_id' => $wh_id,
+                'MobileOrder_nummber' => $order_id,
+                'trn' => 'OC',
+                'cont_code_van' => $cont_id
+            ),
+        )
+        );
+        $response = curl_exec($curl);
+        curl_close($curl);
+        try {
+            $array = json_decode($response, true);
+            $data = json_decode($array, true);
+            // Access "Status" value
+            $status = $data[0]['Status'];
+            $vatNumber = $data[0]['VatNumber'];
+
+            if ($status == 'success') {
+                return $vatNumber;
+            } else {
+                return '11111111111111111111';
+            }
+
+        } catch (\Exception $e) {
+            return $e;
+        }
+
+    }
+
+    public
+        function get_IBS_INVOICE_new(
+        $com_id,
+        $wh_id,
+        $order_id,
+        $cont_id
+    ) {
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => '159.223.60.117/api/Invoicesavevann',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => array(
+                'ApiKey_van' => 'API2345fsdvh3675gsvbxdgeg425435hdgfsfg33',
+                'company_id' => $com_id,
+                'wh_id' => $wh_id,
+                'MobileOrder_nummber' => $order_id,
+                'trn' => 'OC',
+                'cont_code_van' => $cont_id
+            ),
+        )
+        );
         $response = curl_exec($curl);
         curl_close($curl);
         return $response;
 
     }
-	public function submit_leave_HRIS(Request $request)
+    public function submit_leave_HRIS(Request $request)
     {
 
         $curl = curl_init();
@@ -5346,7 +5487,7 @@ SELECT
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
-             CURLOPT_POSTFIELDS => '{
+            CURLOPT_POSTFIELDS => '{
                      "staffId": "' . $request->staffId . '",
                      "startDate": "' . $request->startDate . '",
                      "endDate": "' . $request->endDate . '",
@@ -5358,14 +5499,15 @@ SELECT
                      "outTime": "' . $request->outTime . '",
                      "doc": "' . $request->doc . '",
                      "sC_KEY": "StrONGKAutHENTICATIONKEy"
-                      }',          
+                      }',
             CURLOPT_HTTPHEADER => array(
                 'Content-Type: application/json'
             ),
-        ));
+        )
+        );
         $response = curl_exec($curl);
         curl_close($curl);
-        $manage = json_decode($response, true);       
+        $manage = json_decode($response, true);
         $res = $manage['status'];
         $result_data = array(
             'status' => '',
@@ -5387,15 +5529,17 @@ SELECT
         }
         return $result_data;
     }
-	
-	
+
+
     public
-    function Check_Invoice_Ok_OR_Not($order_id, $cont_id)
-    {
+        function Check_Invoice_Ok_OR_Not(
+        $order_id,
+        $cont_id
+    ) {
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://coreapi.sihirfms.com/api/checkInv',
+            CURLOPT_URL => '159.223.60.117/api/checkInv',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -5403,9 +5547,13 @@ SELECT
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => array('ApiKey_van' => 'API2345fsdvh3675gsvbxdgeg425435hdgfsfg33',
-                'trip_nummber' => $order_id, 'cont_code_trip' => $cont_id),
-        ));
+            CURLOPT_POSTFIELDS => array(
+                'ApiKey_van' => 'API2345fsdvh3675gsvbxdgeg425435hdgfsfg33',
+                'trip_nummber' => $order_id,
+                'cont_code_trip' => $cont_id
+            ),
+        )
+        );
         $response = curl_exec($curl);
         curl_close($curl);
         $manage = json_decode($response, true);
@@ -5415,8 +5563,9 @@ SELECT
     }
 
     public
-    function vanOrderSaveNew(Request $request)
-    {
+        function vanOrderSaveNew(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
 
         $request->country_id;
@@ -5682,10 +5831,11 @@ SELECT
             }
         }
     }
-	
-	 public
-    function SaveVanOrderNew(Request $request)
-    {
+
+    public
+        function SaveVanOrderNew(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
 
         $request->country_id;
@@ -5801,8 +5951,8 @@ SELECT
 
                     foreach ($orderLines as $orderLineData) {
 
-                       // $order_amount_new = ($orderLineData->P_Qty * $orderLineData->Rate)
-                         //   + $orderLineData->excise + $orderLineData->vat - $orderLineData->total_discount;
+                        // $order_amount_new = ($orderLineData->P_Qty * $orderLineData->Rate)
+                        //   + $orderLineData->excise + $orderLineData->vat - $orderLineData->total_discount;
 
                         $orderLine = new OrderLine();
                         $orderLine->setConnection($country->cont_conn);
@@ -5837,9 +5987,9 @@ SELECT
                         $orderLine->ordd_ocat = $orderLineData->total_price;
                         $orderLine->ordd_odat = 0;
 
-                       // $orderLine->ordd_oamt = $order_amount_new;
-                       // $orderLine->ordd_ocat = $order_amount_new;
-                       // $orderLine->ordd_odat = $order_amount_new;
+                        // $orderLine->ordd_oamt = $order_amount_new;
+                        // $orderLine->ordd_ocat = $order_amount_new;
+                        // $orderLine->ordd_odat = $order_amount_new;
 
                         $orderLine->ordd_excs = $orderLineData->excise_percent;
                         $orderLine->ordd_ovat = $orderLineData->vat_percent;
@@ -5848,7 +5998,7 @@ SELECT
                         $orderLine->ordd_tvat = $orderLineData->vat;
 
                         $orderLine->ordd_amnt = 0;
-                       // $orderLine->ordd_amnt = $order_amount_new;
+                        // $orderLine->ordd_amnt = $order_amount_new;
 
                         $orderLine->lfcl_id = 1;
                         $orderLine->cont_id = $request->country_id;
@@ -5949,8 +6099,9 @@ SELECT
     }
 
     public
-    function vanGRVSave(Request $request)
-    {
+        function vanGRVSave(
+        Request $request
+    ) {
 
         $country = (new Country())->country($request->country_id);
         if ($country != false) {
@@ -6057,13 +6208,13 @@ SELECT
                         $returnLine->rtdd_tvat = $orderLineData->vat;
                         $returnLine->rtdd_amnt = 0;
                         $returnLine->dprt_id = $orderLineData->reason_id;
-                        $returnLine->rtdd_ptyp = $orderLineData->retrun_type;//1 non-saleble, 2=saleable
+                        $returnLine->rtdd_ptyp = $orderLineData->retrun_type; //1 non-saleble, 2=saleable
                         $returnLine->lfcl_id = 11;
                         $returnLine->cont_id = $request->country_id;
-						$returnLine->rtdd_batc = $orderLineData->rtdd_batc??'-';
-                        $returnLine->rtdd_mfdt = $orderLineData->rtdd_mfdt??null;
-                        $returnLine->rtdd_exdt = $orderLineData->rtdd_exdt??null;
-                        $returnLine->rtdd_imag = $orderLineData->rtdd_imag??'-';
+                        $returnLine->rtdd_batc = $orderLineData->rtdd_batc ?? '-';
+                        $returnLine->rtdd_mfdt = $orderLineData->rtdd_mfdt ?? null;
+                        $returnLine->rtdd_exdt = $orderLineData->rtdd_exdt ?? null;
+                        $returnLine->rtdd_imag = $orderLineData->rtdd_imag ?? '-';
                         $returnLine->aemp_iusr = $request->up_emp_id;
                         $returnLine->aemp_eusr = $request->up_emp_id;
                         $returnLine->save();
@@ -6111,8 +6262,9 @@ SELECT
     }
 
     public
-    function MasterDataNew_FOC(Request $request)
-    {
+        function MasterDataNew_FOC(
+        Request $request
+    ) {
 
         $data6 = array();
         $country = (new Country())->country($request->country_id);
@@ -6166,8 +6318,9 @@ AND t2.prom_edat >=CURDATE()
     }
 
     public
-    function aroundOutlet(Request $request)
-    {
+        function aroundOutlet(
+        Request $request
+    ) {
         $data1 = array();
         /*     $country = (new Country())->country($request->country_id);
              $db_conn = $country->cont_conn;
@@ -6195,8 +6348,9 @@ AND t2.prom_edat >=CURDATE()
     }
 
     public
-    function GetManagers_SR(Request $request)
-    {
+        function GetManagers_SR(
+        Request $request
+    ) {
         $data1 = array();
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
@@ -6212,8 +6366,9 @@ AND t2.prom_edat >=CURDATE()
     }
 
     public
-    function GetVanSalesTripSite(Request $request)
-    {
+        function GetVanSalesTripSite(
+        Request $request
+    ) {
         $data1 = array();
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
@@ -6233,8 +6388,9 @@ AND t2.prom_edat >=CURDATE()
     }
 
     public
-    function GetSRRoute(Request $request)
-    {
+        function GetSRRoute(
+        Request $request
+    ) {
         $data1 = array();
 
         $Day_Name = $request->Day_Name;
@@ -6265,8 +6421,9 @@ AND t2.prom_edat >=CURDATE()
 
 
     public
-    function GetOutletSerialData(Request $request)
-    {
+        function GetOutletSerialData(
+        Request $request
+    ) {
         $data1 = array();
 
         $route_id = $request->route_id;
@@ -6298,8 +6455,9 @@ GROUP BY t3.site_id, t4.site_code, t4.site_name, t3.rspm_serl
     }
 
     public
-    function GetSRDPO(Request $request)
-    {
+        function GetSRDPO(
+        Request $request
+    ) {
         $data1 = array();
         $emp_id = $request->emp_id;
 
@@ -6317,18 +6475,18 @@ FROM tm_dlrm AS t1
   INNER JOIN tl_srdi AS t5 ON t1.id = t5.dlrm_id
 WHERE t1.dptp_id = 1 AND t5.aemp_id ='$emp_id'
 ORDER BY t3.id ASC;
-  ");/*$data1 = DB::connection($db_conn)->select("
-  SELECT
-  t3.id        AS depot_id,
-  t3.dpot_name AS depot_name
+  "); /*$data1 = DB::connection($db_conn)->select("
+SELECT
+t3.id        AS depot_id,
+t3.dpot_name AS depot_name
 FROM tm_dlrm AS t1
-  INNER JOIN tm_whos AS t2 ON t1.whos_id = t2.id
-  INNER JOIN tm_dpot AS t3 ON t2.dpot_id = t3.id
-  INNER JOIN tm_acmp AS t4 ON t1.acmp_id = t4.id
-  INNER JOIN tl_emcm AS t5 ON t4.id = t5.acmp_id
+INNER JOIN tm_whos AS t2 ON t1.whos_id = t2.id
+INNER JOIN tm_dpot AS t3 ON t2.dpot_id = t3.id
+INNER JOIN tm_acmp AS t4 ON t1.acmp_id = t4.id
+INNER JOIN tl_emcm AS t5 ON t4.id = t5.acmp_id
 WHERE t1.dptp_id = 1 AND t5.aemp_id = '$emp_id'
 ORDER BY t3.id ASC
-  ");*/
+");*/
 
         }
 
@@ -6337,8 +6495,9 @@ ORDER BY t3.id ASC
     }
 
     public
-    function GetSRSUBDPO(Request $request)
-    {
+        function GetSRSUBDPO(
+        Request $request
+    ) {
         $data1 = array();
         $emp_id = $request->emp_id;
         $DPO = $request->dpo_id;
@@ -6359,19 +6518,19 @@ ORDER BY t3.id ASC
   INNER JOIN tl_srdi AS t5 ON t1.id = t5.dlrm_id
   WHERE t3.id = '$DPO' AND t5.aemp_id = '$emp_id' AND  t1.dptp_id = 1
   ORDER BY t3.id ASC;
-  ");/* $data1 = DB::connection($db_conn)->select("
-  SELECT
-  t1.id AS depot_id,
-  t1.acmp_id AS ou_id,
-  concat(t4.acmp_name, '(', t1.dlrm_name, ')') AS dsp_name
-  FROM tm_dlrm AS t1
-  INNER JOIN tm_whos AS t2 ON t1.whos_id = t2.id
-  INNER JOIN tm_dpot AS t3 ON t2.dpot_id = t3.id
-  INNER JOIN tm_acmp AS t4 ON t1.acmp_id = t4.id
-  INNER JOIN tl_emcm AS t5 ON t4.id = t5.acmp_id
-  WHERE t3.id = '$DPO' AND t5.aemp_id = '$emp_id' AND  t1.dptp_id = 1
-  ORDER BY t3.id ASC
-  ");*/
+  "); /* $data1 = DB::connection($db_conn)->select("
+SELECT
+t1.id AS depot_id,
+t1.acmp_id AS ou_id,
+concat(t4.acmp_name, '(', t1.dlrm_name, ')') AS dsp_name
+FROM tm_dlrm AS t1
+INNER JOIN tm_whos AS t2 ON t1.whos_id = t2.id
+INNER JOIN tm_dpot AS t3 ON t2.dpot_id = t3.id
+INNER JOIN tm_acmp AS t4 ON t1.acmp_id = t4.id
+INNER JOIN tl_emcm AS t5 ON t4.id = t5.acmp_id
+WHERE t3.id = '$DPO' AND t5.aemp_id = '$emp_id' AND  t1.dptp_id = 1
+ORDER BY t3.id ASC
+");*/
 
         }
 
@@ -6380,8 +6539,9 @@ ORDER BY t3.id ASC
     }
 
     public
-    function GetSrSalesGroup(Request $request)
-    {
+        function GetSrSalesGroup(
+        Request $request
+    ) {
         $data1 = array();
         $emp_id = $request->emp_id;
 
@@ -6401,8 +6561,9 @@ ORDER BY t3.id ASC
 
     }
     public
-    function GetSrRouteSiteData(Request $request)
-    {
+        function GetSrRouteSiteData(
+        Request $request
+    ) {
         $data1 = array();
         $emp_id = $request->emp_id;
 
@@ -6444,13 +6605,14 @@ ORDER BY t3.id ASC
   t4.otcg_id,
   t5.cont_id ;
   ");
-}
-    return $data1;
+        }
+        return $data1;
 
     }
     public
-    function GetSRTodayOutletList(Request $request)
-    {
+        function GetSRTodayOutletList(
+        Request $request
+    ) {
         $data1 = array();
         $emp_id = $request->emp_id;
         $route_id = $request->route_id;
@@ -6630,8 +6792,9 @@ FROM
     }
 
     public
-    function GetCumulativeVisited_Site_Details_Data(Request $request)
-    {
+        function GetCumulativeVisited_Site_Details_Data(
+        Request $request
+    ) {
         $data1 = array();
         $emp_id = $request->emp_id;
         $Ou_id = $request->ou_id;
@@ -6694,8 +6857,9 @@ FROM
     }
 
     public
-    function halfDayFullDayReport(Request $request)
-    {
+        function halfDayFullDayReport(
+        Request $request
+    ) {
         $country = (new Country())->country($request->country_id);
         if ($country != false) {
             $db_conn = $country->cont_conn;
@@ -6717,7 +6881,8 @@ AND (`created_at` BETWEEN '$da_st'AND'$da_set')
 UNION ALL
 SELECT 0 T_AMT,0 VISITED_PRO,COUNT(`site_id`)AS VISITED_NON 
 FROM `tt_npro` WHERE `aemp_id`=$request->aemp_id
-AND (`created_at` BETWEEN '$da_st'AND'$da_set'))t1");
+AND (`created_at` BETWEEN '$da_st'AND'$da_set'))t1"
+                );
 
                 $sql_2nd = DB::connection($db_conn)->select(
                     "SELECT sum(TP_AMT)T_AMT,sum(VISITED_PRO)VISITED_PRO, sum(VISITED_NON) VISITED_NON FROM
@@ -6727,14 +6892,16 @@ AND (`created_at` BETWEEN '$daf_st'AND'$daf_set')
 UNION ALL
 SELECT 0 T_AMT,0 VISITED_PRO,COUNT(`site_id`)AS VISITED_NON 
 FROM `tt_npro` WHERE `aemp_id`=$request->aemp_id
-AND (`created_at` BETWEEN '$daf_st'AND'$daf_set'))t1");
+AND (`created_at` BETWEEN '$daf_st'AND'$daf_set'))t1"
+                );
 
                 $sql_rout_out = DB::connection($db_conn)->select(
                     "SELECT count(t3.site_id)AS t_outlet  
   FROM tl_rpln AS t1
   INNER JOIN tl_sgsm AS t2 ON t1.aemp_id = t2.aemp_id 
   INNER JOIN tl_rsmp AS t3 ON t1.rout_id = t3.rout_id
-  WHERE t1.aemp_id=$request->aemp_id AND t1.rout_id=$request->rout_id;");
+  WHERE t1.aemp_id=$request->aemp_id AND t1.rout_id=$request->rout_id;"
+                );
 
                 return array(
                     "first_half" => $sql_1st[0],
@@ -6748,8 +6915,9 @@ AND (`created_at` BETWEEN '$daf_st'AND'$daf_set'))t1");
     }
 
     public
-    function GetXVisited_Site_Details_Data(Request $request)
-    {
+        function GetXVisited_Site_Details_Data(
+        Request $request
+    ) {
         $data1 = array();
         $emp_id = $request->emp_id;
         $Ou_id = $request->ou_id;
@@ -6808,8 +6976,9 @@ AND (`created_at` BETWEEN '$daf_st'AND'$daf_set'))t1");
     }
 
     public
-    function CheckINSyncAllData_TempSiteMerge(Request $request)
-    {
+        function CheckINSyncAllData_TempSiteMerge(
+        Request $request
+    ) {
 
         $data2 = array();
         $data3 = array();
@@ -6988,8 +7157,9 @@ AND t5.acmp_id = $request->ou_id AND t8.id IS NULL;
     }
 
     public
-    function GetTemp_Site_Details_Data(Request $request)
-    {
+        function GetTemp_Site_Details_Data(
+        Request $request
+    ) {
         $data1 = array();
         $emp_id = $request->emp_id;
         //$Ou_id = $request->ou_id;
@@ -7035,8 +7205,9 @@ AND t5.acmp_id = $request->ou_id AND t8.id IS NULL;
 
 
     public
-    function GetSRTodayOutletListSearch(Request $request)
-    {
+        function GetSRTodayOutletListSearch(
+        Request $request
+    ) {
         $data1 = array();
         $emp_id = $request->emp_id;
         $route_id = $request->route_id;
@@ -7129,8 +7300,9 @@ AND t5.acmp_id = $request->ou_id AND t8.id IS NULL;
     }
 
     public
-    function GetSRTodayOutletListSearchQRCode(Request $request)
-    {
+        function GetSRTodayOutletListSearchQRCode(
+        Request $request
+    ) {
         $data1 = array();
         $emp_id = $request->emp_id;
         $route_id = $request->route_id;
@@ -7221,8 +7393,9 @@ AND t5.acmp_id = $request->ou_id AND t8.id IS NULL;
     }
 
     public
-    function updateOutlet(Request $request)
-    {
+        function updateOutlet(
+        Request $request
+    ) {
         $data1 = array();
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
@@ -7257,8 +7430,9 @@ GROUP BY t1.id,
     }
 
     public
-    function outletCategory(Request $request)
-    {
+        function outletCategory(
+        Request $request
+    ) {
         $data1 = array();
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
@@ -7271,18 +7445,49 @@ GROUP BY t1.id,
     }
 
     public
-    function govDistrict(Request $request)
-    {
+        function govDistrict(Request $request) {
         $data1 = array();
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
+        $module_type = $country->module_type;
+        if ($db_conn != '') {
+			
+			 if ($module_type ==2) {
+				 $data1 = DB::connection($db_conn)->select("
+			SELECT t2.id as dsct_id,t2.dsct_code AS district_code,t2.dsct_name AS district_name
+			FROM `tl_srds`t1 
+			JOIN tm_dsct t2 ON t1.`dsct_id`=t2.id
+			WHERE t1.`aemp_id`=$request->aemp_id"); 
+			 }else{
+				 $data1 = DB::connection($db_conn)->select("SELECT
+		  id        AS district_code,
+		  dsct_name AS district_name
+		FROM tm_dsct
+		WHERE `lfcl_id` = 1
+		ORDER BY dsct_name"); 
+			 }           
+        }
+        return $data1;
+
+    }
+
+    public
+        function govThana(
+        Request $request
+    ) {
+        $data1 = array();
+        $country = (new Country())->country($request->country_id);
+        $db_conn = $country->cont_conn;
+        $dsct_code = $request->send_district_code;
         if ($db_conn != '') {
             $data1 = DB::connection($db_conn)->select("SELECT
-  id        AS district_code,
-  dsct_name AS district_name
-FROM tm_dsct
-WHERE `lfcl_id` = 1
-ORDER BY dsct_name");
+  t1.`id` as Thana_Code,
+  t1.than_name AS Thana_Name
+FROM `tm_than`t1 
+JOIN tm_dsct t2 ON t1.`dsct_id`=t2.id
+WHERE t1.`lfcl_id` = 1 AND
+      t2.dsct_code = '$dsct_code'
+ORDER BY t1.than_name;");
 
         }
         return $data1;
@@ -7290,29 +7495,9 @@ ORDER BY dsct_name");
     }
 
     public
-    function govThana(Request $request)
-    {
-        $data1 = array();
-        $country = (new Country())->country($request->country_id);
-        $db_conn = $country->cont_conn;
-        $dsct_id = $request->send_district_code;
-        if ($db_conn != '') {
-            $data1 = DB::connection($db_conn)->select("SELECT
-  `id` as Thana_Code,
-  than_name AS Thana_Name
-FROM `tm_than`
-WHERE `lfcl_id` = 1 AND
-      `dsct_id` = '$dsct_id'
-ORDER BY than_name");
-
-        }
-        return $data1;
-
-    }
-
-    public
-    function govWard(Request $request)
-    {
+        function govWard(
+        Request $request
+    ) {
         $data1 = array();
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
@@ -7329,8 +7514,9 @@ WHERE `LFCL_ID`='1' AND
     }
 
     public
-    function market(Request $request)
-    {
+        function market(
+        Request $request
+    ) {
         $data1 = array();
         $country = (new Country())->country($request->country_id);
         $db_conn = $country->cont_conn;
@@ -7350,8 +7536,9 @@ ORDER BY mktm_name");
     }
 
     public
-    function GetOutletNameAndID(Request $request)
-    {
+        function GetOutletNameAndID(
+        Request $request
+    ) {
         $data1 = array();
         $Order_Date = $request->S_Date;
         $SR_ID = $request->SR_ID;
@@ -7374,8 +7561,9 @@ ORDER BY mktm_name");
     }
 
     public
-    function GetOutletWiseOrderID(Request $request)
-    {
+        function GetOutletWiseOrderID(
+        Request $request
+    ) {
         $data1 = array();
         $Order_Date = $request->S_Date;
         $SR_ID = $request->SR_ID;
@@ -7400,8 +7588,9 @@ ORDER BY mktm_name");
     }
 
     public
-    function GetDMTripItemStockDetails(Request $request)
-    {
+        function GetDMTripItemStockDetails(
+        Request $request
+    ) {
         $data1 = array();
         $TRIP_Code = $request->TRIP_Code;
 
@@ -7434,8 +7623,9 @@ ORDER BY mktm_name");
     }
 
     public
-    function GetVanTripItemStockDetails(Request $request)
-    {
+        function GetVanTripItemStockDetails(
+        Request $request
+    ) {
         $data1 = array();
         $TRIP_Code = $request->TRIP_Code;
 
@@ -7443,48 +7633,46 @@ ORDER BY mktm_name");
         $db_conn = $country->cont_conn;
         if ($db_conn != '') {
             $data1 = DB::connection($db_conn)->select("
-        SELECT t9.item_id,t9.item_code,t9.amin_snme, sum(t9.INV_QTY)AS INV_QTY,sum(t9.DELV_QNTY)AS DELV_QNTY,
-         sum(t9.STK_QTY+t9.GRV_G+t9.GRV_B)AS tSTK_QTY,sum(t9.GRV_G)AS GRV_G,sum(t9.GRV_B)AS GRV_B,t9.factor,avg(t9.rate)AS rate 
-         FROM
-          (
-          SELECT item_id,item_code,amin_snme,INV_QTY,DELV_QNTY,STK_QTY,GRV_G,GRV_B,factor,rate
-            from
-             (SELECT
-              Item_Id AS item_id,
-              Item_Code AS item_code,
+        SELECT
+              trp_n TrpNumber,
+              tm.Item_Id AS item_id,
+              tm.Item_Code AS item_code,
               Item_Name AS amin_snme,
-              Rec_Qty AS INV_QTY,
-              ifnull(sum(tn.delQnty),0)AS DELV_QNTY,
-              sum(Rec_Qty)-ifnull(sum(tn.delQnty),0) as STK_QTY,
-              0 GRV_G,
-              0 GRV_B,
+              sum(Rec_Qty) AS INV_QTY,
+              ifnull(tn.delQnty,0) DELV_QNTY,
+              sum(Rec_Qty)-ifnull(tn.delQnty,0) as tSTK_QTY,
+              ifnull(tg.GRV_G,0) GRV_G,
+              ifnull(tg.GRV_B,0)GRV_B,
               Item_Factor AS factor,
-              Item_Rate AS rate
-              from((SELECT
+              avg(Item_Rate) AS rate
+              from(              
+              SELECT
+              t8.TRIP_NO trp_n,
               t1.id                  AS Item_Id,
               t1.amim_code                       AS Item_Code,
               t1.amim_name                       AS Item_Name,
               t9.ORDD_UPRC                       AS Item_Rate,
               t1.amim_duft                       AS Item_Factor,
-              sum( t9.INV_QNTY )                 AS Rec_Qty
+			  sum(t9.INV_QNTY)                 AS Rec_Qty
              FROM `tm_amim`t1 JOIN dm_van_trip_detail t9 ON(t9.`AMIM_ID`=t1.id)
              INNER JOIN dm_trip AS t8 ON t9.TRIP_NO=t8.TRIP_NO
              WHERE  t1.lfcl_id=1 AND
-             t8.TRIP_NO='$TRIP_Code' AND  t8.STATUS='N'
-             GROUP BY t9.AMIM_ID,t1.amim_code,t1.id,t1.amim_code, t1.amim_name ,t9.ORDD_UPRC, t1.amim_duft
-              )as tm left join (select t10.Amim_id,sum(t10.DELV_QNTY) delQnty from  dm_trip_detail t10 where  t10.TRIP_NO='$TRIP_Code' 
-              group by t10.Amim_id) tn on tm.Item_Id = tn.Amim_id)
-              group by Item_Id,Item_Code,Item_Name,Item_Rate,Item_Factor,Rec_Qty)tg
-       UNION ALL
-          (SELECT t2.`amim_id`AS item_id,t4.amim_code AS item_code,t4.amin_snme AS amin_snme,0 INV_QTY,0 DELV_QNTY,
-           0 STK_QTY,if(t2.rtdd_ptyp=2,SUM(t2.`rtdd_dqty`),0) GRV_G,if(t2.rtdd_ptyp=1,SUM(t2.`rtdd_dqty`),0) GRV_B,t4.amim_duft AS factor,t2.rtdd_uprc AS rate
+             t8.TRIP_NO IN('$TRIP_Code')
+             GROUP BY t8.TRIP_NO,t1.id,t1.amim_code,t1.amim_name,t9.ORDD_UPRC,t1.amim_duft) as tm 
+	         left join (
+             select TRIP_NO, Amim_id,sum(delQnty) delQnty from(
+             select t10.TRIP_NO, t10.Amim_id,t10.DELV_QNTY delQnty from  dm_trip_detail t10 where  t10.TRIP_NO IN('$TRIP_Code')
+             ) as tc   group by TRIP_NO,Amim_id             
+             ) tn on tm.Item_Id = tn.Amim_id and tn.TRIP_NO=tm.trp_n  
+			left join ( SELECT t1.dm_trip, t2.`amim_id`AS item_id,t4.amim_code AS item_code,
+           0 STK_QTY,if(t2.rtdd_ptyp=2,SUM(t2.`rtdd_dqty`),0) GRV_G,if(t2.rtdd_ptyp=1,SUM(t2.`rtdd_dqty`),0) GRV_B
            FROM tt_rtan t1 JOIN tt_rtdd t2 ON(t1.id=t2.rtan_id)
            JOIN `dm_trip`t3 ON(t1.dm_trip=t3.`TRIP_NO`)
            JOIN tm_amim t4 ON(t2.`amim_id`=t4.id)
-           WHERE t1.`dm_trip`='$TRIP_Code'
-           GROUP BY t2.`amim_id`,t4.amim_code,t2.rtdd_uprc,t2.rtdd_ptyp)
-           )t9
-           GROUP BY t9.item_id,t9.item_code,t9.amin_snme, t9.factor;
+           WHERE t1.`dm_trip`IN('$TRIP_Code')
+           GROUP BY t2.`amim_id`,t4.amim_code,t2.rtdd_uprc,t2.rtdd_ptyp) tg
+           on tm.Item_Id = tg.item_id and tg.dm_trip=tm.trp_n               
+          group by  trp_n , tm.Item_Id, Item_Code,Item_Name, Item_Factor;
         ");
         }
         return $data1;
@@ -7492,8 +7680,9 @@ ORDER BY mktm_name");
     }
 
     public
-    function GetVanTripItemLoadDetails(Request $request)
-    {
+        function GetVanTripItemLoadDetails(
+        Request $request
+    ) {
         $data1 = array();
         $TRIP_Code = $request->TRIP_Code;
         $load_id = $request->load_id;
@@ -7517,8 +7706,9 @@ ORDER BY mktm_name");
     }
 
     public
-    function GetVanTripLoadRequestDetails(Request $request)
-    {
+        function GetVanTripLoadRequestDetails(
+        Request $request
+    ) {
         $data1 = array();
         $TRIP_Code = $request->TRIP_Code;
 
@@ -7553,8 +7743,9 @@ ORDER BY mktm_name");
     }
 
     public
-    function GetOutletWiseOrderDetails(Request $request)
-    {
+        function GetOutletWiseOrderDetails(
+        Request $request
+    ) {
         $data1 = array();
         $Order_Date = $request->S_Date;
         $SR_ID = $request->SR_ID;
@@ -7607,8 +7798,9 @@ t2.geo_lon
     }
 
     public
-    function GetChallanWiseOrderData(Request $request)
-    {
+        function GetChallanWiseOrderData(
+        Request $request
+    ) {
         $data1 = array();
         $From_Date = $request->From_Date;
         $To_Date = $request->To_Date;

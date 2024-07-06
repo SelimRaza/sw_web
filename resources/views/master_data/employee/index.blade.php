@@ -7,7 +7,7 @@
                 <div class="title_left">
                     <ol class="breadcrumb">
                         <li>
-                            <a href="{{ URL::to('/')}}"><i class="fa fa-home"></i>Home</a>
+                            <a href="{{ URL::to('/')}}"></i>Home</a>
                         </li>
                         <li class="active">
                             <strong>All Employee</strong>
@@ -22,8 +22,8 @@
                                 <input type="text" class="form-control" name="search_text" placeholder="Search for..."
                                        value="{{$search_text}}">
                                 <span class="input-group-btn">
-                      <button class="btn btn-default" type="submit">Go!</button>
-                    </span>
+                                <button class="btn btn-default" type="submit">Go!</button>
+                                </span>
 
                             </div>
                         </div>
@@ -49,7 +49,6 @@
                         <div class="x_title">
                             @if($permission->wsmu_crat)
                                 <a class="btn btn-success btn-sm" href="{{ URL::to('/employee/create')}}">Add New</a>
-                                <a class="btn btn-success btn-sm" href="{{ URL::to('/employee/employeeHrisUpload')}}">Add HRIS</a>
                                 <a class="btn btn-success btn-sm"
                                    href="{{ URL::to('employee/employeeUpload')}}">Upload</a>
 
@@ -58,13 +57,12 @@
                                 <a class="btn btn-success btn-sm"
                                    href="{{ URL::to('employee/get/routeLike/view')}}">Route Like</a>
                             @endif
-
-                            <div class="clearfix"></div>
                         </div>
+                        <div class="clearfix"></div>
                         <div class="x_content">
-                            {{$employees->appends(Request::only('search_text'))->links()}}
+                            <!-- {{$employees->appends(Request::only('search_text'))->links()}} -->
 
-                            <table id="datatable" class="table table-bordered projects" data-page-length='100'>
+                            <table  class="table" data-page-length='100'>
                                 <thead>
                                 <tr class="tbl_header">
                                     <th>SL
@@ -109,7 +107,7 @@
                                             <ul class="list-inline">
                                                 <li>
                                                     @if($employee->aemp_picn!='')
-                                                        <img src="https://images.sihirbox.com/{{$employee->aemp_picn}}"
+                                                        <img src="https://sw-bucket.sgp1.cdn.digitaloceanspaces.com/{{$employee->aemp_picn}}"
                                                              class="avatar" alt="Avatar">
                                                     @endif
                                                 </li>
@@ -164,9 +162,6 @@
                                 @endforeach
                                 </tbody>
                             </table>
-
-                            <!-- end project list -->
-
                         </div>
                     </div>
                 </div>

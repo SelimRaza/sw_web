@@ -36,9 +36,12 @@ class Ward extends Model implements WithHeadings, ToModel, WithHeadingRow,FromCo
 
     public function model(array $row)
     {
+
         $value = (object)$row;
         $thana_id = Thana::on($this->connection)->where(['than_code' => $value->thana_code])->first();
-
+        // if(!$thana_id){
+        //     dd($value->thana_code,$value->ward_name);
+        // }
         $ward = new Ward();
         $ward->setConnection($this->connection);
         $ward->ward_name = $value->ward_name;

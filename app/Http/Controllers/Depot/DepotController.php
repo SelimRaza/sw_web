@@ -118,7 +118,7 @@ class DepotController extends Controller
         }
         if ($dist_id != "") {
 
-            $q1 = " AND t4.dist_id = '$dist_id'";
+            $q1 = " AND t4.dsct_id = '$dist_id'";
         }
         if ($than_id != "") {
 

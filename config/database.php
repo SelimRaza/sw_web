@@ -16,9 +16,9 @@ return [
     */
 
     // 'default' => env('DB_CONNECTION', 'mysql'),
-    'default' => 'bsolutio_comm',
-      // 'default' => 'myprg_comm',
-    
+    'default' => 'common',
+    // 'default' => 'myprg_comm',
+
     /*
     |--------------------------------------------------------------------------
     | Database Connections
@@ -36,53 +36,14 @@ return [
     */
 
     'connections' => [
-        
-        'myprg_comm1' => [
+        'common' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => env('DB_HOST', 'db-mysql-sgp1-spro-os-p-do-user-3244464-0.b.db.ondigitalocean.com'),
-            'port' => env('DB_PORT', '25060'),
-            'database' => env('DB_DATABASE', 'myprg_comm'),
-            'username' => env('DB_USERNAME', 'spro_pran'),
-            'password' => env('DB_PASSWORD', 'AVNS_JEXQN7YXQXycWO6Mi0v'),
-            'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'strict' => false,
-            'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
-        ],
-         'mydb_uae' => [
-            'driver' => 'mysql',
-            'url' => env('DATABASE_URL'),
-            'host' => env('DB_HOST', 'public-db-mysql-sgp1-spro-os-p-do-user-3244464-0.b.db.ondigitalocean.com'),
-            'port' => env('DB_PORT', '25060'),
-            'database' => env('DB_DATABASE', 'mydb_uae'),
-            'username' => env('DB_USERNAME', 'spro_pran'),
-            'password' => env('DB_PASSWORD', 'AVNS_JEXQN7YXQXycWO6Mi0v'),
-            'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'strict' => false,
-            'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
-        ],
-       'bsolutio_comm' => [
-            'driver' => 'mysql',
-            'url' => env('DATABASE_URL'),
-            'host' => env('DB_HOST', 'localhost'),
+            'host' => env('DB_HOST', '128.199.240.50'),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'bsolutio_comm'),
-            'username' => env('DB_USERNAME', 'bsolutio_fmg'),
-            'password' => env('DB_PASSWORD', 'mahmud@2023'),
+            'database' => env('DB_DATABASE', 'common'),
+            'username' => env('DB_USERNAME', 'sw_sole'),
+            'password' => env('DB_PASSWORD', 'fahiM16119@2023R'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8',
             'collation' => 'utf8_unicode_ci',
@@ -94,14 +55,14 @@ return [
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
-        'bsolutio_mdule1' => [
+        'mdule1' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => env('DB_HOST', 'localhost'),
+            'host' => env('DB_HOST', '128.199.240.50'),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'bsolutio_mdule1'),
-            'username' => env('DB_USERNAME', 'bsolutio_fmg'),
-            'password' => env('DB_PASSWORD', 'mahmud@2023'),
+            'database' => env('DB_DATABASE', 'mdule1'),
+            'username' => env('DB_USERNAME', 'sw_sole'),
+            'password' => env('DB_PASSWORD', 'fahiM16119@2023R'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8',
             'collation' => 'utf8_unicode_ci',
@@ -113,35 +74,14 @@ return [
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
-        'bsolutio_mdule14' => [
+        'mdule2' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => env('DB_HOST', 'db-mysql-sgp1-spro-bd-p-do-user-3244464-0.b.db.ondigitalocean.com'),
-            'port' => env('DB_PORT', '25060'),
-            'database' => env('DB_DATABASE', 'myprg_pran'),
-            'username' => env('DB_USERNAME', 'spro_pran'),
-            'password' => env('DB_PASSWORD', 'AVNS_LWtsQwsC7HDG5jRStKR'),
-            'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
-        ],
-        
-        
-        'myprg_mal' => [
-            'driver' => 'mysql',
-            'url' => env('DATABASE_URL'),
-            'host' => env('DB_HOST', 'localhost'),
+            'host' => env('DB_HOST', '128.199.240.50'),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'bsolutio_mdule2'),
-            'username' => env('DB_USERNAME', 'bsolutio_fmg'),
-            'password' => env('DB_PASSWORD', 'mahmud@2023'),
+            'database' => env('DB_DATABASE', 'mdule2'),
+            'username' => env('DB_USERNAME', 'sw_sole'),
+            'password' => env('DB_PASSWORD', 'fahiM16119@2023R'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8',
             'collation' => 'utf8_unicode_ci',
@@ -153,7 +93,6 @@ return [
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
- 
         'oracle' => [
             'driver' => 'oracle',
             'host' => '178.128.21.53',

@@ -19,8 +19,9 @@ use Illuminate\Http\Request;
 //Route::group(['middleware' => 'throttle:2,1'], function () {
 
 
-
 Route::group(['middleware' => ['VerifyAPIKey']], function () {
+	
+
     Route::post('noteAtt/employeeAttendance', 'API\v1\AttNoteData@employeeAttendance');
     Route::post('noteAtt/attendanceSave', 'API\v1\AttNoteData@attendanceSave');
     Route::post('noteAtt/saveIOM', 'API\v1\AttNoteData@saveIOM');
@@ -79,6 +80,7 @@ Route::group(['middleware' => ['VerifyAPIKey']], function () {
     Route::post('OrderModuleDataUAE/GetCashPartyCreditCollectionPendingList', 'API\v2\OrderModuleDataUAE@GetCashPartyCreditCollectionPendingList');
     Route::post('SpecialBudgetDetailsUserWise', 'API\v2\OrderModuleDataUAE@SpecialBudgetDetailsUserWise');
     //
+    Route::post('getUser7Daysdata', 'API\v3\MobileAPI@getUser7Daysdata');
     Route::post('login2', 'API\v3\MobileAPI@login2');
     Route::post('country', 'API\v1\MobileAPI@country');
     Route::post('countryChange', 'API\v1\MobileAPI@countryChange');
@@ -276,6 +278,23 @@ Route::group(['middleware' => ['VerifyAPIKey']], function () {
 
     Route::post('asset/getAssetItemList', 'API\v3\MobileAPI@getAssetItemList');
 
+//DMS
+	Route::post('CreateVehicleSaveData', 'API\v2\DMSModuleData@CreateVehicleSaveData');
+	Route::post('AssignVehicletoDM', 'API\v2\DMSModuleData@AssignVehicletoDM');
+	Route::post('CreateTripForDM', 'API\v2\DMSModuleData@CreateTripForDM');
+	Route::post('GetVehicleListByDMS', 'API\v2\DMSModuleData@GetVehicleListByDMS');
+	Route::post('GetTransitTripListByDMS', 'API\v2\DMSModuleData@GetTransitTripListByDMS');
+	Route::post('GetTripWiseOrderListByDMS', 'API\v2\DMSModuleData@GetTripWiseOrderListByDMS');
+	Route::post('GetSRListByDMS', 'API\v2\DMSModuleData@GetSRListByDMS');
+	Route::post('GetDMListByDMS', 'API\v2\DMSModuleData@GetDMListByDMS');
+	Route::post('GetDMOpenTripListByDMS', 'API\v2\DMSModuleData@GetDMOpenTripListByDMS');
+	Route::post('GetSRPendingOrderByDMS', 'API\v2\DMSModuleData@GetSRPendingOrderByDMS');
+	Route::post('GetDMPendingTripOrderByTrip', 'API\v2\DMSModuleData@GetDMPendingTripOrderByTrip');
+	Route::post('GetDMSItemListForStock', 'API\v2\DMSModuleData@GetDMSItemListForStock');
+	Route::post('SaveDMSItemStock', 'API\v2\DMSModuleData@SaveDMSItemStock');
+	Route::post('DMSPushOrderToDM', 'API\v2\DMSModuleData@PushOrderToDM');
+	Route::post('DMSSendTripToDM', 'API\v2\DMSModuleData@DMSSendTripToDM');
+
     // Space Management
     Route::post('getAllSpaceProgram', 'API\v3\SpaceManagement@getAllSpaceProgram');
     Route::post('assignOutletToSpace', 'API\v3\SpaceManagement@assignOutletToSpace');
@@ -314,6 +333,9 @@ Route::group(['middleware' => ['VerifyAPIKey']], function () {
     Route::post('assignAssetToOutlet', 'API\v3\OutletLog@assignAssetToOutlet');
     Route::post('getOwnListedAssetOutlet', 'API\v3\OutletLog@getOwnListedAssetOutlet');
     Route::post('getSelectedOutletAsset', 'API\v3\OutletLog@getSelectedOutletAsset');
+    Route::post('sw/get', function(){
+        return 'hello';
+    });
 
 });
 Route::group(['middleware' => ['VerifyAPIKey', 'throttle:5,1']], function () {

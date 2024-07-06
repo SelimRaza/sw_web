@@ -39,22 +39,6 @@
                     <div class="x_panel">
                         <div class="x_title">
                             <h1>Employee </h1>
-                            <ul class="nav navbar-right panel_toolbox">
-                                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                                </li>
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                                       aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                                    <ul class="dropdown-menu" role="menu">
-                                        <li><a href="#">Settings 1</a>
-                                        </li>
-                                        <li><a href="#">Settings 2</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><a class="close-link"><i class="fa fa-close"></i></a>
-                                </li>
-                            </ul>
                             <div class="clearfix"></div>
                         </div>
                         <div class="x_content">
@@ -64,7 +48,7 @@
                                 <input type="hidden" name="_token" id="_token" value="<?php echo csrf_token(); ?>">
                                 {{csrf_field()}}
 
-                                <div class="item form-group">
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Designation <span
                                                 class="required">*</span>
                                     </label>
@@ -90,8 +74,32 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class="item form-group">
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Designation <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <select class="form-control" name="master_role_id" id="master_role_id" required>
+                                            <option value="">Select</option>
+                                            @foreach ($masterRoles as $masterRole)
+                                                <option value="{{ $masterRole->id }}">{{ ucfirst($masterRole->role_name) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Role <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <select class="form-control" name="role_id" id="role_id" required>
+                                            <option value="">Select</option>
+                                            @foreach ($roles as $role)
+                                                <option value="{{ $role->id }}">{{ ucfirst($role->edsg_name) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+
+
+
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Manager ID
                                         <span
                                                 class="required">*</span>
@@ -126,9 +134,178 @@
                                             @endforeach
                                         </select>--}}
                                     </div>
+                                </div> -->
+                                <!-- <div class="item form-group">
+                                    <div class="row">
+                                        <div class="col-md-5 col-sm-6 col-xs-12 col-md-offset-1">
+                                            <label class="control-label" for="name">Manager ID <span class="required">*</span></label>
+                                            <input id="user_name" class="form-control col-md-7 col-xs-12" data-validate-length-range="6" data-validate-words="2" name="manager_id" value="{{ old('manager_id') }}" placeholder="User Name" required="required" type="text">
+                                        </div>
+
+                                        <div class="col-md-5 col-sm-6 col-xs-12">
+                                            <label class="control-label" for="name">Line Manager ID <span class="required">*</span></label>
+                                            <input id="user_name" class="form-control col-md-7 col-xs-12" data-validate-length-range="6" data-validate-words="2" name="line_manager_id" value="{{ old('line_manager_id') }}" placeholder="User Name" required="required" type="text">
+                                        </div>
+                                    </div>
+                                </div> -->
+
+                                <div class="item form-group">
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Manager ID <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <input id="user_name" class="form-control col-md-7 col-xs-12" data-validate-length-range="6" data-validate-words="2" name="manager_id" value="{{ old('manager_id') }}" placeholder="User Name" required="required" type="text">
+
+                                    </div>
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Line Manager ID <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <input id="user_name" class="form-control col-md-7 col-xs-12" data-validate-length-range="6" data-validate-words="2" name="line_manager_id" value="{{ old('line_manager_id') }}" placeholder="User Name" required="required" type="text">
+
+                                    </div>
                                 </div>
 
                                 <div class="item form-group">
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Full Name <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                            <input id="name" class="form-control col-md-7 col-xs-12"
+                                               data-validate-length-range="6" data-validate-words="2" name="name" value="{{old('name')}}"
+                                               placeholder="Full Name" required="required" type="text">
+                                    </div>
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Last Name <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                            <input id="name" class="form-control col-md-7 col-xs-12"
+                                               data-validate-length-range="6" data-validate-words="2" name="ln_name" value="{{old('ln_name')}}"
+                                               placeholder="Ln Name" type="text">
+                                    </div>
+                                </div>
+                                <div class="item form-group">
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">User ID <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                            <input id="name" class="form-control col-md-7 col-xs-12"
+                                               data-validate-length-range="6" data-validate-words="2" name="email" value="{{old('email')}}"
+                                               placeholder="User Name" required="required" type="text">
+                                    </div>
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Email <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                            <input id="name" class="form-control col-md-7 col-xs-12"
+                                               data-validate-length-range="6" data-validate-words="2" name="address" value="{{old('address')}}"
+                                               placeholder="email@eacmple.com" type="email">
+                                    </div>
+                                </div>
+                                <div class="item form-group">
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Email CC <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                            <input id="name" class="form-control col-md-7 col-xs-12"
+                                               data-validate-length-range="6" data-validate-words="2"
+                                               name="email_cc"
+                                               placeholder="email1@exmple.com,email2@exmple.com" type="text" value="{{old('email_cc')}}"
+                                               step="any">
+                                    </div>
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Mobile <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                            <input id="name" class="form-control col-md-7 col-xs-12"
+                                               data-validate-length-range="6" data-validate-words="2" name="mobile" value="{{old('mobile')}}"
+                                               placeholder="Mobile" type="text">
+                                    </div>
+                                </div>
+                                <div class="item form-group">
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Menu Group <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <select class="form-control" name="amng_id" id="amng_id" required>
+                                            <option value="">Select</option>
+                                            @foreach ($appMenuGroup as $appMenuGroup1)
+                                                <option value="{{ $appMenuGroup1->id }}">{{ ucfirst($appMenuGroup1->amng_name) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Profile Image <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <input id="name" class="form-control col-md-7 col-xs-12"
+                                               data-validate-length-range="6" data-validate-words="2" name="input_img" value="{{old('input_img')}}"
+                                               placeholder="Image" type="file"
+                                               step="1">
+                                    </div>
+                                </div>
+                                <div class="item form-group">
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Allowed Distance <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <input id="name" class="form-control col-md-7 col-xs-12"
+                                               data-validate-length-range="6" data-validate-words="2"
+                                               name="allowed_distance" value="0"
+                                               placeholder="Allowed Distance" required="required" type="number" value="{{old('allowed_distance')}}"
+                                               step="any">
+                                    </div>
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Outlet Code <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <input id="outlet_code" name="outlet_code" class="form-control col-md-7 col-xs-12"
+                                                data-validate-length-range="6" data-validate-words="2"  value="{{old('outlet_code')}}"
+                                                placeholder="Outlet Code"  type="text">
+                                    </div>
+                                </div>
+                                <div class="item form-group">
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Credit Limit <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                            <input id="name" class="form-control col-md-7 col-xs-12"
+                                               data-validate-length-range="6" data-validate-words="2"
+                                               name="aemp_crdt" value="0"
+                                               placeholder="Amount" required="required" type="number" value="{{old('aemp_crdt')}}"
+                                               step="any">
+                                    </div>
+                                    @if(Auth::user()->country()->module_type==2)
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Nationality <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <select class="form-control" name="cont_id" id="cont_id" required>
+                                            <option value="">Select</option>
+                                            @foreach ($country as $cnt)
+                                                <option value="{{ $cnt->id }}">{{ ucfirst($cnt->cont_code.'-'.$cnt->cont_name) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    @endif
+                                </div>
+                                @if(Auth::user()->country()->module_type==2)
+                                <div class="item form-group">
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Visa Number <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <input id="name" class="form-control col-md-7 col-xs-12" name="visa_no"
+                                               placeholder="Visa Number" type="text"
+                                               step="1">
+                                    </div>
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Expiry Date <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <input id="expr_date" class="form-control col-md-7 col-xs-12" name="expr_date"
+                                                value="<?php echo date('Y-m-d');?>"
+                                               step="1">
+                                    </div>
+                                </div>
+                                @endif
+                                <div class="item form-group">
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Auto Email <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                            <input id="name" class="form-control col-md-7 col-xs-12"
+                                               data-validate-length-range="6" data-validate-words="2"  {{ old('auto_email') == 'on' ? 'checked' : '' }}
+                                               name="auto_email" type="checkbox"
+                                        >
+                                    </div>
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Live Location <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                            <input id="name" class="form-control col-md-7 col-xs-12"  {{ old('location_on') == 'on' ? 'checked' : '' }}
+                                               data-validate-length-range="6" data-validate-words="2"
+                                               name="location_on" type="checkbox"
+                                        >
+                                    </div>
+                                </div>
+                                <div class="item form-group">
+                                    <label class="control-label col-md-2 col-sm-2 col-xs-12" for="name">Sales Person <span class="required">*</span></label>
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <input id="name" class="form-control col-md-7 col-xs-12"
+                                               {{ old('aemp_issl') == 'on' ? 'checked' : '' }} data-validate-length-range="6" data-validate-words="2"
+                                               name="aemp_issl" type="checkbox"
+                                        >
+                                    </div>
+                                   
+                                </div>
+
+                                    
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">User ID <span
                                                 class="required">*</span>
                                     </label>
@@ -137,10 +314,10 @@
                                                data-validate-length-range="6" data-validate-words="2" name="email" value="{{old('email')}}"
                                                placeholder="User Name" required="required" type="text">
                                     </div>
-                                </div>
+                                </div> -->
+                                
 
-
-                                <div class="item form-group">
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Full Name <span
                                                 class="required">*</span>
                                     </label>
@@ -158,9 +335,9 @@
                                                data-validate-length-range="6" data-validate-words="2" name="ln_name" value="{{old('ln_name')}}"
                                                placeholder="Ln Name" type="text">
                                     </div>
-                                </div>
+                                </div> -->
 
-                                <div class="item form-group">
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Email
                                     </label>
                                     <div class="col-md-6 col-sm-6 col-xs-12">
@@ -168,10 +345,10 @@
                                                data-validate-length-range="6" data-validate-words="2" name="address" value="{{old('address')}}"
                                                placeholder="email@eacmple.com" type="email">
                                     </div>
-                                </div>
+                                </div> -->
 
 
-                                <div class="item form-group">
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Email CC
 
                                     </label>
@@ -182,8 +359,8 @@
                                                placeholder="email1@exmple.com,email2@exmple.com" type="text" value="{{old('email_cc')}}"
                                                step="any">
                                     </div>
-                                </div>
-                                <div class="item form-group">
+                                </div> -->
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Auto Email
                                     </label>
                                     <div class="col-md-6 col-sm-6 col-xs-12">
@@ -202,8 +379,8 @@
                                                name="location_on" type="checkbox"
                                         >
                                     </div>
-                                </div>
-                                <div class="item form-group">
+                                </div> -->
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Is Sales Person
                                     </label>
                                     <div class="col-md-6 col-sm-6 col-xs-12">
@@ -212,8 +389,8 @@
                                                name="aemp_issl" type="checkbox"
                                         >
                                     </div>
-                                </div>
-                                <div class="item form-group">
+                                </div> -->
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Mobile
                                     </label>
                                     <div class="col-md-6 col-sm-6 col-xs-12">
@@ -221,9 +398,9 @@
                                                data-validate-length-range="6" data-validate-words="2" name="mobile" value="{{old('mobile')}}"
                                                placeholder="Mobile" type="text">
                                     </div>
-                                </div>
+                                </div> -->
 
-                                <div class="item form-group">
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Allowed Distance
                                         <span
                                                 class="required">*</span>
@@ -235,7 +412,7 @@
                                                placeholder="Allowed Distance" required="required" type="number" value="{{old('allowed_distance')}}"
                                                step="any">
                                     </div>
-                                </div>
+                                </div> -->
 
                                 <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Customer id
@@ -250,7 +427,7 @@
                                                step="any">
                                     </div>
                                 </div> -->
-                                <div class="item form-group">
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Outlet Code <span
                                                 class="required">*</span>
                                     </label>
@@ -259,9 +436,9 @@
                                                 data-validate-length-range="6" data-validate-words="2"  value="{{old('outlet_code')}}"
                                                 placeholder="Outlet Code"  type="text">
                                     </div>
-                                </div>
+                                </div> -->
 
-                                <div class="item form-group">
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Personal Credit Limit
                                         <span
                                                 class="required">*</span>
@@ -273,8 +450,8 @@
                                                placeholder="Amount" required="required" type="number" value="{{old('aemp_crdt')}}"
                                                step="any">
                                     </div>
-                                </div>
-                                <div class="item form-group">
+                                </div> -->
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Profile
                                         Image<span
                                                 class="required">*</span>
@@ -285,8 +462,8 @@
                                                placeholder="Image" type="file"
                                                step="1">
                                     </div>
-                                </div>
-                                <div class="item form-group">
+                                </div> -->
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">App Menu Group <span
                                                 class="required">*</span>
                                     </label>
@@ -298,9 +475,9 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                </div>
-                                @if(Auth::user()->country()->module_type==2)
-                                <div class="item form-group">
+                                </div> -->
+                                <!-- @if(Auth::user()->country()->module_type==2) -->
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Nationality<span
                                                 class="required"></span>
                                     </label>
@@ -312,8 +489,8 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                </div>
-                                <div class="item form-group">
+                                </div> -->
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Visa No
                                         <span
                                                 class="required"></span>
@@ -323,8 +500,8 @@
                                                placeholder="Visa Number" type="text"
                                                step="1">
                                     </div>
-                                </div>
-                                <div class="item form-group">
+                                </div> -->
+                                <!-- <div class="item form-group">
                                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Expiry Date
                                         <span
                                                 class="required"></span>
@@ -334,8 +511,8 @@
                                                 value="<?php echo date('Y-m-d');?>"
                                                step="1">
                                     </div>
-                                </div>
-                                @endif
+                                </div> -->
+                                <!-- @endif -->
                                 <div class="ln_solid"></div>
                                 <div class="form-group">
                                     <div class="col-md-6 col-md-offset-3">

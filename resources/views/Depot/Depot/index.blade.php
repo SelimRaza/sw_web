@@ -261,6 +261,8 @@
             var slgp_id = $('#slgp_id').val();
             var dirg_id = $('#dirg_id').val();
             var zone_id = $('#zone_id').val();
+            var dist_id = $('#dist_id').val();
+            var than_id = $('#than_id').val();
             $("#d_report").hide();
             var _token = $("#_token").val();
             //alert(acmp_id);
@@ -272,6 +274,8 @@
                     data: {
                         acmp_id: acmp_id,
                         zone_id: zone_id,
+                        dist_id: dist_id,
+                        than_id: than_id,
                         dirg_id: dirg_id,
                         slgp_id: slgp_id,
                         _token: _token

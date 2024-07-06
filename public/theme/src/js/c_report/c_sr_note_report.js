@@ -30,17 +30,25 @@ function getHReport() {
         alert('Please select report');
         return false;
     }
+
+    if( reportType === 'outlet_vs_item_coverage' && sr_id === null && sr_id_m === ''){
+        alert('Please select sr or provide staff id');
+        return false;
+    }
+
     var time_period = $("#start_date_period_h").val();
     if (time_period == '') {
         start_date = $('#start_date_h').val()
         end_date = $('#end_date_h').val()
     }
-   
+    var dtls_sum=$('#history_dtls_sum_div').val();
+
     $('#ajax_load').css('display', 'block');
     $.ajax({
         type: "POST",
         url: "/getHistoryReportData",
         data: {
+            _token: _token,
             sr_id: sr_id,
             sr_id_m: sr_id_m,
             time_period: time_period,
@@ -49,12 +57,12 @@ function getHReport() {
             usr_type: usr_type,
             reportType: reportType,
             slgp_id:slgp_id,
-            _token: _token
+            dtls_sum:dtls_sum
+           
         },
         dataType: "json",
         success: function (data) {
             $('#ajax_load').css('display', 'none');
-
 
             var html = '';
             var heading = '';
@@ -63,11 +71,12 @@ function getHReport() {
             var end_date = data.end_date;
             var data = data.data;
 
+
+
             switch (reportType) {
                 case "sr_activity_sales_hierarchy":
+                    if(dtls_sum==1){
                         var date = '<?php echo date("Y_m_d"); ?>';
-                        // $('#activity_section').removeAttr('onclick');
-                        // $('#activity_section').attr('onclick', 'exportTableToCSV("activity_map_sr.csv","tableDiv_sr_history")');
                         heading += '<tr><th>Date </th>' +
                             '<th>Zone</th><th>SR ID</th><th>SR Name</th>' +
                             '<th>Rout Name</th><th>Rout Outlet</th>' +
@@ -104,7 +113,7 @@ function getHReport() {
                                 '<td>' + data[i]['strikeRate'] + '</td>' +
                                 '<td>' + data[i]['lpc'] + '</td>' +
                                 '<td>' + data[i]['t_amnt'] + '</td>' +
-                                '<td><button class="btn btn-success in_tg" onclick="showWardWiseVisitDetails(this)" sr_id="' + data[i]["id"] + '" date="' + data[i]["dhbd_date"] + '">View</button>' +
+                                '<td><button class="btn btn-success in_tg" onclick="showWardWiseVisitDetails(this)" sr_id="' + data[i]["id"] + '" date="' + data[i]["dhbd_date"] + '">Visit</button>' +
                                 '<button class="btn btn-danger in_tg" onclick="showVisitMap(' + data[i]["id"] + ',this,0)" date="' + data[i]['dhbd_date'] + '" sr_id="' + data[i]["id"] + '">Map</button>' +
                                 '<button class="btn btn-primary in_tg" onclick="showAllVisitedOutletList(this)" date="' + data[i]['dhbd_date'] + '" sr_id="' + data[i]["id"] + '">Outlet</button></td>' +
                                 '</tr>';
@@ -118,94 +127,67 @@ function getHReport() {
                             '<th>' + (s_rate / data.length).toFixed(2) + '</th>' +
                             '<th>' + (t_lpc / data.length).toFixed(2) + '</th>' +
                             '<th>' + (t_amnt).toFixed(2) + '</th><th></th></tr>';
-                    //  else {
-                    //     console.log("else-block");
-                    //     var date = '<?php echo date("Y_m_d"); ?>';
-
-                    //     $('#activity_section').removeAttr('onclick');
-                    //     $('#activity_section').attr('onclick', 'exportTableToCSV("activity_map_supervisor.csv","tableDiv_sr_history")');
-                    //     heading += '<tr>' +
-                    //         '<th>Date</th>' +
-                    //         '<th>Name</th><th>Thana</th><th>District</th><th>Total Note</th></tr>';
-                    //     var html='';
-                    //     let total_note=0;
-                    //     for(var i=0;i<data.length;i++){
-                    //         total_note+=parseInt(data[i].Total_note);
-                    //         html+='<tr><td>'+data[i].hloc_date+'</td>'+
-                    //                 '<td>'+data[i].aemp_name+'</td>'+
-                    //                 '<td>'+data[i].than_name+'</td>'+
-                    //                 '<td>'+data[i].dsct_name+'</td>'+
-                    //                 '<td>'+data[i].Total_note+'</td></tr>';
-
-                    //     }
+                    }
+                    else{
+                        var date = '<?php echo date("Y_m_d"); ?>';
+                        heading += '<tr>' +
+                            '<th>Zone</th><th>SR ID</th><th>SR Name</th>' +
+                            '<th>Rout Outlet</th>' +
+                            '<th>Visit</th><th>RO-Visit</th><th>WR-Visit</th><th>Order</th>' +
+                            '<th>Strike Rate</th><th>LPC</th>' +
+                            '<th>Exp.</th>'+
+                            '<th>T.Market</th>'+
+                            '<th>T.Ward/Union</th>'+
+                            '<th>T.Thana</th>'+
+                            '<th>T.District</th>'+
+                           '<tr>';
+                        var t_visit = 0;
+                        var t_memo = 0;
+                        var t_amnt = 0.00;
+                        var t_olt = 0;
+                        var t_ro = 0;
+                        var t_wr = 0;
+                        var s_rate = 0;
+                        var t_lpc = 0;
+                        for (var i = 0; i < data.length; i++) {
+                            t_visit = t_visit + data[i]['t_visit'];
+                            t_memo = t_memo + data[i]['t_memo'];
+                            t_amnt = t_amnt + data[i]['t_amnt'];
+                            t_olt = t_olt + data[i]['rout_olt'];
+                            t_ro = t_ro + parseInt(data[i]['rout_visit']);
+                            t_wr = t_wr + parseInt(data[i]['t_visit'] - data[i]['rout_visit']);
+                            s_rate = s_rate + parseFloat(data[i]['strikeRate']);
+                            t_lpc = t_lpc + parseFloat(data[i]['lpc']);
+                            var text=data[i]['mktm_name'];
+                            html += '<tr>' +
+                                '<td>' + data[i]['zone_name'] + '</td>' +
+                                '<td>' + data[i]['aemp_usnm'] + '</td>' +
+                                '<td>' + data[i]['aemp_name'] + '</td>' +
+                                '<td>' + data[i]['rout_olt'] + '</td>' +
+                                '<td>' + data[i]['t_visit'] + '</td>' +
+                                '<td>' + data[i]['rout_visit'] + '</td>' +
+                                '<td>' + (data[i]['t_visit'] - data[i]['rout_visit']) + '</td>' +
+                                '<td>' + data[i]['t_memo'] + '</td>' +
+                                '<td>' + data[i]['strikeRate'] + '</td>' +
+                                '<td>' + data[i]['lpc'] + '</td>' +
+                                '<td>' + data[i]['t_amnt'] + '</td>' +
+                                '<td>' + data[i]['t_market'] + '<i class="fa fa-eye" style="float:right;cursor:pointer;" aemp_id="'+data[i]['aemp_id']+'" s_dat="'+data[i]['dhbd_date']+'" e_dat="'+data[i]['dhbd_date1']+'" onclick="showData(this,1)"></i></td>' +
+                                '<td>' + data[i]['t_ward'] +'<i class="fa fa-eye" style="float:right;cursor:pointer;" aemp_id="'+data[i]['aemp_id']+'" s_dat="'+data[i]['dhbd_date']+'" e_dat="'+data[i]['dhbd_date1']+'" onclick="showData(this,2)"></i></td>' +
+                                '<td>' + data[i]['t_thana'] +'<i class="fa fa-eye" style="float:right;cursor:pointer;" aemp_id="'+data[i]['aemp_id']+'" s_dat="'+data[i]['dhbd_date']+'" e_dat="'+data[i]['dhbd_date1']+'" onclick="showData(this,3)"></i></td>' +
+                                '<td>' + data[i]['t_disct'] + '<i class="fa fa-eye" style="float:right;cursor:pointer;" aemp_id="'+data[i]['aemp_id']+'" s_dat="'+data[i]['dhbd_date']+'" e_dat="'+data[i]['dhbd_date1']+'" onclick="showData(this,4)"></i></td>' +
+                                '</tr>';
+                        }
+                        footer += '<tr><th>GT</th><th></th><th></th><th></th><th></th>' +
+                            '<th>' + t_olt + '</th>' +
+                            '<th>' + t_visit + '</th>' +
+                            '<th>' + t_ro + '</th>' +
+                            '<th>' + t_wr + '</th>' +
+                            '<th>' + t_memo + '</th>' +
+                            '<th>' + (s_rate / data.length).toFixed(2) + '</th>' +
+                            '<th>' + (t_lpc / data.length).toFixed(2) + '</th>' +
+                            '<th>' + (t_amnt).toFixed(2) + '</th><th></th></tr>';
+                    }
                         
-
-                        // let visit_location =[];
-                        // let test_data = [];
-                        // var last_test = [];
-                        // let pt = 0;
-                        //     for (var i = 0; i < data.length; i++) {
-                        //         var lat = data[i].geo_lat;
-                        //         var long = data[i].geo_lon;
-                        //         var date = data[i].hloc_date;
-                        //         var name = data[i].aemp_name;
-
-                        //         var url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + long + "&key=AIzaSyAUz9b1JjhtFMPkg4scrdW2uAbLfGyc3d4&lang=en-US";
-                        //         $.get(url, function (data2) {
-                                    
-                        //         }).then(function (data2) {
-                        //             var results = data2.results;
-                        //             var city = "";
-                        //             var thana = "";
-                        //             var zilla = "";
-                        //             var state = "";
-                        //             var country = "";
-                        //             var zipcode = "";
-                        //             let own_city='';
-                        //             if (data2.status === 'OK') {
-                        //                 if (results[0]) {    
-                                                                                   
-                        //                     var address_components = results[0].address_components;
-                        //                     console.log(address_components)
-                        //                     for (var i = 0; i < address_components.length; i++) {
-                        //                         if (address_components[i].types[0] === "administrative_area_level_1" && address_components[i].types[1] === "political") {
-                        //                             state = address_components[i].long_name;
-                        //                         }
-                        //                         if (address_components[i].types[0] === "administrative_area_level_2" && address_components[i].types[1] === "political") {
-                        //                             zilla = address_components[i].long_name;
-                        //                         }
-                        //                         if (address_components[i].types[0] === "locality" && address_components[i].types[1] === "political") {
-                        //                             city = address_components[i].long_name;
-                        //                         }
-                        //                         if (address_components[i].types[1] === "sublocality" && address_components[i].types[0] === "political") {
-                        //                             thana = address_components[i].long_name;
-                        //                         }
-
-                        //                         if (address_components[i].types[0] === "postal_code") {
-                        //                             zipcode = address_components[i].long_name;
-
-                        //                         }
-
-                        //                         if (address_components[i].types[0] === "country") {
-                        //                             country = address_components[i].long_name;
-
-                        //                         }
-                        //                         own_city=address_components[3].short_name;
-                        //                     }
-                        //                     visit_location[i]={ 'date': date, 'name': name, 'city': city, 'thana': thana, 'zilla': zilla, 'state': state, 'country': country };
-                        //                     test_data.push({ date: date, name: name, city: city, thana: thana, zilla: zilla, state: state, country: country });
-                        //                     last_test.push({ date, name, city,zipcode, thana, zilla, state, country,own_city });
-                                            
-
-                        //                 }
-                                        
-                        //             }
-                                    
-                        //             console.log("promise SJB: " + last_test.length);
-                        //         });
-                        //     }
-                            
-                    //}
                     break;
                 case "sr_activity_gvt_hierarchy":
                     $('#activity_section').removeAttr('onclick');
@@ -220,6 +202,37 @@ function getHReport() {
                                 '<td>'+data[i].ward_name+'</td>'+
                                 '<td>'+data[i].than_name+'</td>'+
                                 '<td>'+data[i].dsct_name+'</td></tr>';
+                    }
+                    break;
+                case "tracking":
+                    $('#activity_section').removeAttr('onclick');
+                    $('#activity_section').attr('onclick', 'exportTableToCSV("Tracking.csv","tableDiv_sr_history")');
+                    heading +=`<tr>
+                                <th>SL</th>
+                                <th>DATE</th>
+                                <th>TIME</th>
+                                <th>SR_ID</th>
+                                <th>SR_NAME</th>
+                                <th>ACTIVITY</th>
+                                <th>ADDRESS</th>
+                                <th>LATTITUDE</th>
+                                <th>LONGITUDE</th>
+                                <th>OUTLET</th>
+                                `
+                    for(var i=0;i<data.length;i++){
+                        html += `<tr>
+                        <td>${i+1}</td>
+                        <td>${data[i].activity_date}</td>
+                        <td>${data[i].activity_time}</td>
+                        <td>${data[i].aemp_usnm}</td>
+                        <td>${data[i].aemp_name}</td>
+                        <td>${data[i].loc_type}</td>
+                        <td>${data[i].location_name}</td>
+                        <td>${data[i].geo_lat}</td>
+                        <td>${data[i].geo_lon}</td>
+                        <td>${data[i].site_name}</td>
+                    </tr>`;
+                    
                     }
                     break;
                 case "activity_summary":
@@ -280,7 +293,50 @@ function getHReport() {
                         '<td>' + parseInt(note) + '</td>' +
                         '<td>' + parseInt(tr_vst) + '</td>' +
                         '<td>' + parseInt(t0_vst) + '</td></tr>';
+                    break;
+                case "outlet_vs_item_coverage":
 
+                    html = ''
+                    heading = ''
+
+                    heading += `<tr>
+                        <th>SR ID - NAME</th>
+                        <th>ROUTE OUTLETS</th>
+                        <th>VISIT</th>
+                        <th>UNIQUE VISITS</th>
+                        <th>ORDERS</th>
+                        <th>VALUE OF ORDERS</th>
+                        <th>ACTION</th>
+                    </tr>`;
+
+                    if(sr_id === null){
+                        sr_id = data[0].sr_id
+                    }
+
+                    for (let i = 0; i < data.length; i++) {
+
+                        html += `<tr>
+                            <td >${data[i].sr_id} - ${data[i].sr_name}</td>
+                            <td id="total-visit-${data[i].aemp_id}">${data[i].rout_outlet}</td>
+                            <td id="unique-visit-${data[i].aemp_id}">${data[i].visited_olt}</td>
+                            <td id="dist-olt-${data[i].aemp_id}">${data[i].dist_olt}</td>
+                            <td>${data[i].total_orders}</td>
+                            <td>${data[i].order_value}</td>
+                            <td style="text-align: center; padding: 0">
+                                 <button class="btn" style="color: white;background: rgb(0 176 255 / 60%); border-radius: 5px;
+                                    padding: 1px 5px;" onclick="getSrOutletCoverageDetails(${data[i].aemp_id}, '${start_date}', '${end_date}')">
+                                    <i class="fa fa-user" aria-hidden="true"></i>
+                                 </button>
+                                    
+                                 <button class="btn group-wise-outlet" style="color: white; background: rgb(0 105 255 / 60%); border-radius: 5px; 
+                                    padding: 1px 5px;" onclick="getGroupOutletCoverageDetails('${sr_id}', '${start_date}', '${end_date}')">
+                                    <i class="fa fa-users" aria-hidden="true"></i>
+                                 </button>
+                            </td>
+                        </tr>`;
+                    }
+
+                    break;
                 default:
                     break;
             }
@@ -300,18 +356,202 @@ function getHReport() {
         }
     });
 }
+
+//
+function showData(v,type){
+    let _token = $("#_token").val();
+    var aemp_id=$(v).attr('aemp_id');
+    var start_date=$(v).attr('s_dat');
+    var end_date=$(v).attr('e_dat');
+    $.ajax({
+        type: "POST",
+        url: "/getSRVisitHierarchyDetails",
+        data: {
+            _token: _token,
+            aemp_id: aemp_id,
+            start_date: start_date,
+            end_date: end_date,
+            type:type
+        },
+        dataType: "json",
+        success: function (data) {
+            $("#dynamic_modal").modal({backdrop: false});
+            $('#dynamic_modal').modal('show');
+            $('#dynamic_modal').show();
+
+            $('#dynamic_modal_head').empty()
+            $('#dynamic_modal_cont').empty()
+            var head='';
+            if(type==1){
+                head='<th>SL</th>'+
+                        '<th>MARKET NAME</th>'+
+                        '<th>VISIT</th>';
+            }
+            else if(type==2){
+                head='<th>SL</th>'+
+                        '<th>WARD NAME</th>'+
+                        '<th>VISIT</th>';
+            }
+            else if(type==3){
+                head='<th>SL</th>'+
+                        '<th>THANA NAME</th>'+
+                        '<th>VISIT</th>';
+            }
+            else if(type==4){
+                head='<th>SL</th>'+
+                        '<th>DISTRICT NAME</th>'+
+                        '<th>VISIT</th>';
+            }
+            $('#dynamic_modal_head').html(head);
+            $('#head_outlet_vs_item_coverage').html(`<tr>
+                <th>ITEM CODE - NAME</th>
+                <th>TOTAL VISIT</th>
+                <th>UNIQUE VISIT</th>
+                <th>TOTAL ORDER</th>
+                <th>TOUCH OLT</th>
+                <th>VALUE OF ORDER</th>
+            </tr>`)
+
+            let html = ''
+            for(var i=0;i<data.length;i++){
+                html += `<tr>
+                    <td>${i+1}</td>
+                    <td>${data[i].mktm_name}</td>
+                    <td>${data[i].t_visit}</td>
+                </tr>`
+            }
+            
+            $('#dynamic_modal_cont').html(html)
+        },
+        error:function(error){
+
+        }
+    });
+}
+
+// Outlet vs Item Coverage - SR Wise Details
+function getSrOutletCoverageDetails(staff_id, start_date, end_date) {
+    let _token = $("#_token").val();
+
+    // $('#ajax_load').css('display', 'block');
+
+    $.ajax({
+        type: "POST",
+        url: "/getSrOutletCoverageDetails",
+        data: {
+            _token: _token,
+            staff_id: staff_id,
+            start_date: start_date,
+            end_date: end_date
+        },
+        dataType: "json",
+        success: function (data) {
+            $("#tableDiv_outlet_vs_item_coverage").modal({backdrop: false});
+            $('#tableDiv_outlet_vs_item_coverage').modal('show');
+            $('#tableDiv_outlet_vs_item_coverage').show();
+
+            $('#head_outlet_vs_item_coverage').empty()
+            $('#outlet_vs_item_coverage_info').empty()
+            $('#foot_outlet_vs_item_coverage').empty()
+
+
+            $('#head_outlet_vs_item_coverage').html(`<tr>
+                <th>ITEM CODE - NAME</th>
+                <th>TOTAL VISIT</th>
+                <th>UNIQUE VISIT</th>
+                <th>TOTAL ORDER</th>
+                <th>TOUCH OLT</th>
+                <th>VALUE OF ORDER</th>
+            </tr>`)
+
+            let outlet_vs_item_coverage_info = ''
+
+            data.forEach((value, index) => {
+                let total_visit     = $(`#total-visit-${staff_id}`).text()
+                let unique_visit    = $(`#unique-visit-${staff_id}`).text()
+                let dist_olt        = $(`#dist-olt-${staff_id}`).text()
+
+                outlet_vs_item_coverage_info += `<tr>
+                    <td>${value.amim_code} - ${value.amim_name}</td>
+                    <td>${total_visit}</td>
+                    <td>${unique_visit}</td>
+                    <td>${dist_olt}</td>
+                    <td>${value.touch_olt}</td>
+                    <td>${value.order_amnt}</td>
+                </tr>`
+            })
+            $('#outlet_vs_item_coverage_info').html(outlet_vs_item_coverage_info)
+
+        },
+        error: function(error) {
+            $('#head_outlet_vs_item_coverage').empty()
+            $('#outlet_vs_item_coverage_info').empty()
+            $('#foot_outlet_vs_item_coverage').empty()
+        }
+    })
+}
+
+// Outlet vs Item Coverage - Group Wise Details
+function getGroupOutletCoverageDetails(sr_ids, start_date, end_date){
+    let _token = $("#_token").val();
+
+    // $('#ajax_load').css('display', 'block');
+
+    $.ajax({
+        type: "POST",
+        url: "/getGroupOutletCoverageDetails",
+        data: {
+            _token: _token,
+            sr_ids: sr_ids,
+            start_date: start_date,
+            end_date: end_date
+        },
+        dataType: "json",
+        success: function (data) {
+            $("#tableDiv_outlet_vs_item_coverage").modal({backdrop: false});
+            $('#tableDiv_outlet_vs_item_coverage').modal('show');
+            $('#tableDiv_outlet_vs_item_coverage').show();
+
+            $('#head_outlet_vs_item_coverage').empty()
+            $('#outlet_vs_item_coverage_info').empty()
+            $('#foot_outlet_vs_item_coverage').empty()
+
+
+            $('#head_outlet_vs_item_coverage').html(`<tr>
+                <th>ITEM CODE - NAME</th>
+                <th>TOTAL VISIT</th>
+                <th>UNIQUE VISIT</th>
+                <th>TOTAL ORDER</th>
+                <th>TOUCH OLT</th>
+                <th>VALUE OF ORDER</th>
+                <th>TOTAL SR</th>
+            </tr>`)
+
+            let outlet_vs_item_coverage_info = ''
+
+            data.forEach((value, index) => {
+                outlet_vs_item_coverage_info += `<tr>
+                    <td>${value.amim_code} - ${value.amim_name}</td>
+                    <td>${value.total_visited}</td>
+                    <td>${value.unique_visit}</td>
+                    <td>${value.total_amnt.toFixed(2)}</td>
+                    <td>${value.touch_olt}</td>
+                    <td>${value.order_amnt.toFixed(2)}</td>
+                    <td>${value.total_aemp}</td>
+                </tr>`
+            })
+
+            $('#outlet_vs_item_coverage_info').html(outlet_vs_item_coverage_info)
+        }
+    })
+}
+
 function appendData(head,content){
     $('#head_history').empty();
     $('#cont_history').empty();
     $('#head_history').append(head);
     $('#cont_history').append(content);
     $('#tableDiv_sr_history').show();
-    $('#tableDiv_sr_history').excelTableFilter();
-    $('.dropdown-filter-item').css('color', 'black');
-    $('.dropdown-filter-dropdown').css({'margin-top': '3px', 'height': '23px', 'padding': '0px', 'gap': '1px' });
-    $('.arrow-down').css('display', 'none');
-    $('.dropdown-filter-icon').css('border', '1px solid white');
-    $('th').css({'vertical-align': 'top', 'white-space': 'nowrap', 'text-overflow': 'ellipsis', 'width': '100% !important', 'padding': '2px 10px'});
 }
 
 function getCategoryWiseNoteDetails(obj){
@@ -337,7 +577,7 @@ function getCategoryWiseNoteDetails(obj){
                                 '<td>'+data[i].site_name+'</td>'+
                                 '<td>'+data[i].note_titl+'</td>'+
                                 '<td>'+data[i].note_body+'</td>'+
-                                '<td><img src="https://images.sihirbox.com/'+data[i].note_img+'" alt="n/a" height="75" width="100%" class="thumb" style="border-radius:3px; cursor:pointer;" id="'+data[i].id+'" onclick="getNoteImage(this)"></td>'+
+                                '<td><img src="https://sw-bucket.sgp1.cdn.digitaloceanspaces.com/'+data[i].note_img+'" alt="n/a" height="75" width="100%" class="thumb" style="border-radius:3px; cursor:pointer;" id="'+data[i].id+'" onclick="getNoteImage(this)"></td>'+
                                 '<td>'+data[i].ntpe_name+'</td></tr>';
                 count++;
             }

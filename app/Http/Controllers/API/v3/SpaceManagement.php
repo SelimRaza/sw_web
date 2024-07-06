@@ -42,7 +42,7 @@ class SpaceManagement extends Controller
             $all_sp=DB::connection($db_conn)->select("Select 
                     t1.id spcm_id,t1.spcm_name,t1.spcm_code,t1.spcm_sdat,t1.spcm_exdt spcm_edat,t1.spft_id,t1.gift_is_national,t1.amnt_is_national,
                     IF(t1.spcm_qyfr=2,1,0) is_fitm,attr4 is_national,t1.spft_amnt,t1.spcm_imge
-                    FROM tm_spcm t1 WHERE t1.spcm_exdt>=curdate() AND lfcl_id=1");
+                    FROM tm_spcm t1 WHERE t1.spcm_exdt>=curdate() AND lfcl_id=1 AND spcm_slgp={$employee_obj->slgp_id}");
             for($i=0;$i<count($all_sp);$i++){
                 // Is National
                 $spcm_id=$all_sp[$i]->spcm_id;

@@ -79,8 +79,6 @@
                                 <thead>
                                 <tr>
                                     <th>SL</th>
-                                    <th>Year</th>
-                                    <th>Month</th>
                                     <th>Emp Name</th>
                                     <th>Balance</th>
                                     <th style="width: 20%">Action</th>
@@ -91,8 +89,6 @@
                                 @foreach($spdm as $index => $spdm1)
                                     <tr>
                                         <td>{{$index+1}}</td>
-                                        <td>{{$spdm1->spbm_year}}</td>
-                                        <td>{{$spdm1->spbm_mnth}}</td>
                                         <td>{{$spdm1->aemp_name.'('.$spdm1->aemp_usnm.')'}}</td>
                                         <td>{{round($spdm1->spbm_amnt,4)}}</td>
                                         <td>
@@ -102,28 +98,10 @@
                                                 </a>
                                             @endif
                                             @if($permission->wsmu_updt)
-                                                @if($spdm1->lfcl_id==1)
-                                                    @php
-                                                        $flag=0;
-                                                        $mnth=date("m");
-                                                        $year=date("Y");
-                                                        if($spdm1->spbm_year ==$year && $spdm1->spbm_mnth ==$mnth){
-                                                            $flag=0;
-                                                        }else{
-                                                            $flag=1;
-                                                        }
-                                                    @endphp
-                                                    @if($flag==0)
+
                                                         <a href="{{route('cashCredit.edit',$spdm1->id)}}"
                                                             class="btn btn-info btn-xs"><i class="fa fa-pencil"  ></i> Adjust
                                                         </a>
-                                                    @else
-                                                        <a href="#"
-                                                            class="btn btn-warning btn-xs" disabled> Over
-                                                        </a>
-                                                    @endif
-                                                    
-                                                @endif
                                             @endif
 
 

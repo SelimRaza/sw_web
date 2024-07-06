@@ -68,7 +68,7 @@ class RouteSiteMapping extends Model implements WithHeadings, ToArray, WithHeadi
             $total = DB::connection($this->db)->select("select count(id) as total_data from test_update_1");
             if (!empty($total) && $total[0]->total_data > 0) {
                 $query = 'INSERT IGNORE INTO `tl_rsmp`(`rout_id`, `site_id`, `rspm_serl`, `cont_id`, `lfcl_id`, `aemp_iusr`, `aemp_eusr`) 
-                    SELECT t3.id as rout_id,t2.id as site_id,1 as rspm_serl,2 as cont_id,1 as lfcl_id,1 as aemp_iusr,1 as aemp_eusr 
+                    SELECT t3.id as rout_id,t2.id as site_id,1 as rspm_serl,t3.cont_id,1 as lfcl_id,t3. aemp_iusr,t3. aemp_eusr 
                     FROM `test_update_1`t1 
                     JOIN tm_site t2 ON t1.`site_code`=t2.site_code
                     JOIN tm_rout t3 ON t1.`route_code`=t3.rout_code

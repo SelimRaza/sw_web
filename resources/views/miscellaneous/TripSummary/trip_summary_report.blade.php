@@ -74,10 +74,18 @@
                                 <div class="form-row col-md-12 col-sm-12 col-xs-12">
                                     <div class="form-group col-md-4 col-sm-4 col-xs-12">
                                         <label class="control-label col-md-4 col-sm-4 col-xs-12"
-                                                for="start_date">Site Code<span class="required"></span>
+                                                for="start_date">Site Code(From)<span class="required"></span>
                                         </label>
                                         <div class="col-md-8 col-sm-8 col-xs-12">
                                             <input type="text" class="form-control in_tg" id="site_code" placeholder="Site Code" name="site_code">
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-4 col-sm-4 col-xs-12">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12"
+                                                for="start_date">Site Code(To) <span class="required"></span>
+                                        </label>
+                                        <div class="col-md-8 col-sm-8 col-xs-12">
+                                            <input type="text" class="form-control in_tg" id="site_code2" placeholder="Site Code" name="site_code_2">
                                         </div>
                                     </div>
                                     <div class="form-group col-md-4 col-sm-4 col-xs-12">
@@ -88,6 +96,10 @@
                                             <input type="text" class="form-control in_tg" id="ordm_ornm" placeholder="Order No" name="ordm_ornm">
                                         </div>
                                     </div>
+                                    
+                                    
+                                </div>
+                                <div class="form-row col-md-12 col-sm-12 col-xs-12">
                                     <div class="form-group col-md-4 col-sm-4 col-xs-12">
                                         <label class="control-label col-md-4 col-sm-4 col-xs-12"
                                                 for="start_date">Trip No<span class="required"></span>
@@ -96,10 +108,6 @@
                                             <input type="text" class="form-control in_tg" id="trip_no" placeholder="Trip No" name="ordm_ornm">
                                         </div>
                                     </div>
-                                    
-                                </div>
-                                <div class="form-row col-md-12 col-sm-12 col-xs-12">
-                                    
                                     <div class="form-group col-md-4 col-sm-4 col-xs-12" >
                                         <label class="control-label col-md-4 col-sm-4 col-xs-12"
                                                 for="start_date">Start Date(Trip)<span class="required">*</span>
@@ -211,12 +219,16 @@
             var end_date = $("#end_date").val();
             var emp_id = $("#sr_usnm").val();
             var site_code = $("#site_code").val();
+            var site_code2 = $("#site_code2").val();
             var ordm_ornm = $("#ordm_ornm").val();
             var trip_no = $("#trip_no").val();
             var sv_id = $("#sv_id").val();
             var dlrm_id = $("#dlrm_id").val();
             var rpt_type = $("input[type='radio'][name=rpt_type]:checked").val();
             var _token = $("#_token").val();
+            if(site_code2==''){
+                site_code2=site_code;
+            }
             $('#tbl_head').empty();
             $('#cont').empty();
             $('#ajax_load').css("display", "block");
@@ -228,6 +240,7 @@
                     end_date: end_date,
                     sr_usnm: emp_id,
                     site_code: site_code,
+                    site_code2: site_code2,
                     ordm_ornm: ordm_ornm,
                     trip_no: trip_no,
                     rpt_type: rpt_type,
@@ -242,7 +255,7 @@
                     $('#ajax_load').css("display", "none");
                     var html = '';
                     var count = 1;
-                    if(rpt_type==2){
+                    if(rpt_type==20){
                         for(var i=0;i<data.length;i++){
                             html+='<tr><td colspan="15"></td></tr><tr>'+
                                     '<th></th>'+
@@ -255,9 +268,10 @@
                                     '<th> DM_NAME</th>'+
                                     '<th> ORDER_AMNT</th>'+
                                     '<th> INV_AMNT</th>'+
+                                    '<th> RTAN_AMNT</th>'+
                                     '<th> DELI_AMNT</th>'+
                                     '<th> COLL_AMNT</th>'+
-                                    '<th> RTAN_AMNT</th>'+
+                                    
                                     '<th> CRED_AMNT</th>'+
                                     '<th> TRIP_STATUS</th></tr>';
                             html+='<tr><td></td>'+
@@ -270,9 +284,10 @@
                                     '<td>'+ data[i].DM_NAME +'</td>'+
                                     '<td>'+ data[i].ORDD_AMNT +'</td>'+
                                     '<td>'+ data[i].INV_AMNT +'</td>'+
+                                    '<td>'+ data[i].RTAN_AMNT +'</td>'+
                                     '<td>'+ data[i].DELV_AMNT +'</td>'+
                                     '<td>'+ data[i].COLLECTION_AMNT +'</td>'+
-                                    '<td>'+ data[i].RTAN_AMNT +'</td>'+
+                                   
                                     '<td>'+ data[i].CRED_AMNT +'</td>'+
                                     '<td>'+ data[i].TRIP_STAT +'</td></tr><tr><td colspan="15"></td></tr>';
                             var details=data[i].INVOICE_DATA;
@@ -331,15 +346,18 @@
                                     '<th> NO_DELIVERY</th>'+
                                     '<th> ORDER_AMNT</th>'+
                                     '<th> INV_AMNT</th>'+
+                                    '<th> RTAN_AMNT</th>'+
                                     '<th> DELI_AMNT</th>'+
+                                    '<th> DISCOUNT</th>'+
+                                    '<th> GRV-GD</th>'+
+                                    '<th> GRV-BAD</th>'+
                                     '<th> COLL_AMNT</th>'+
                                     '<th> CASH</th>'+
                                     '<th> CHEQUE</th>'+
                                     '<th> ONLINE</th>'+
-                                    '<th> RTAN_AMNT</th>'+
+                                    
                                     '<th> CRED_AMNT</th>'+
-                                    '<th> GRV-GD</th>'+
-                                    '<th> GRV-BAD</th>'+
+                                    
                                     '<th> TRIP_STATUS</th></tr>';
                         for(var i=0;i<data.length;i++){
                             html+='<tr>'+
@@ -354,24 +372,84 @@
                                     '<td>'+ data[i].DELI_NUM +'</td>'+
                                     '<td>'+ data[i].ORDD_AMNT +'</td>'+
                                     '<td>'+ data[i].INV_AMNT +'</td>'+
+                                    '<td>'+ data[i].RTAN_AMNT +'</td>'+
                                     '<td>'+ data[i].DELV_AMNT +'</td>'+
+                                    '<td>'+ data[i].DISCOUNT +'</td>'+
+                                    '<td>'+ data[i].GD_GRV +'</td>'+
+                                    '<td>'+ data[i].BAD_GRV +'</td>'+
                                     '<td>'+ data[i].COLLECTION_AMNT +'</td>'+
                                     '<td>'+ data[i].Cash +'</td>'+
                                     '<td>'+ data[i].Cheque +'</td>'+
                                     '<td>'+ data[i].Online +'</td>'+
-                                    '<td>'+ data[i].RTAN_AMNT +'</td>'+
+                                    
                                     '<td>'+ data[i].CRED_AMNT +'</td>'+
+                                    
+                                    '<td>'+ data[i].TRIP_STAT +'</td></tr>';
+                            count++;
+                        }
+                    }
+                    else if(rpt_type==2){
+                        html+='<tr>'+
+                                    '<th> SL</th>'+
+                                    '<th> TRIP_NO</th>'+
+                                    '<th> TRIP_DATE</th>'+
+                                    '<th> ORDER_NO</th>'+
+                                    '<th> DEPO_NAME</th>'+
+                                    '<th> DM_ID</th>'+
+                                    '<th> DM_NAME</th>'+
+                                    '<th> SR_ID</th>'+
+                                    '<th> SR_NAME</th>'+
+                                    '<th> SITE_CODE</th>'+
+                                    '<th> SITE_NAME</th>'+
+                                    '<th> ORDER_AMNT</th>'+
+                                    '<th> INV_AMNT</th>'+
+                                    '<th> RTAN_AMNT</th>'+
+                                    '<th> DELI_AMNT</th>'+
+                                    '<th> DISCOUNT</th>'+
+                                    '<th> GRV-GD</th>'+
+                                    '<th> GRV-BAD</th>'+
+                                    '<th> COLL_AMNT</th>'+
+                                    '<th> CASH</th>'+
+                                    '<th> CHEQUE</th>'+
+                                    '<th> ONLINE</th>'+
+                                    
+                                    '<th> CRED_AMNT</th>'+
+                                    '<th> ORDER_STATUS</th>'+
+                                    
+                                    '<th> TRIP_STATUS</th></tr>';
+                        for(var i=0;i<data.length;i++){
+                            html+='<tr>'+
+                                    '<td>'+ count +'</td>'+
+                                    '<td>'+ data[i].TRIP_NO +'</td>'+
+                                    '<td>'+ data[i].TRIP_DATE +'</td>'+
+                                    '<td>'+ data[i].ORDM_ORNM +'</td>'+
+                                    '<td>'+ data[i].DEPOT_NAME +'</td>'+
+                                    '<td>'+ data[i].DM_ID +'</td>'+
+                                    '<td>'+ data[i].DM_NAME +'</td>'+
+                                    '<td>'+ data[i].AEMP_USNM +'</td>'+
+                                    '<td>'+ data[i].AEMP_NAME +'</td>'+
+                                    '<td>'+ data[i].SITE_CODE +'</td>'+
+                                    '<td>'+ data[i].SITE_NAME +'</td>'+
+                                    '<td>'+ data[i].ORDD_AMNT +'</td>'+
+                                    '<td>'+ data[i].INV_AMNT +'</td>'+
+                                    '<td>'+ data[i].RTAN_AMNT +'</td>'+
+                                    '<td>'+ data[i].DELV_AMNT +'</td>'+
+                                    '<td>'+ data[i].DISCOUNT +'</td>'+
                                     '<td>'+ data[i].GD_GRV +'</td>'+
                                     '<td>'+ data[i].BAD_GRV +'</td>'+
+                                    '<td>'+ data[i].COLLECTION_AMNT +'</td>'+
+                                    '<td>'+ data[i].Cash +'</td>'+
+                                    '<td>'+ data[i].Cheque +'</td>'+
+                                    '<td>'+ data[i].Online +'</td>'+
+                                    
+                                    '<td>'+ data[i].CRED_AMNT +'</td>'+                                   
+                                    '<td>'+ data[i].ORDER_STAT +'</td>'+                                   
                                     '<td>'+ data[i].TRIP_STAT +'</td></tr>';
                             count++;
                         }
                     }
                     
                     $("#cont").append(html)
-                    
-                   
-
                 },error:function(error){
                     console.log(error);
                     $('#ajax_load').css("display", "none");

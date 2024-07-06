@@ -64,9 +64,9 @@ class Kernel extends ConsoleKernel
             $dashboardDataProcess->uniqueDashboardDataSR($date);
             $dashboardDataProcess->dashboardDataUpdate($date);*/
 
-            $hrdata = new HrisUser();
-            $hrdata->createOrUpdateUser((new Country())->country(2));
-            $hrdata->createOrUpdateUser((new Country())->country(5));
+           // $hrdata = new HrisUser();
+           // $hrdata->createOrUpdateUser((new Country())->country(2));
+           // $hrdata->createOrUpdateUser((new Country())->country(5));
            // $dashboardDataProcess->outletDataImport();
         })->timezone('Asia/Dhaka')->hourly();
 
@@ -110,10 +110,10 @@ class Kernel extends ConsoleKernel
                 //$dataGen->prgDashboardSRData($country1->cont_conn, $datetime->format('Y-m-d H:i:s'));// will be off
                 //$dataGen->prgdashboardUpdate($country1->cont_conn, $datetime->format('Y-m-d H:i:s'));// will be off
 
-               ////////  $dataGen->prgDashboardSRData5($country1->cont_conn, $datetime->format('Y-m-d H:i:s'));
-                //////// $dataGen->prgdashboardUpdate5($country1->cont_conn, $datetime->format('Y-m-d H:i:s'));
+                  $dataGen->prgDashboardSRData5($country1->cont_conn, $datetime->format('Y-m-d H:i:s'));
+                  $dataGen->prgdashboardUpdate5($country1->cont_conn, $datetime->format('Y-m-d H:i:s'));
 
-            $country5=(new Country())->country(5);
+            $country5=(new Country())->country(3);
             date_default_timezone_set($country5->cont_tzon);
 
            // $dataGen->prgDashboardSRData($country5->cont_conn, $datetime->format('Y-m-d H:i:s'));// will be off

@@ -98,7 +98,7 @@
                                             <ul class="list-inline">
                                                 <li>
                                                     @if($sku->amim_imgl)
-                                                        <img src="https://images.sihirbox.com/{{$sku->amim_imgl}}"
+                                                        <img src="https://sw-bucket.sgp1.cdn.digitaloceanspaces.com/{{$sku->amim_imgl}}"
                                                              class="avatar" alt="Avatar">
                                                     @endif
                                                 </li>
@@ -109,7 +109,7 @@
                                             <ul class="list-inline">
                                                 <li>
                                                     @if($sku->amim_imic)
-                                                        <img src="https://images.sihirbox.com/{{$sku->amim_imic}}"
+                                                        <img src="https://sw-bucket.sgp1.cdn.digitaloceanspaces.com/{{$sku->amim_imic}}"
                                                              class="avatar" alt="Avatar">
                                                     @endif
                                                 </li>

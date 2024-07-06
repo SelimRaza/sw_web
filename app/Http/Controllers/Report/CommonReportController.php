@@ -60,6 +60,7 @@ class CommonReportController extends Controller
         $acmp = DB::connection($this->db)->select("SELECT DISTINCT acmp_id as id, acmp_name, acmp_code FROM `user_group_permission` WHERE `aemp_id`='$empId'");
         $region = DB::connection($this->db)->select("SELECT DISTINCT `dirg_id` as id, dirg_name, dirg_code FROM `user_area_permission` WHERE `aemp_id`='$empId' ORDER BY dirg_code,dirg_name");
         $dsct = DB::connection($this->db)->select("SELECT `id`, `dsct_name`, `dsct_code` FROM `tm_dsct` WHERE `lfcl_id`='1'");
+        $edsg_list = DB::connection($this->db)->select("SELECT `id`, `edsg_code`, `edsg_name` FROM `tm_edsg` WHERE `lfcl_id`='1'");
         $zone= DB::connection($this->db)->select("SELECT DISTINCT zone_id  id,zone_code,zone_name FROM `user_area_permission` WHERE `aemp_id`='$empId'");     
         $results = [];
         $role_id=Auth::user()->employee()->role_id;
@@ -72,11 +73,11 @@ class CommonReportController extends Controller
         $module_type=Auth::user()->country()->module_type;
         if($module_type==2){
             $depo_list= DB::connection($this->db)->select("SELECT id,dlrm_code,dlrm_name FROM `tm_dlrm` WHERE  lfcl_id=1 ORDER BY dlrm_code");    
-           return view('report.Advance.common_report_adv',['acmp'=>$acmp,'region'=>$region,'dsct'=>$dsct,'dsct1'=>$dsct,'role_id'=>$user_role_id,'emid'=>$empId,'zone'=>$zone,'asset'=>$asset,'depo_list'=>$depo_list]);
+           return view('report.Advance.common_report_adv',['acmp'=>$acmp,'region'=>$region,'dsct'=>$dsct,'dsct1'=>$dsct,'role_id'=>$user_role_id,'emid'=>$empId,'zone'=>$zone,'asset'=>$asset,'depo_list'=>$depo_list,'edsg_list'=>$edsg_list]);
         }
         
        // return view('report.summary_report.common_report',['acmp'=>$acmp,'region'=>$region,'dsct'=>$dsct,'dsct1'=>$dsct,'role_id'=>$user_role_id,'emid'=>$empId,'zone'=>$zone,'asset'=>$asset]);
-        return view('report.EReport.common_report',['acmp'=>$acmp,'region'=>$region,'dsct'=>$dsct,'dsct1'=>$dsct,'role_id'=>$user_role_id,'emid'=>$empId,'zone'=>$zone,'asset'=>$asset]);
+        return view('report.EReport.common_report',['acmp'=>$acmp,'region'=>$region,'dsct'=>$dsct,'dsct1'=>$dsct,'role_id'=>$user_role_id,'emid'=>$empId,'zone'=>$zone,'asset'=>$asset,'edsg_list'=>$edsg_list]);
         
         
     }
@@ -341,10 +342,9 @@ class CommonReportController extends Controller
         for($i=0;$i<count($dirg_zone_list);$i++){
             $zone_list[$i]=$dirg_zone_list[$i]->zone_id;
         }
-        $this->single_date=$request->start_date;
-        $date=$this->getStartAndEndDate($time_period);
-        $start_date=$date['start_date'];
-        $end_date=$date['end_date'];
+       
+        $start_date=$request->start_date;
+        $end_date=$request->end_date;
         $zone_q ="";
         $ordm_min=DB::connection($this->db)->select("SELECT min(id) min_id FROM tt_ordm WHERE ordm_date='$start_date' AND slgp_id=$sales_group_id");
         $ordm_max=DB::connection($this->db)->select("SELECT max(id)max_id FROM tt_ordm WHERE ordm_date='$end_date' AND slgp_id=$sales_group_id");
@@ -413,13 +413,15 @@ class CommonReportController extends Controller
         if ($than_id != "") {
             $q6 = " AND t1.than_id = '$than_id'";
         }
-        $this->single_date=$request->start_date;
-        $date=$this->getStartAndEndDate($time_period);
-        $start_date=$date['start_date'];
-        $end_date=$date['end_date'];
+        // $this->single_date=$request->start_date;
+        // $date=$this->getStartAndEndDate($time_period);
+        // $start_date=$date['start_date'];
+        // $end_date=$date['end_date'];
+        $start_date=$request->start_date;
+        $end_date=$request->end_date;
         $oid_min_max=DB::connection($this->db)->select("Select min(id) as min_id,max(id) as max_id FROM tt_ordm where ordm_date BETWEEN '$start_date' AND '$end_date'");
-        $min_id=$oid_min_max[0]->min_id;
-        $max_id=$oid_min_max[0]->max_id;
+        $min_id=$oid_min_max[0]->min_id??1;
+        $max_id=$oid_min_max[0]->max_id??1;
         $cls_cat_switch=$request->rtype.$request->sr_zone;
         switch($reportType){
             case "class_wise_order_report_amt":
@@ -1006,215 +1008,162 @@ class CommonReportController extends Controller
                 return array('class_list'=>$class_list,'class_wise_ord_memo'=>$class_wise_ord_memo);
                 break;
             case "sr_activity_hourly_order":
-                        if($time_period==0){
-                            $q_z="";
-                            $q2_g="";
-                            $q3_r="";
-                            $q9_s="";
-                            if ($zone_id != "") {
-
-                                $q_z = " AND t2.zone_id =$zone_id";
-                            }
-                            if ($sales_group_id != "") {
-
-                                $q2_g = " AND t1.slgp_id = '$sales_group_id'";
-                            }
-                            
-                            // DB::connection($this->db)->select(DB::raw("SET sql_require_primary_key=0"));
-                            DB::connection($this->db)->select(DB::raw("SET sql_mode=''"));
-                            $sql = "CREATE TEMPORARY TABLE temp1(id int auto_increment primary key)   SELECT
-                            t4.acmp_name, t4.slgp_name, t3.dirg_name,concat(t3.zone_code,'-',t3.zone_name)zone_name, t1.ordm_date,t1.aemp_id,replace(t2.aemp_name,',','.')aemp_name, t2.aemp_usnm, t2.aemp_mob1,
-                            HOUR(ordm_time)'hr', COUNT(ordm_ornm) AS order_number,t5.rout_name AS rout_name
-                            FROM `tt_ordm` t1
-                            INNER JOIN tm_aemp t2 ON  t1.aemp_id=t2.id
-                            INNER JOIN user_area_permission t3 on t2.zone_id=t3.zone_id
-                            INNER JOIN user_group_permission t4 ON t2.slgp_id=t4.slgp_id
-                            INNER JOIN tm_rout t5 ON t1.rout_id=t5.id
-                            WHERE t1.ordm_date = '$start_date' AND
-                                t3.aemp_id = '$empId' and t4.aemp_id='$empId' ".$q_z . $q2_g."
-                            GROUP BY hr, t1.aemp_id ORDER BY t1.aemp_id, hr";
-                            $srData = DB::connection($this->db)->select(DB::raw($sql));
-                            $srDataw = DB::connection($this->db)->select(DB::raw("select ordm_date, aemp_id, aemp_usnm, aemp_name, slgp_name, aemp_mob1,
-                            acmp_name, zone_name, dirg_name,rout_name from temp1 GROUP BY aemp_id"));
-
-                                $row_no = 1;
-                                $icol = 8;
-                            $final[0][0] = "Order Date";
-                            $final[0][1] = "Group";
-                            $final[0][2] = "Zone";
-                            $final[0][3] = "SR ID";
-                            $final[0][4] = "SR Name";
-                            $final[0][5] = "SR Mobile";
-                            $final[0][6] = "09AM";
-                            $final[0][7] = "10AM";
-                            $final[0][8] = "11AM";
-                            $final[0][9] = "12PM";
-                            $final[0][10] = "01PM";
-                            $final[0][11] = "02PM";
-                            $final[0][12] = "03PM";
-                            $final[0][13] = "04PM";
-                            $final[0][14] = "05PM";
-                            $final[0][15] = "06PM";
-                            $final[0][16] = "07PM";
-                            $final[0][17] = "08PM";
-                            $final[0][18] = "09PM";
-                            
-                            foreach ($srDataw as $rows) {
-                                $colu = 6;
-                                $sr_id = $rows->aemp_id;
-                                $final[$row_no][0] = $rows->ordm_date;
-                                $final[$row_no][1] = $rows->slgp_name;
-                                $final[$row_no][2] = $rows->zone_name;
-                                $final[$row_no][3] = $rows->aemp_usnm;
-                                $final[$row_no][4] = str_replace(",","-",$rows->aemp_name);
-                                $final[$row_no][5] = $rows->aemp_mob1;
-                               
-                                if ($colu==6){
-                                }
-                                $h=8;
-                                for ($i=6; $i<21; $i++) {
-                                    $k = $i;
-                                    if ($k==6){
-                                        $srDatas = DB::connection($this->db)->select(DB::raw("select order_number from temp1 where hr >= '0' AND hr<='8' and aemp_id='$sr_id'"));
-                                    }else if ($i>18){
-                                        $srDatas = DB::connection($this->db)->select(DB::raw("select order_number from temp1 where hr >= '21' AND hr<='23' and aemp_id='$sr_id'"));
-                                    }else{
-                                        $srDatas = DB::connection($this->db)->select(DB::raw("select order_number from temp1 where hr ='$h' and aemp_id='$sr_id'"));
-                                    }
-
-                                    $tam=0;
-                                    foreach ($srDatas as $result)
-                                        if($result->order_number > 0){$tam = $result->order_number;}else{$tam = 0;}
-                                    //echo "{" . $k . " - ". $tam. "}";
-                                    $final[$row_no][$colu] = $tam;
-                                    $colu++;
-                                    $h++;
-                                }
-                                $row_no = $row_no +1;
-                            }
-
-                        return $final;
-                        }
-                        else{
-                            $zone_filter="";
-                            $slgp_filter="";
-                            if($dirg_id !=""){
-                                $zone_filter=" AND zone_id IN (".implode(',',$zone_list).")";
-                            }
-                            if ($zone_id != "") {
-                                $zone_filter = " AND zone_id = $zone_id";
-                            }
-                            if ($sales_group_id != "") {
-                                $slgp_filter = " AND slgp_id = '$sales_group_id'";
-                            }
-                            
-                            $data=DB::connection($this->db)->select("SELECT act_date,slgp_name,concat(t2.zone_code,'-',t2.zone_name)zone_name,aemp_usnm,replace(aemp_name,',','.')aemp_name,aemp_mob1,9am,
-                                    10am,11am,12pm,1pm,2pm,3pm,4pm,5pm,6pm,7pm,8pm,9pm
-                                FROM tbl_sr_activity_summary t1
-                                INNER JOIN tm_zone t2 ON t1.zone_id=t2.id
-                                WHERE act_date BETWEEN '$start_date' AND '$end_date'".$slgp_filter.$zone_filter."
-                                ORDER BY act_date asc");
-                            return $data;
-                        }
-                break;
-            case "sr_activity_hourly_visit":
-                if($time_period==0){
-                    $q_z="";
-                    $q2_g="";
-                    if ($zone_id != "") {
-                        $q_z = " AND t2.zone_id = $zone_id";
+                    $flag_curdate=500;
+                    if($start_date==date('Y-m-d')|| $end_date==date('Y-m-d')){$flag_curdate=0; $c_date=date('Y-m-d');}
+                    if($flag_curdate==0){
+                        $zone="";
+                    $group="";
+                    if($dirg_id !=""){
+                        $zone=" AND t2.id IN (".implode(',',$zone_list).")";
                     }
+                    if ($zone_id != "") {
+                        $zone = " AND t2.zone_id = $zone_id";
+                    }
+                    
                     if ($sales_group_id != "") {
-                        $q2_g = " AND t1.slgp_id = '$sales_group_id'";
+                        $group = " AND t1.slgp_id = '$sales_group_id'";
                     }
                     DB::connection($this->db)->select(DB::raw("SET sql_mode=''"));
-                    $sql = "CREATE TEMPORARY TABLE temp1 (id int auto_increment primary key) SELECT
-                    t4.acmp_name, t4.slgp_name, t3.dirg_name,concat(t3.zone_code,'-',t3.zone_name)zone_name, t1.ordm_date,t1.aemp_id,replace(t2.aemp_name,',','.')aemp_name, t2.aemp_usnm, t2.aemp_mob1,
-                    HOUR(ordm_time)'hr', COUNT(ordm_ornm) AS order_number
-                    FROM `tt_ordm` t1
-                    INNER JOIN tm_aemp t2 ON  t1.aemp_id=t2.id
-                    INNER JOIN user_area_permission t3 on t2.zone_id=t3.zone_id
-                    INNER JOIN user_group_permission t4 ON t2.slgp_id=t4.slgp_id
-                    WHERE  t1.ordm_date = '$start_date' AND
-                        t3.aemp_id = '$empId' and t4.aemp_id='$empId' ".$q_z . $q2_g."
-                    GROUP BY hr, t1.aemp_id ORDER BY t1.aemp_id, hr";
+                    $data=DB::connection($this->db)->select("SELECT p.act_date, p.id, p.aemp_name, p.aemp_mob1, p.aemp_usnm,
+                            p.acmp_id, p.acmp_name, p.slgp_id, p.slgp_name, p.zone_id, p.zone_name, SUM(9am) 9am, SUM(10am) 10am,
+                            SUM(11am) 11am, SUM(12pm) 12pm, SUM(1pm) 1pm, SUM(2pm) 2pm, SUM(3pm) 3pm, SUM(4pm) 4pm, SUM(5pm) 5pm,
+                            SUM(6pm) 6pm, SUM(7pm) 7pm, SUM(8pm) 8pm, SUM(9pm) 9pm
 
-                                $sql2 = "CREATE TEMPORARY TABLE temp2 (id int auto_increment primary key) SELECT t1.aemp_id, HOUR(npro_time) as hr, COUNT(t1.id) as note FROM `tt_npro` t1
-                    INNER JOIN tm_aemp t2 ON  t1.aemp_id=t2.id
-                    INNER JOIN user_area_permission t3 on t2.zone_id=t3.zone_id
-                    INNER JOIN user_group_permission t4 ON t2.slgp_id=t4.slgp_id
-                    WHERE t1.npro_date = '$start_date' AND
-                        t3.aemp_id = '$empId' and t4.aemp_id='$empId' ". $q_z . $q2_g."
-                    GROUP BY hr, t1.aemp_id ORDER BY t1.aemp_id, hr";
+                            FROM
+                            (SELECT 
+                            t2.id,t2.aemp_name,t2.aemp_mob1,t2.aemp_usnm,t6.id acmp_id,
+                            t6.acmp_name,t4.id slgp_id,t4.slgp_name,t5.id zone_id,
+                            t5.zone_name,t1.ordm_date act_date,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)<9 THEN 1 ELSE 0 END)`9am`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=9 THEN 1 ELSE 0 END)`10am`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=10 THEN 1 ELSE 0 END)`11am`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=11 THEN 1 ELSE 0 END)`12pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=12 THEN 1 ELSE 0 END)`1pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=13 THEN 1 ELSE 0 END)`2pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=14 THEN 1 ELSE 0 END)`3pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=15 THEN 1 ELSE 0 END)`4pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=16 THEN 1 ELSE 0 END)`5pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=17 THEN 1 ELSE 0 END)`6pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=18 THEN 1 ELSE 0 END)`7pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=19 THEN 1 ELSE 0 END)`8pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)>=20 THEN 1 ELSE 0 END)`9pm`,
+                            '0' 9amn,'0' 10amn ,'0' 11amn,'0' 12pmn,'0' 1pmn,'0' 2pmn,'0' 3pmn,
+                            '0' 4pmn,'0' 5pmn,'0' 6pmn,'0' 7pmn,'0' 8pmn,'0' 9pmn
+                            FROM tt_ordm t1
+                            INNER JOIN tm_aemp t2 on t1.aemp_id=t2.id
+                            INNER JOIN tm_slgp t4 ON t2.slgp_id=t4.id 
+                            INNER JOIN tm_zone t5 ON t2.zone_id=t5.id
+                            INNER JOIN tm_acmp t6 ON t4.acmp_id=t6.id
+                            WHERE t1.ordm_date='$c_date' " .$group . $zone  ."
+                            GROUP By t2.id,t2.aemp_name,t2.aemp_mob1,t2.aemp_usnm)p");
+                            
 
-
-                    $srData = DB::connection($this->db)->select(DB::raw($sql));
-                    $srData2 = DB::connection($this->db)->select(DB::raw($sql2));
-                    $srDataw = DB::connection($this->db)->select(DB::raw("select ordm_date, aemp_id, aemp_usnm, aemp_name, slgp_name, aemp_mob1,
-                                                                        acmp_name, zone_name, dirg_name from temp1 GROUP BY aemp_id"));
-                    $row_no = 1;
-                    $icol = 6;
-                    $final[0][0] = "Order Date";
-                    $final[0][1] = "Group";
-                    $final[0][2] = "Zone";
-                    $final[0][3] = "SR ID";
-                    $final[0][4] = "SR Name";
-                    $final[0][5] = "SR Mobile";
-                    $final[0][6] = "09AM";
-                    $final[0][7] = "10AM";
-                    $final[0][8] = "11AM";
-                    $final[0][9] = "12PM";
-                    $final[0][10] = "01PM";
-                    $final[0][11] = "02PM";
-                    $final[0][12] = "03PM";
-                    $final[0][13] = "04PM";
-                    $final[0][14] = "05PM";
-                    $final[0][15] = "06PM";
-                    $final[0][16] = "07PM";
-                    $final[0][17] = "08PM";
-                    $final[0][18] = "09PM";
-                
-                    foreach ($srDataw as $rows) {
-                        $colu = 6;
-                        $sr_id = $rows->aemp_id;
-                        $final[$row_no][0] = $rows->ordm_date;
-                        $final[$row_no][1] = $rows->slgp_name;
-                        $final[$row_no][2] = $rows->zone_name;
-                        $final[$row_no][3] = $rows->aemp_usnm;
-                        $final[$row_no][4] = str_replace(",","-",$rows->aemp_name);
-                        $final[$row_no][5] = $rows->aemp_mob1;
-                        if ($colu==6){
-
-                        }
-                        $h=8;
-                        for ($i=6; $i<21; $i++) {
-                            $k = $i;
-                            if ($k==6){
-                                $srDatas = DB::connection($this->db)->select(DB::raw("select order_number from temp1 where hr >= '0' AND hr<='8' and aemp_id='$sr_id'"));
-                                $srDatas2 = DB::connection($this->db)->select(DB::raw("select note from temp2 where hr >= '0' AND hr<='8' and aemp_id='$sr_id'"));
-                            }else if ($i>18){
-                                $srDatas = DB::connection($this->db)->select(DB::raw("select order_number from temp1 where hr >= '21' AND hr<='23' and aemp_id='$sr_id'"));
-                                $srDatas2 = DB::connection($this->db)->select(DB::raw("select note from temp2 where hr >= '21' AND hr<='23' and aemp_id='$sr_id'"));
-                            }else{
-                                $srDatas = DB::connection($this->db)->select(DB::raw("select order_number from temp1 where hr ='$h' and aemp_id='$sr_id'"));
-                                $srDatas2 = DB::connection($this->db)->select(DB::raw("select note from temp2 where hr ='$h' and aemp_id='$sr_id'"));
-                            }
-
-                            $tam2=0;
-                            $tam=0;
-                            foreach ($srDatas2 as $result2)
-                                if($result2->note > 0){$tam2 = $result2->note ;}else{$tam2 = 0;}
-                            foreach ($srDatas as $result)
-                                if($result->order_number > 0){$tam = $result->order_number ;}else{$tam = 0;}
-                            //echo "{" . $k . " - ". $tam. "}";
-                            $final[$row_no][$colu] = $tam+$tam2;
-                            $colu++;
-                            $h++;
-                        }
-
-                        $row_no = $row_no +1;
+                        return $data;
                     }
-                    return $final;
+                    else{
+                        $zone_filter="";
+                        $slgp_filter="";
+                        if($dirg_id !=""){
+                            $zone_filter=" AND zone_id IN (".implode(',',$zone_list).")";
+                        }
+                        if ($zone_id != "") {
+                            $zone_filter = " AND zone_id = $zone_id";
+                        }
+                        if ($sales_group_id != "") {
+                            $slgp_filter = " AND slgp_id = '$sales_group_id'";
+                        }
+                        
+                        $data=DB::connection($this->db)->select("SELECT act_date,slgp_name,concat(t2.zone_code,'-',t2.zone_name)zone_name,aemp_usnm,replace(aemp_name,',','.')aemp_name,aemp_mob1,9am,
+                                10am,11am,12pm,1pm,2pm,3pm,4pm,5pm,6pm,7pm,8pm,9pm
+                            FROM tbl_sr_activity_summary t1
+                            INNER JOIN tm_zone t2 ON t1.zone_id=t2.id
+                            WHERE act_date BETWEEN '$start_date' AND '$end_date'".$slgp_filter.$zone_filter."
+                            ORDER BY act_date asc");
+                        return $data;
+                    }
+                break;
+            case "sr_activity_hourly_visit":
+                $flag_curdate=500;
+                if($start_date==date('Y-m-d')|| $end_date==date('Y-m-d')){$flag_curdate=0; $c_date=date('Y-m-d');}
+                if($flag_curdate==0){
+                    $zone="";
+                    $group="";
+                    if($dirg_id !=""){
+                        $zone=" AND t2.id IN (".implode(',',$zone_list).")";
+                    }
+                    if ($zone_id != "") {
+                        $zone = " AND t2.zone_id = $zone_id";
+                    }
+                    
+                    if ($sales_group_id != "") {
+                        $group = " AND t1.slgp_id = '$sales_group_id'";
+                    }
+                    DB::connection($this->db)->select(DB::raw("SET sql_mode=''"));
+                    $data=DB::connection($this->db)->select("SELECT p.act_date, p.id, p.aemp_name, p.aemp_mob1, p.aemp_usnm,
+                            p.acmp_id, p.acmp_name, p.slgp_id, p.slgp_name, p.zone_id, p.zone_name, SUM(p.9am + p.9amn) 9am, SUM(p.10am + p.10amn)10am,
+                            SUM(p.11am + p.11amn) 11am, SUM(p.12pm + p.12pmn) 12pm, SUM(p.1pm + p.1pmn) 1pm, SUM(p.2pm + p.2pmn) 2pm,
+                            SUM(p.3pm + p.3pmn) 3pm, SUM(p.4pm + p.4pmn) 4pm, SUM(p.5pm + p.5pmn) 5pm, SUM(p.6pm + p.6pmn) 6pm,
+                            SUM(p.7pm + p.7pmn) 7pm, SUM(p.8pm + p.8pmn) 8pm, SUM(p.9pm + p.9pmn) 9pm,CURRENT_TIMESTAMP+INTERVAL 6 HOUR 'created_at'
+                            FROM
+                            (SELECT 
+                            t2.id,t2.aemp_name,t2.aemp_mob1,t2.aemp_usnm,t6.id acmp_id,
+                            t6.acmp_name,t4.id slgp_id,t4.slgp_name,t5.id zone_id,
+                            t5.zone_name,t1.ordm_date act_date,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)<9 THEN 1 ELSE 0 END)`9am`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=9 THEN 1 ELSE 0 END)`10am`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=10 THEN 1 ELSE 0 END)`11am`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=11 THEN 1 ELSE 0 END)`12pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=12 THEN 1 ELSE 0 END)`1pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=13 THEN 1 ELSE 0 END)`2pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=14 THEN 1 ELSE 0 END)`3pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=15 THEN 1 ELSE 0 END)`4pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=16 THEN 1 ELSE 0 END)`5pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=17 THEN 1 ELSE 0 END)`6pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=18 THEN 1 ELSE 0 END)`7pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)=19 THEN 1 ELSE 0 END)`8pm`,
+                            SUM(CASE WHEN HOUR(t1.ordm_time)>=20 THEN 1 ELSE 0 END)`9pm`,
+                            '0' 9amn,'0' 10amn ,'0' 11amn,'0' 12pmn,'0' 1pmn,'0' 2pmn,'0' 3pmn,
+                            '0' 4pmn,'0' 5pmn,'0' 6pmn,'0' 7pmn,'0' 8pmn,'0' 9pmn
+                            FROM tt_ordm t1
+                            INNER JOIN tm_aemp t2 on t1.aemp_id=t2.id
+                            INNER JOIN tm_slgp t4 ON t2.slgp_id=t4.id 
+                            INNER JOIN tm_zone t5 ON t2.zone_id=t5.id
+                            INNER JOIN tm_acmp t6 ON t4.acmp_id=t6.id
+                            WHERE t1.ordm_date='$c_date' " .$group . $zone  ."
+                            GROUP By t2.id,t2.aemp_name,t2.aemp_mob1,t2.aemp_usnm
+                            UNION ALL 
+                            SELECT t2.id,t2.aemp_name,t2.aemp_mob1,t2.aemp_usnm,t6.id acmp_id,
+                            t6.acmp_name,t4.id slgp_id,t4.slgp_name,t5.id zone_id,t5.zone_name,
+                            t1.npro_date act_date,'0' 9am,'0' 10am ,'0' 11am,'0' 12pm,'0' 1pm,
+                            '0' 2pm,'0' 3pm,'0' 4pm,'0' 5pm,'0' 6pm,'0' 7pm,'0' 8pm,'0' 9pm,
+                            SUM(CASE WHEN HOUR(t1.npro_time)<9 THEN 1 ELSE 0 END)`9amn`,
+                            SUM(CASE WHEN HOUR(t1.npro_time)=9 THEN 1 ELSE 0 END)`10amn`,
+                            SUM(CASE WHEN HOUR(t1.npro_time)=10 THEN 1 ELSE 0 END)`11amn`,
+                            SUM(CASE WHEN HOUR(t1.npro_time)=11 THEN 1 ELSE 0 END)`12pmn`,
+                            SUM(CASE WHEN HOUR(t1.npro_time)=12 THEN 1 ELSE 0 END)`1pmn`,
+                            SUM(CASE WHEN HOUR(t1.npro_time)=13 THEN 1 ELSE 0 END)`2pmn`,
+                            SUM(CASE WHEN HOUR(t1.npro_time)=14 THEN 1 ELSE 0 END)`3pmn`,
+                            SUM(CASE WHEN HOUR(t1.npro_time)=15 THEN 1 ELSE 0 END)`4pmn`,
+                            SUM(CASE WHEN HOUR(t1.npro_time)=16 THEN 1 ELSE 0 END)`5pmn`,
+                            SUM(CASE WHEN HOUR(t1.npro_time)=17 THEN 1 ELSE 0 END)`6pmn`,
+                            SUM(CASE WHEN HOUR(t1.npro_time)=18 THEN 1 ELSE 0 END)`7pmn`,
+                            SUM(CASE WHEN HOUR(t1.npro_time)=19 THEN 1 ELSE 0 END)`8pmn`,
+                            SUM(CASE WHEN HOUR(t1.npro_time)>=20 THEN 1 ELSE 0 END)`9pmn`
+                            FROM (Select t1.npro_date,t1.aemp_id,t1.npro_time,t1.slgp_id from tt_npro t1
+                            where t1.npro_date='$c_date'  AND t1.site_id not in 
+                            (select site_id from tt_ordm where aemp_id=t1.aemp_id and ordm_date='$c_date' " .$group . $zone  .")
+                            Group By t1.site_id,t1.npro_date,t1.aemp_id) t1
+                            INNER JOIN tm_aemp t2 on t1.aemp_id=t2.id
+                            INNER JOIN tm_slgp t4 ON t2.slgp_id=t4.id
+                            INNER JOIN tm_zone t5 ON t2.zone_id=t5.id
+                            INNER JOIN tm_acmp t6 ON t4.acmp_id=t6.id
+                            Where t1.slgp_id = '$sales_group_id' " .$zone . "
+                            GROUP By t2.id,t2.aemp_name,t2.aemp_mob1,t2.aemp_usnm
+                            
+                            )p 
+                            GROUP BY p.id,p.aemp_name,p.aemp_mob1,p.aemp_usnm,p.acmp_id,p.acmp_name,p.slgp_id,p.slgp_name,p.zone_id,p.zone_name
+                        ");
+                    return $data;
                 }
                 else{
 
@@ -1277,6 +1226,9 @@ class CommonReportController extends Controller
             case "attendance_report":
                 $q1='';
                 $q2='';
+                $q3='';
+                $attendance_type=$request->attendance_type;
+                $edsg_id=$request->edsg_id;
                 if($dirg_id !=""){
                     $q2=" AND t2.zone_id IN (".implode(',',$zone_list).")";
                 }
@@ -1286,12 +1238,22 @@ class CommonReportController extends Controller
                 if ($sales_group_id != "") {
                     $q1= " AND t2.slgp_id = '$sales_group_id'";
                 }
+                if($attendance_type){
+                    $q3=" AND t1.type $attendance_type";
+                }
+                if($edsg_id){
+                    $q2.=" AND t2.edsg_id='$edsg_id'";
+                }
                 $data=DB::connection($this->db)->select("SELECT t1.attn_date,t1.slgp_name,t1.dirg_name,t1.zone_name,t1.aemp_id,t1.aemp_usnm,replace(t1.aemp_name,',','-')aemp_name,t1.aemp_mob1,t1.edsg_name,
-                    ifnull(t1.start_time,'0000-00-00 00:00:00') start_time,ifnull(t1.end_time,'0000-00-00 00:00:00') end_time,ifnull(t2.atyp_name,'Absent')status FROM
+                    ifnull(t1.start_time,'0000-00-00 00:00:00') start_time,ifnull(t1.end_time,'0000-00-00 00:00:00') end_time,ifnull(t2.atyp_name,'Absent')status,
+                    start_image,end_image
+                     FROM
                     (SELECT t2.id aemp_id,
                     t1.dhbd_date attn_date,t4.slgp_name,t6.dirg_name,t5.zone_name,t2.aemp_usnm,t2.aemp_name,t2.aemp_mob1,t7.edsg_name,
                     min(t3.attn_time) start_time,max(t3.attn_time) end_time,
-                    max(t3.atten_atyp) type
+                    if(t3.atten_type=1,t3.attn_imge,'') start_image,
+                    if(t3.atten_type=2,t3.attn_imge,'') end_image,
+                    ifnull(max(t3.atten_atyp),50) type
                     FROM th_dhbd_5 t1
                     INNER JOIN tm_aemp t2 ON t1.aemp_id=t2.id
                     LEFT JOIN tt_attn t3 ON t2.id=t3.aemp_id AND t3.attn_date=t1.dhbd_date
@@ -1303,7 +1265,9 @@ class CommonReportController extends Controller
                     AND t2.lfcl_id=1 ".$q1.$q2."
                     GROUP BY t1.dhbd_date,t4.slgp_name,t6.dirg_name,t5.zone_name,t2.id,t2.aemp_usnm,t2.aemp_name,t2.aemp_mob1
                     ORDER BY t5.zone_code,t2.aemp_name,t1.dhbd_date ASC)t1
-                    LEFT JOIN tm_atyp t2 ON t1.type=t2.id");
+                    LEFT JOIN tm_atyp t2 ON t1.type=t2.id
+                    Where 1 ".$q3."
+                    ");
                 return $data;
                 break;
             case "note_report":
@@ -1334,7 +1298,7 @@ class CommonReportController extends Controller
                         LEFT JOIN tm_ntpe t7 on t1.ntpe_id=t7.id
                         WHERE t1.note_date >= '$start_date' AND t1.note_date <= '$end_date' AND t3.aemp_id = '$empId' AND
                             t4.aemp_id = '$empId' " . $q1 . $q2 . $q3 . " AND t3.acmp_id = '$acmp_id'
-                        ORDER BY t1.note_date, t3.slgp_code, t4.zone_code, t1.aemp_id desc");
+                        ORDER BY t1.note_dtim ASC");
                 return $data;
                 break;
             case "note_summary":
@@ -2330,8 +2294,8 @@ class CommonReportController extends Controller
                 }
                 if ($sales_group_id != "") {
                     $q2 = " AND t1.slgp_id = '$sales_group_id' ";
-                }  
-                $data=DB::connection($this->db)->select("SELECT '$acmp_name' acmp_name,'$slgp_name' slgp_name,
+                }
+                $data=DB::connection($this->db)->select("SELECT 'acmp_name' acmp_name,t7.slgp_name,
                         t5.`aemp_name`,
                         t5.`aemp_usnm`,
                         t5.`aemp_mob1`,
@@ -2339,18 +2303,22 @@ class CommonReportController extends Controller
                         t4.`amim_name`,
                         t1.ordm_date,
                         t6.zone_name,
-                        ROUND(SUM(t2.ordd_oamt)/1000,2) AS ordd_amt,
-                        ROUND(SUM(t2.ordd_odat)/1000,2) AS deli_amt
+                        ROUND(SUM(t2.ordd_oamt),2) AS ordd_amt,
+                        ROUND(SUM(t2.ordd_odat),2) AS deli_amt,
+                        SUM(t2.ordd_inty) order_qty,
+                        SUM(t2.ordd_dqty) deli_qty,
+                        t4.amim_duft
                         FROM `tt_ordm` as t1,`tt_ordd`as t2,tm_amim as t4,
-                        tm_aemp as t5 ,tm_zone as t6
+                        tm_aemp as t5 ,tm_zone as t6,tm_slgp t7
                         where t1.id between $min_id and $max_id
                         and (t1.ordm_date between '$start_date' AND '$end_date')
                                     and t1.id=t2.ordm_id 
-                        ".$q2.$zone_query." and t2.amim_id=t4.id and t1.aemp_id=t5.id  and t5.zone_id=t6.id 
+                        ".$q2.$zone_query." and t2.amim_id=t4.id and t1.aemp_id=t5.id  and t5.zone_id=t6.id AND t1.slgp_id=t7.id
                         group by t5.`aemp_name`,
                         t5.`aemp_usnm`,
                         t5.`aemp_mob1`,
                         t4.`amim_code`,
+                        t4.amim_duft,
                         t4.`amim_name`,
                         t1.ordm_date,
                         t6.zone_name");
@@ -3250,6 +3218,43 @@ class CommonReportController extends Controller
         }
         $slgp_id=$request->slgp_id;
         switch ($request->reportType){
+            case "tracking":
+                    $sr_query='';
+                    $sr_hloc='';
+                    $slgp_id=$request->slgp_id;
+                    if($id){
+                        $sr_query=" AND t1.aemp_id IN (".implode(',',$id).")";
+                        $sr_hloc=" AND t1.aemp_id IN (".implode(',',$id).")";
+                    }
+                    if(!$id && $slgp_id){
+                        $sr_query.=" AND t1.slgp_id=$slgp_id";
+                    }
+                    $data= DB::connection($this->db)->select("
+                                SELECT t2.id,t2.aemp_usnm,t2.aemp_name,t2.aemp_name,t1.* FROM (
+                                SELECT `hloc_date` activity_date, `hloc_time` activity_time, `aemp_id`,t1.geo_lat,t1.geo_lon, `hloc_addr` location_name,'SystemTrack' loc_type,'' site_name
+                                FROM `th_hloc` t1
+                                WHERE t1.hloc_date BETWEEN '$start_date' AND '$end_date' ".$sr_hloc ."
+                                UNION ALL
+                                SELECT ordm_date activity_date,ordm_time activity_time, `aemp_id`,t1.geo_lat,t1.geo_lon, t2.site_adrs location_name,'Order' loc_type,
+                                concat(t2.site_code,'-',t2.site_name)site_name
+                                FROM `tt_ordm` t1
+                                INNER JOIN tm_site t2 ON t1.site_id=t2.id
+                                WHERE t1.ordm_date BETWEEN '$start_date' AND '$end_date' ".$sr_query."
+                                UNION ALL
+                                SELECT npro_date activity_date,npro_time activity_time, `aemp_id`,t1.geo_lat,t1.geo_lon,t2.site_adrs location_name,'NP-Order' loc_type,concat(t2.site_code,'-',t2.site_name)site_name
+                                FROM `tt_npro` t1
+                                INNER JOIN tm_site t2 ON t1.site_id=t2.id
+                                WHERE t1.npro_date BETWEEN '$start_date' AND '$end_date'  ".$sr_query."
+                                UNION ALL
+                                SELECT note_date activity_date,note_dtim activity_time, t1.`aemp_id`, t1.`geo_lat`, t1.`geo_lon`,t1.geo_addr location_name,'Note' loc_type,concat(t2.site_code,'-',t2.site_name)site_name
+                                FROM `tt_note` t1
+                                LEFT JOIN tm_site t2 ON t1.site_code=t2.site_code
+                                WHERE t1.note_date BETWEEN '$start_date' AND '$end_date' ".$sr_query."
+                            )t1
+                            INNER JOIN tm_aemp t2 ON t1.aemp_id=t2.id
+                            ORDER BY t1.aemp_id,t1.activity_date");
+
+                break;
             case "sr_activity_sales_hierarchy":
                 if($request->dtls_sum==1){
                     $sr_query='';
@@ -3260,7 +3265,7 @@ class CommonReportController extends Controller
                     if(!$id && $slgp_id){
                         $sr_query.=" AND t1.slgp_id=$slgp_id";
                     }
-                    DB::connection($this->db)->select(DB::raw("SET sql_mode=''"));
+                    DB::connection($this->db)->select(DB::raw("SET sql_mode=''"));                 
                     $data=DB::connection($this->db)->select("SELECT 
                                 t1.date dhbd_date,t1.aemp_id id,t1.aemp_code aemp_usnm,
                                 t1.aemp_name,
@@ -3547,6 +3552,7 @@ class CommonReportController extends Controller
                             GROUP BY MONTH(selected_date)
                         ) wd_mnt ON mnth=wd_mnt.mnth_t
                 group by id,mnth,aemp_usnm,aemp_name ORDER BY aemp_usnm,mnth;");
+                return $data;
                 break;
             case "outlet_vs_item_coverage":
                 $ids = implode(',', $id);

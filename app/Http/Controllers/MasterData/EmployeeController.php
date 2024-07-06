@@ -109,7 +109,7 @@ class EmployeeController extends Controller
                         // ->orWhere('t5.edsg_name', 'LIKE', '%' . $q . '%')
                         // ->orWhere('t1.aemp_emal', 'LIKE', '%' . $q . '%');
                     })
-                    ->paginate(100);
+                    ->paginate(100000);
             } else {
                 $employees = DB::connection($this->db)->table('tm_aemp AS t1')
                     ->join('tm_aemp AS t2', 't1.aemp_mngr', '=', 't2.id')
@@ -122,7 +122,7 @@ class EmployeeController extends Controller
                     ->leftJoin('tm_site as t7','t1.site_id','=','t7.id')
                     ->select('t1.id AS id','t7.site_code', 't1.aemp_usnm', 't1.aemp_name', 't1.aemp_mob1', 't1.aemp_onme', 't1.aemp_stnm', 't1.aemp_mngr', 't2.aemp_usnm AS mnrg_usnm', 't2.aemp_name AS mnrg_name',
                         't3.aemp_usnm AS lmid_usnm', 't3.aemp_name AS lmid_name','t8.slgp_name','t9.acmp_name','t1.created_at', 't1.updated_at', 't4.role_name', 't5.edsg_name', 't1.aemp_emal', 't1.aemp_picn', 't1.lfcl_id', 't6.amng_name')->orderByDesc('t1.id')
-                    ->paginate(100);
+                    ->paginate(100000);
             }
             return view('master_data.employee.index')->with("employees", $employees)->with('permission', $this->userMenu)->with('search_text', $q)->with('acmp', $acmp)->with('zone', $zone);
         } else {
@@ -451,49 +451,49 @@ class EmployeeController extends Controller
             // $sales_groups = SalesGroupEmployee::where(['emp_id' => $id])->get();
             // $pjps = PJP::where(['emp_id' => $id])->get();
             $employee = collect(DB::connection($this->db)->select("SELECT
-  t1.id,
-  t1.aemp_name AS name,
-  t1.aemp_usnm AS email,
-  t1.aemp_onme AS ln_name,
-  t1.aemp_mob1 AS mobile,
-  t1.aemp_emal AS address,
-  t1.aemp_aldt AS allowed_distance,
-  t9.edsg_name AS role_name,
-  t3.aemp_name AS manager_name,
-  t4.aemp_name AS line_manager_name,
-  t1.aemp_emcc    email_cc,
-  t1.aemp_otml    auto_email,
-  t1.aemp_lonl    location_on
-FROM tm_aemp AS t1
-  INNER JOIN tm_aemp AS t3 ON t1.aemp_mngr = t3.id
-  INNER JOIN tm_aemp AS t4 ON t1.aemp_lmid = t4.id
-  INNER JOIN tm_edsg AS t9 ON t1.edsg_id = t9.id
-WHERE t1.id =$id"))->first();
+                        t1.id,
+                        t1.aemp_name AS name,
+                        t1.aemp_usnm AS email,
+                        t1.aemp_onme AS ln_name,
+                        t1.aemp_mob1 AS mobile,
+                        t1.aemp_emal AS address,
+                        t1.aemp_aldt AS allowed_distance,
+                        t9.edsg_name AS role_name,
+                        t3.aemp_name AS manager_name,
+                        t4.aemp_name AS line_manager_name,
+                        t1.aemp_emcc    email_cc,
+                        t1.aemp_otml    auto_email,
+                        t1.aemp_lonl    location_on
+                        FROM tm_aemp AS t1
+                        INNER JOIN tm_aemp AS t3 ON t1.aemp_mngr = t3.id
+                        INNER JOIN tm_aemp AS t4 ON t1.aemp_lmid = t4.id
+                        INNER JOIN tm_edsg AS t9 ON t1.edsg_id = t9.id
+                        WHERE t1.id =$id"))->first();
 
             $companyMapping = DB::connection($this->db)->select("SELECT
-  t1.id as emcm_id,
-  t2.id AS acmp_id,
-  t2.acmp_name,
-  t2.acmp_code
-FROM tl_emcm AS t1
-  INNER JOIN tm_acmp AS t2 ON t1.acmp_id = t2.id
-WHERE t1.aemp_id = $id");
+                                t1.id as emcm_id,
+                                t2.id AS acmp_id,
+                                t2.acmp_name,
+                                t2.acmp_code
+                                FROM tl_emcm AS t1
+                                INNER JOIN tm_acmp AS t2 ON t1.acmp_id = t2.id
+                                WHERE t1.aemp_id = $id");
 
             $depotMapping = DB::connection($this->db)->select("SELECT
-  t1.id                                                                                  AS id,
-  t2.id                                                                                  AS dlrm_id,
-  t2.dlrm_name,
-  t2.dlrm_code,
-  t3.acmp_name,
-  t3.acmp_code,
-  concat(t4.base_name, '(', t4.base_code, ')', ' < ', t5.zone_name,'(', t5.zone_code, ')', ' < ', t6.dirg_name) AS base_name
-FROM tl_srdi AS t1
-  INNER JOIN tm_dlrm AS t2 ON t1.dlrm_id = t2.id
-  INNER JOIN tm_acmp AS t3 ON t2.acmp_id = t3.id
-  INNER JOIN tm_base AS t4 ON t2.base_id = t4.id
-  INNER JOIN tm_zone AS t5 ON t4.zone_id = t5.id
-  INNER JOIN tm_dirg AS t6 ON t5.dirg_id = t6.id
-WHERE t1.aemp_id = $id");
+                            t1.id                                                                                  AS id,
+                            t2.id                                                                                  AS dlrm_id,
+                            t2.dlrm_name,
+                            t2.dlrm_code,
+                            t3.acmp_name,
+                            t3.acmp_code,
+                            concat(t4.base_name, '(', t4.base_code, ')', ' < ', t5.zone_name,'(', t5.zone_code, ')', ' < ', t6.dirg_name) AS base_name
+                            FROM tl_srdi AS t1
+                            INNER JOIN tm_dlrm AS t2 ON t1.dlrm_id = t2.id
+                            INNER JOIN tm_acmp AS t3 ON t2.acmp_id = t3.id
+                            INNER JOIN tm_base AS t4 ON t2.base_id = t4.id
+                            INNER JOIN tm_zone AS t5 ON t4.zone_id = t5.id
+                            INNER JOIN tm_dirg AS t6 ON t5.dirg_id = t6.id
+                            WHERE t1.aemp_id = $id");
 
             $salesGroupMapping = DB::connection($this->db)->select("SELECT
   t1.id as sgsm_id,
@@ -513,27 +513,27 @@ FROM tl_sgsm AS t1
 WHERE t1.aemp_id = $id;");
 
             $routePlanMapping = DB::connection($this->db)->select("SELECT
-  t1.id                                                                                  AS rpln_id,
-  t1.rpln_day,
-  t2.rout_name,
-  t2.rout_code,
-  concat(t3.base_name, '(', t3.base_code, ')', ' < ', t4.zone_name,'(', t4.zone_code, ')', ' < ', t5.dirg_name) AS base_name
-FROM tl_rpln AS t1
-  INNER JOIN tm_rout AS t2 ON t1.rout_id = t2.id
-  INNER JOIN tm_base AS t3 ON t2.base_id = t3.id
-  INNER JOIN tm_zone AS t4 ON t3.zone_id = t4.id
-  INNER JOIN tm_dirg AS t5 ON t4.dirg_id = t5.id
-WHERE t1.aemp_id = $id;");
+                                t1.id                                                                                  AS rpln_id,
+                                t1.rpln_day,
+                                t2.rout_name,
+                                t2.rout_code,
+                                concat(t3.base_name, '(', t3.base_code, ')', ' < ', t4.zone_name,'(', t4.zone_code, ')', ' < ', t5.dirg_name) AS base_name
+                                FROM tl_rpln AS t1
+                                INNER JOIN tm_rout AS t2 ON t1.rout_id = t2.id
+                                INNER JOIN tm_base AS t3 ON t2.base_id = t3.id
+                                INNER JOIN tm_zone AS t4 ON t3.zone_id = t4.id
+                                INNER JOIN tm_dirg AS t5 ON t4.dirg_id = t5.id
+                                WHERE t1.aemp_id = $id;");
             $zoneGroupMapping = DB::connection($this->db)->select("SELECT
-  t1.id,
-  t2.slgp_name,
-  t2.slgp_code,
-  t3.zone_code,
-  t3.zone_name
-FROM tl_zmzg AS t1
-  INNER JOIN tm_slgp AS t2 ON t1.slgp_id = t2.id
-  INNER JOIN tm_zone AS t3 ON t1.zone_id = t3.id
-WHERE t1.aemp_id = $id;");
+                                t1.id,
+                                t2.slgp_name,
+                                t2.slgp_code,
+                                t3.zone_code,
+                                t3.zone_name
+                                FROM tl_zmzg AS t1
+                                INNER JOIN tm_slgp AS t2 ON t1.slgp_id = t2.id
+                                INNER JOIN tm_zone AS t3 ON t1.zone_id = t3.id
+                                WHERE t1.aemp_id = $id;");
             $ecmp = DB::connection($this->db)->select("SELECT t2.cont_name,t1.visa_no,t1.expr_date  FROM tl_ecmp t1 INNER JOIN tl_cont t2 ON t1.cont_id=t2.id WHERE t1.aemp_id=$id");
 
 

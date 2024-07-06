@@ -419,20 +419,20 @@
 
         var amim_fulld = document.getElementById("amim_full");
         //5MB
-        const maxAllowedSize = 5 * 1024 * 1024;
+        const maxAllowedSize = 1 * 400 * 1024;
         amim_fulld.onchange = function () {
             if (this.files[0].size > maxAllowedSize) {
-                alert("Image size is big!!! Please Resize and Try Again...");
+                alert("Image size is big!!! Max allowed size 400 KB");
                 this.value = "";
             }
             ;
         };
         var image_icons = document.getElementById("image_icon");
-        const maxAllowedSizedd = 1 * 50 * 1024;
+        const maxAllowedSizedd = 1 * 200 * 1024;
         image_icons.onchange = function () {
 
             if (this.files[0].size > maxAllowedSizedd) {
-                alert("Image size is big!!! Please Resize and Try Again...");
+                alert("Image size is big!!! Max allowed size 200 KB");
                 this.value = "";
             }
             ;

@@ -71,7 +71,7 @@ class AttNoteData extends Controller
                         $attendance->atten_type = 'L';
                         $attendance->atten_atyp = 3;
                         $attendance->rout_id = 1;
-                        $attendance->attn_rmak = $request->reason == "" ? '' : $request->leave_id;
+                        $attendance->attn_rmak = $request->reason == "" ? '' : $request->reason;
                         $attendance->cont_id = $request->country_id;
                         $attendance->lfcl_id = 1;
                         $attendance->aemp_iusr = $request->up_emp_id;
