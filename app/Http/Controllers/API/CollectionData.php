@@ -29,7 +29,6 @@ class CollectionData extends Controller
         $this->middleware('timezone');
     }
 
-
     public function invoiceSave(Request $request)
     {
         // DB::enableQueryLog();
